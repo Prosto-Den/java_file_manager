@@ -6,13 +6,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.geometry.Insets?>
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml">
 
     <!--Метка HBox.hgrow="ALWAYS" позволяет виджету растягиваться по горизонтали !-->
     <BorderPane HBox.hgrow="ALWAYS">
         <top>
-            <fx:include source="ControlPanel.fxml"/>
+            <fx:include source="ControlPanel.fxml" />
         </top>
         <center>
             <fx:include source="Panel.fxml"/>
@@ -21,7 +22,7 @@
 
     <BorderPane HBox.hgrow="ALWAYS">
         <top>
-            <fx:include source="ControlPanel.fxml"/>
+            <fx:include source="ControlPanel.fxml" />
         </top>
         <center>
             <fx:include source="Panel.fxml"/>

@@ -6,12 +6,18 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.geometry.Insets?>
 <HBox xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="controllers.ControlPanelController"
-            prefHeight="30.0" prefWidth="600.0"
-            spacing="5"
-            alignment="CENTER_LEFT">
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="controllers.ControlPanelController"
+      prefHeight="30.0" prefWidth="600.0"
+      spacing="5"
+      alignment="CENTER_LEFT"
+      style="-fx-border-color: #000; -fx-border-width: 2 1 2 1">
+
+    <padding>
+        <Insets bottom="5" top="5" left="5"/>
+    </padding>
 
     <Button text="Добавить" textAlignment="RIGHT" fx:id="addButton" HBox.hgrow="ALWAYS"/>
     <ComboBox fx:id="diskComboBox" HBox.hgrow="ALWAYS"/>
