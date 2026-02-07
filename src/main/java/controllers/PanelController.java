@@ -15,7 +15,8 @@ import javafx.util.Callback;
 import java.io.File;
 
 import types.IconTypes;
-import utils.ResourceHandler;
+import resourceHandler.ResourceHandler;
+import resourceHandler.IconName;
 import utils.FileSystem;
 
 public class PanelController implements Initializable
@@ -24,9 +25,6 @@ public class PanelController implements Initializable
     private ListView<String> fileViewer;
 
     private final FileSystem fileSystem = new FileSystem();
-
-//    @FXML
-//    private ControlPanelController controlPanel;
 
     @Override
     public void initialize(URL location, ResourceBundle resources)
@@ -52,6 +50,7 @@ public class PanelController implements Initializable
                         ObservableList<String> newData = FXCollections.observableArrayList();
                         fileViewer.getItems().clear();
 
+                        //TODO вынести строковые ресурсы
                         if (name.equals(".."))
                             fileSystem.goBack();
                         else
@@ -87,7 +86,7 @@ public class PanelController implements Initializable
             {
                 if (item.equals(".."))
                 {
-                    Image image = ResourceHandler.getIcon(IconTypes.FILE_VIEWER, "24x24", "back.png");
+                    Image image = ResourceHandler.getIcon(IconTypes.FILE_VIEWER, "24x24", IconName.BACK);
                     imageView.setImage(image);
                     setGraphic(imageView);
                     setText(item);
@@ -99,9 +98,9 @@ public class PanelController implements Initializable
 
                     //TODO пока захардкожено, потом надо будет поправить
                     if (file.isDirectory())
-                        image = ResourceHandler.getIcon(IconTypes.FILE_VIEWER, "24x24", "folder.png");
+                        image = ResourceHandler.getIcon(IconTypes.FILE_VIEWER, "24x24", IconName.FOLDER);
                     else
-                        image = ResourceHandler.getIcon(IconTypes.FILE_VIEWER, "24x24", "file.png");
+                        image = ResourceHandler.getIcon(IconTypes.FILE_VIEWER, "24x24", IconName.FILE);
 
                     if (image != null)
                     {
