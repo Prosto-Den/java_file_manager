@@ -17,13 +17,9 @@ public class App extends Application
     @Override
     public void start(Stage stage) throws Exception
     {
-        //TODO пути к fxml тоже надо вынести
-        BorderPane leftLayout = (BorderPane) buildPanel();
-        BorderPane rightLayout = (BorderPane) buildPanel();
-
-        HBox layout = new HBox(leftLayout, rightLayout);
-        HBox.setHgrow(leftLayout, Priority.ALWAYS);
-        HBox.setHgrow(rightLayout, Priority.ALWAYS);
+        //TODO вынести строковые пути к fxml в файлик
+        HBox layout = FXMLLoader.load(Objects.requireNonNull(getClass()
+                .getResource("/layouts/MainLayout.fxml")));
 
         Scene scene = new Scene(layout);
         stage.setScene(scene);
@@ -33,18 +29,5 @@ public class App extends Application
     public static void Launch(String[] args)
     {
         launch(args);
-    }
-
-    private Parent buildPanel() throws IOException
-    {
-        Parent controlPanel = FXMLLoader.load(Objects.requireNonNull(getClass()
-                .getResource("layouts/ControlPanel.fxml")));
-        Parent panel = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("layouts/Panel.fxml")));
-
-        BorderPane layout = new BorderPane();
-        layout.setTop(controlPanel);
-        layout.setCenter(panel);
-
-        return layout;
     }
 }

@@ -9,10 +9,13 @@
 <HBox xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="controllers.ControlPanelController"
-            prefHeight="30.0" prefWidth="600.0">
-    <Button text="Добавить" textAlignment="RIGHT" fx:id="addButton" />
-    <ComboBox fx:id="diskComboBox"/>
-    <Button fx:id="backButton"/>
-    <Button fx:id="forwardButton"/>
-    <Button fx:id="insertButton"/>
+            prefHeight="30.0" prefWidth="600.0"
+            spacing="5"
+            alignment="CENTER_LEFT">
+
+    <Button text="Добавить" textAlignment="RIGHT" fx:id="addButton" HBox.hgrow="ALWAYS"/>
+    <ComboBox fx:id="diskComboBox" HBox.hgrow="ALWAYS"/>
+    <Button fx:id="backButton" HBox.hgrow="ALWAYS"/>
+    <Button fx:id="forwardButton" HBox.hgrow="ALWAYS"/>
+    <Button fx:id="insertButton" HBox.hgrow="ALWAYS"/>
 </HBox>
