@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 import java.util.regex.Pattern;
+import types.OSType;
 
 
 /**
@@ -12,8 +13,8 @@ import java.util.regex.Pattern;
 public final class FileSystem
 {
     private String currentPath; // абсолютный путь к текущей директории
-    static private String osName; // имя ОС
-    static private String delimiter; // разделитель для путей этой ОС
+    static private final OSType osType = calcOSType(); // тип ОС
+    static private final String delimiter = calcDelimiter(); // разделитель для путей этой ОС
 
     /**
      * Конструктор по умолчанию. После создания будет указывать на корень системы
@@ -24,27 +25,17 @@ public final class FileSystem
         /*
         TODO добавить чтение текущего пути из настроек. При этом сам класс файловой системы ничего не
          должен знать про настройки, т.е. имеет смысл присылать путь извне (реализовал для этого конструктор)
-        *  */
-        osName = System.getProperty("os.name");
-
-        if (osName.contains("Windows"))
-        {
-            currentPath = "C:\\";
-            delimiter = "\\";
-        }
-        else
-        {
-            currentPath = "/";
-            delimiter = "/";
-        }
+        *
+        */
+        currentPath = getDefaultPath();
     }
     /**
-     * Конструктор с передачей пути, на который объект будет указывать после создания
+     * Конструктор с передачей пути, на который объект будет указывать после создания.
+     * Если директории по такому пути не существует, будет указывать на корень (C:\ для Windows и / для Linux)
      * */
     public FileSystem(String path)
     {
-        currentPath = path;
-        osName = System.getProperty("os.name");
+        currentPath = isDir(path) ? path : getDefaultPath();
     }
 
     /**
@@ -130,10 +121,65 @@ public final class FileSystem
 
     /**
      * Существует ли файл (директория) по этому пути
+     * @param path Путь к файлу/директории
      * @return True если существует, иначе False
      * */
-    public boolean isExist(String filePath)
+    static public boolean isExist(String path)
     {
-        return new File(filePath).exists();
+        return new File(path).exists();
+    }
+
+    /**
+     * Возвращает список со всеми логическими дисками системы (C:\, D:\ и т.д).
+     * Вызов функции актуален только для Windows.
+     * @return Список со всеми логическими дисками системы для Windows, пустой список для Linux.
+     * */
+    static public List<String> getLogicalDrives()
+    {
+        List<String> logicalDrives = new ArrayList<>();
+
+        if (osType == OSType.WINDOWS)
+        {
+            for (char letter = 'A'; letter <= 'Z'; letter++)
+            {
+                String path = String.format("%s:\\", letter);
+                if (isExist(path))
+                    logicalDrives.add(path);
+            }
+        }
+
+        return logicalDrives;
+    }
+
+    /**
+     * Является ли переданный путь директорией
+     * @param path Путь
+     * @return True - если переданный путь существует и является директорией, иначе False
+     * */
+    static public boolean isDir(String path)
+    {
+        return new File(path).isDirectory();
+    }
+
+    static private String calcDelimiter()
+    {
+        if (osType == OSType.WINDOWS)
+            return "\\";
+        return "/";
+    }
+
+    private String getDefaultPath()
+    {
+        if (osType == OSType.WINDOWS)
+            return "C:\\";
+        return "/";
+    }
+
+    static private OSType calcOSType()
+    {
+        String osName = System.getProperty("os.name");
+        if (osName.contains("Windows"))
+            return OSType.WINDOWS;
+        return OSType.LINUX;
     }
 }

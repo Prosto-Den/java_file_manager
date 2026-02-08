@@ -23,7 +23,6 @@ public class PanelController implements Initializable
 {
     @FXML
     private ListView<String> fileViewer;
-
     private final FileSystem fileSystem = new FileSystem();
 
     @Override

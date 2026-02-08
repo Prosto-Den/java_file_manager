@@ -36,5 +36,7 @@ public class ControlPanelController implements Initializable
             addImage.setImage(addIcon);
             addButton.setGraphic(addImage);
         }
+
+        // тут я хочу заполнить diskComboBox логическими драйверами системы, для чего нужен класс FileSystem
     }
 }
