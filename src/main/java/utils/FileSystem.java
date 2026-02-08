@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 import java.util.regex.Pattern;
+
+import javafx.beans.property.SimpleStringProperty;
 import types.OSType;
+import javafx.beans.property.StringProperty;
 
 
 /**
@@ -12,7 +15,7 @@ import types.OSType;
  * */
 public final class FileSystem
 {
-    private String currentPath; // абсолютный путь к текущей директории
+    private final StringProperty currentPath = new SimpleStringProperty(""); // абсолютный путь к текущей директории
     static private final OSType osType = calcOSType(); // тип ОС
     static private final String delimiter = calcDelimiter(); // разделитель для путей этой ОС
 
@@ -27,7 +30,7 @@ public final class FileSystem
          должен знать про настройки, т.е. имеет смысл присылать путь извне (реализовал для этого конструктор)
         *
         */
-        currentPath = getDefaultPath();
+        currentPath.setValue(getDefaultPath());
     }
     /**
      * Конструктор с передачей пути, на который объект будет указывать после создания.
@@ -35,7 +38,7 @@ public final class FileSystem
      * */
     public FileSystem(String path)
     {
-        currentPath = isDir(path) ? path : getDefaultPath();
+        currentPath.setValue(isDir(path) ? path : getDefaultPath());
     }
 
     /**
@@ -46,7 +49,7 @@ public final class FileSystem
      * */
     public List<String> listCurrentPath(boolean asNames)
     {
-        File dir = new File(currentPath);
+        File dir = new File(currentPath.getValue());
         File[] files = dir.listFiles();
         List<String> result = new ArrayList<>();
 
@@ -64,14 +67,17 @@ public final class FileSystem
      * */
     public String buildPath(String fileName)
     {
-        return String.join(delimiter, currentPath, fileName);
+        return String.join(delimiter, currentPath.getValue(), fileName);
     }
 
     /**
      * Сменить текущую директорию
      * */
-    public void setCurrentPath(String currentPath) {
-        this.currentPath = currentPath;
+    public void setCurrentPath(String currentPath)
+    {
+        if (osType == OSType.WINDOWS)
+            currentPath = currentPath.replace("\\\\", "\\");
+        this.currentPath.setValue(currentPath);
     }
 
     /**
@@ -79,7 +85,7 @@ public final class FileSystem
      * @return текущая директория, на которую указывает объект
      * */
     public String getCurrentPath() {
-        return currentPath;
+        return currentPath.getValue();
     }
 
     /**
@@ -88,7 +94,7 @@ public final class FileSystem
     public boolean isCurrentPathRoot()
     {
         Pattern pattern = Pattern.compile("^([A-Z]:\\\\|/)$", Pattern.CASE_INSENSITIVE);
-        return pattern.matcher(currentPath).matches();
+        return pattern.matcher(currentPath.getValue()).matches();
     }
 
     /**
@@ -115,8 +121,7 @@ public final class FileSystem
      * */
     public String getParentDir()
     {
-        File dir = new File(currentPath);
-        return dir.getParent();
+        return new File(currentPath.getValue()).getParent();
     }
 
     /**
@@ -160,6 +165,8 @@ public final class FileSystem
     {
         return new File(path).isDirectory();
     }
+
+    public StringProperty getCurrentPathProperty() {return currentPath;}
 
     static private String calcDelimiter()
     {

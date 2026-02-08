@@ -1,5 +1,7 @@
 package widgets;
 
+import javafx.collections.FXCollections;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -28,7 +30,8 @@ public class ControlPanel extends HBox implements IWidget
     @FXML
     private Button insertButton;
 
-    private FileSystem fileSystem;
+    @FXML
+    private TextField currentPathField;
 
     public ControlPanel()
     {
@@ -45,7 +48,14 @@ public class ControlPanel extends HBox implements IWidget
             addImage.setImage(addIcon);
             addButton.setGraphic(addImage);
         }
+
+        diskComboBox.setItems(FXCollections.observableArrayList(FileSystem.getLogicalDrives()));
+        diskComboBox.setValue(diskComboBox.getItems().getFirst());
     }
 
-    public void setFileSystem(FileSystem fileSystem) { this.fileSystem = fileSystem;}
+    public void setFileSystem(FileSystem fileSystem)
+    {
+        currentPathField.textProperty().bind(fileSystem.getCurrentPathProperty());
+    }
+
 }

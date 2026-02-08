@@ -24,4 +24,5 @@
     <Button fx:id="backButton" HBox.hgrow="ALWAYS"/>
     <Button fx:id="forwardButton" HBox.hgrow="ALWAYS"/>
     <Button fx:id="insertButton" HBox.hgrow="ALWAYS"/>
+    <TextField fx:id="currentPathField" HBox.hgrow="ALWAYS" editable="false"/>
 </fx:root>
