@@ -1,32 +1,38 @@
-package controllers;
-
+package widgets;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import java.net.URL;
-import java.util.ResourceBundle;
-import javafx.scene.control.ListView;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.Image;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.VBox;
+import javafx.fxml.FXML;
 import javafx.util.Callback;
-import java.io.File;
-
-import types.IconTypes;
-import resourceHandler.ResourceHandler;
 import resourceHandler.IconName;
+import resourceHandler.ResourceHandler;
+import types.IconTypes;
 import utils.FileSystem;
 
-public class PanelController implements Initializable
+import java.io.File;
+
+public class Panel extends VBox implements IWidget
 {
     @FXML
     private ListView<String> fileViewer;
-    private final FileSystem fileSystem = new FileSystem();
+
+    private FileSystem fileSystem;
+
+    public Panel()
+    {
+        load("/layouts/Panel.fxml");
+        initUI();
+    }
+
+    public void setFileSystem(FileSystem fileSystem) {this.fileSystem = fileSystem;}
 
     @Override
-    public void initialize(URL location, ResourceBundle resources)
+    public void initUI()
     {
         File dir = new File("C:\\");
         File[] files = dir.listFiles();

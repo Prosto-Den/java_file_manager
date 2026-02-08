@@ -7,9 +7,9 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.geometry.Insets?>
-<HBox xmlns="http://javafx.com/javafx"
+<fx:root xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="controllers.ControlPanelController"
+      type="javafx.scene.layout.HBox"
       prefHeight="30.0" prefWidth="600.0"
       spacing="5"
       alignment="CENTER_LEFT"
@@ -24,4 +24,4 @@
     <Button fx:id="backButton" HBox.hgrow="ALWAYS"/>
     <Button fx:id="forwardButton" HBox.hgrow="ALWAYS"/>
     <Button fx:id="insertButton" HBox.hgrow="ALWAYS"/>
-</HBox>
+</fx:root>

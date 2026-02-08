@@ -5,27 +5,29 @@
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import widgets.*?>
 
 <?import javafx.geometry.Insets?>
 <HBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml">
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="controllers.MainController">
 
     <!--Метка HBox.hgrow="ALWAYS" позволяет виджету растягиваться по горизонтали !-->
     <BorderPane HBox.hgrow="ALWAYS">
         <top>
-            <fx:include source="ControlPanel.fxml" />
+            <ControlPanel fx:id="leftControlPanel"/>
         </top>
         <center>
-            <fx:include source="Panel.fxml"/>
+            <Panel fx:id="leftPanel"/>
         </center>
     </BorderPane>
 
     <BorderPane HBox.hgrow="ALWAYS">
         <top>
-            <fx:include source="ControlPanel.fxml" />
+           <ControlPanel fx:id="rightControlPanel"/>
         </top>
         <center>
-            <fx:include source="Panel.fxml"/>
+            <Panel fx:id="rightPanel"/>
         </center>
     </BorderPane>
 
