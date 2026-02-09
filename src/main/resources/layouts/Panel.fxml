@@ -8,7 +8,15 @@
       xmlns:fx="http://javafx.com/fxml/1"
       type="javafx.scene.layout.VBox">
 
-    <ListView fx:id="fileViewer"
+    <!--ListView fx:id="fileViewer"
               VBox.vgrow="ALWAYS"
-              maxHeight="Infinity"/>
+              maxHeight="Infinity"/ -->
+    <TableView fx:id="fileViewer" VBox.vgrow="ALWAYS" maxHeight="Infinity">
+        <columns>
+            <TableColumn text="Имя файла" prefWidth="300" fx:id="fileNameColumn" minWidth="75"/>
+            <TableColumn text="Размер файла" prefWidth="150" fx:id="fileSizeColumn" minWidth="75"/>
+            <TableColumn text="Дата изменения" prefWidth="200" fx:id="fileEditDateColumn" minWidth="130"/>
+        </columns>
+    </TableView>
+
 </fx:root>

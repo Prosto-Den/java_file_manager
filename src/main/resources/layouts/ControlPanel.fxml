@@ -5,24 +5,47 @@
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+
+<?import javafx.scene.image.Image?>
 <fx:root xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      type="javafx.scene.layout.HBox"
-      prefHeight="30.0" prefWidth="600.0"
-      spacing="5"
-      alignment="CENTER_LEFT"
-      style="-fx-border-color: #000; -fx-border-width: 2 1 2 1">
+         xmlns:fx="http://javafx.com/fxml"
+         type="javafx.scene.layout.HBox"
+         prefHeight="30.0" prefWidth="600.0"
+         spacing="5"
+         alignment="CENTER_LEFT"
+         style="-fx-border-color: #000; -fx-border-width: 2 1 2 1">
 
     <padding>
         <Insets bottom="5" top="5" left="5"/>
     </padding>
 
-    <Button text="Добавить" textAlignment="RIGHT" fx:id="addButton" HBox.hgrow="ALWAYS"/>
+    <ImageView HBox.hgrow="ALWAYS">
+        <Image url="/icons/control_panel/24x24/disk.png"/>
+    </ImageView>
     <ComboBox fx:id="diskComboBox" HBox.hgrow="ALWAYS"/>
-    <Button fx:id="backButton" HBox.hgrow="ALWAYS"/>
-    <Button fx:id="forwardButton" HBox.hgrow="ALWAYS"/>
-    <Button fx:id="insertButton" HBox.hgrow="ALWAYS"/>
+    <Button text="Создать" textAlignment="RIGHT" fx:id="addButton" HBox.hgrow="ALWAYS"/>
+    <Button fx:id="backButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30">
+        <graphic>
+            <ImageView>
+                <Image url="/icons/control_panel/24x24/back_arrow.png" preserveRatio="true"/>
+            </ImageView>
+        </graphic>
+    </Button>
+    <Button fx:id="forwardButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30">
+        <graphic>
+            <ImageView>
+                <Image url="/icons/control_panel/24x24/forward_arrow.png" preserveRatio="true"/>
+            </ImageView>
+        </graphic>
+    </Button>
+    <Button fx:id="insertButton" HBox.hgrow="ALWAYS">
+        <graphic>
+            <ImageView>
+                <Image url="/icons/control_panel/24x24/insert.png" preserveRatio="true"/>
+            </ImageView>
+        </graphic>
+    </Button>
     <TextField fx:id="currentPathField" HBox.hgrow="ALWAYS" editable="false"/>
 </fx:root>

@@ -1,6 +1,8 @@
 package utils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.io.File;
 import java.util.regex.Pattern;
@@ -15,7 +17,9 @@ import javafx.beans.property.StringProperty;
  * */
 public final class FileSystem
 {
-    private final StringProperty currentPath = new SimpleStringProperty(""); // абсолютный путь к текущей директории
+    // Абсолютный путь к текущей директории. Хранится в property из JavaFX, так как таким образом можно легко
+    // отследить изменения текущей директории (для передачи данных между виджетами)
+    private final StringProperty currentPath = new SimpleStringProperty("");
     static private final OSType osType = calcOSType(); // тип ОС
     static private final String delimiter = calcDelimiter(); // разделитель для путей этой ОС
 
@@ -166,6 +170,53 @@ public final class FileSystem
         return new File(path).isDirectory();
     }
 
+    //TODO возможно стоит сделать метод более гибким (например, задать возможность выбора размерности)
+    /**
+     * Получить строку с информацией о размере файла
+     * @param filePath Абсолютный путь к файлу
+     * @return Строка с размером файла
+     * */
+    static public String getFileSize(String filePath)
+    {
+        String[] units = {"B", "KB", "MB", "GB", "TB"};
+        int unitIndex = 0;
+        double size = new File(filePath).length();
+
+        while (size >= 1024 && unitIndex < units.length - 1)
+        {
+            size /= 1024;
+            unitIndex++;
+        }
+
+        return String.format("%.2f %s", size, units[unitIndex]);
+    }
+
+    /**
+     * Получить имя файла из абсолютного пути к нему
+     * @param filePath Абсолютный путь к файлу
+     * @return Имя файла
+     * */
+    static public String getFilenameFromPath(String filePath)
+    {
+        return new File(filePath).getName();
+    }
+
+    /**
+     * Получить дату последнего изменения файла
+     * */
+    static public String lastModifiedDate(String filePath)
+    {
+        //TODO формат для даты вынести в строковые ресурсы
+        long lastModified = new File(filePath).lastModified();
+        Date date = new Date(lastModified);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        return dateFormat.format(date);
+    }
+
+    /**
+     * Выдать property текущего пути
+     * @return Property текущего пути
+     * */
     public StringProperty getCurrentPathProperty() {return currentPath;}
 
     static private String calcDelimiter()
@@ -175,6 +226,10 @@ public final class FileSystem
         return "/";
     }
 
+    /**
+     * Выдать корень файловой системы (C:\ для Windows и / для Linux)
+     * @return Корень системы
+     * */
     private String getDefaultPath()
     {
         if (osType == OSType.WINDOWS)
@@ -182,6 +237,10 @@ public final class FileSystem
         return "/";
     }
 
+    /**
+     * Определить операционную систему. Пока все ОС делятся на Windows и Linux (всё что не Windows, то Linux)
+     * @return Тип ОС
+     * */
     static private OSType calcOSType()
     {
         String osName = System.getProperty("os.name");
