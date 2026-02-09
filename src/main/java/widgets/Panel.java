@@ -9,12 +9,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import javafx.util.Callback;
+import java.io.File;
+
 import resourceHandler.IconName;
 import resourceHandler.ResourceHandler;
 import types.IconTypes;
 import utils.FileSystem;
 
-import java.io.File;
 
 public class Panel extends VBox implements IWidget
 {
