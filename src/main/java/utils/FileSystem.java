@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.io.File;
 import java.util.regex.Pattern;
-
 import javafx.beans.property.SimpleStringProperty;
 import types.OSType;
 import javafx.beans.property.StringProperty;
@@ -218,6 +217,8 @@ public final class FileSystem
      * @return Property текущего пути
      * */
     public StringProperty getCurrentPathProperty() {return currentPath;}
+
+    static public boolean checkOS(OSType type) {return osType.equals(type); }
 
     static private String calcDelimiter()
     {

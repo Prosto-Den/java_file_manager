@@ -9,9 +9,10 @@ import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import java.util.List;
 
+import models.StringKeys;
 import resourceHandler.IconName;
+import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
-import types.IconTypes;
 import utils.FileSystem;
 import models.FileData;
 
@@ -34,6 +35,8 @@ public class Panel extends VBox implements IWidget
     {
         load("/layouts/Panel.fxml");
         initUI();
+
+        ResourceHandler.addStringListener(this::updateText);
     }
 
     public void setFileSystem(FileSystem fileSystem)
@@ -77,14 +80,14 @@ public class Panel extends VBox implements IWidget
                     Image icon;
 
                     if (fileName.equals(".."))
-                        icon = ResourceHandler.getIcon(IconTypes.FILE_VIEWER, "24x24", IconName.BACK);
+                        icon = ResourceHandler.getIcon(IconSize.BIG, IconName.BACK);
                     else
                     {
                         String fullPath = fileSystem.buildPath(file.getNameValue());
                         if (FileSystem.isDir(fullPath))
-                            icon = ResourceHandler.getIcon(IconTypes.FILE_VIEWER, "24x24", IconName.FOLDER);
+                            icon = ResourceHandler.getIcon(IconSize.BIG, IconName.FOLDER);
                         else
-                            icon = ResourceHandler.getIcon(IconTypes.FILE_VIEWER, "24x24", IconName.FILE);
+                            icon = ResourceHandler.getIcon(IconSize.BIG, IconName.FILE);
                     }
 
                     if (icon != null)
@@ -118,6 +121,8 @@ public class Panel extends VBox implements IWidget
 
             return row;
         });
+
+        updateText();
     }
 
     private void handleDoubleClick(FileData fileInfo)
@@ -153,5 +158,12 @@ public class Panel extends VBox implements IWidget
         fileViewer.getItems().clear();
         fileViewer.setItems(fileData);
         fileViewer.refresh();
+    }
+
+    private void updateText()
+    {
+        fileNameColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILENAME));
+        fileSizeColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILE_SIZE));
+        fileEditDateColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
     }
 }

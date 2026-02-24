@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties>
+    <comment>Prosto File Manager - English strings</comment>
+
+    <entry key="title">Prosto File Manager</entry>
+    <entry key="button.add.text">Create</entry>
+    <entry key="button.add.tooltip">Create file in the directory</entry>
+    <entry key="panel.column.filename">Filename</entry>
+    <entry key="panel.column.fileSize">File size</entry>
+    <entry key="panel.column.fileEditDate">Edit date</entry>
+    <entry key="combobox.disk.tooltip">Change disk</entry>
+    <entry key="button.back.tooltip">Back</entry>
+    <entry key="button.forward.tooltip">Forward</entry>
+    <entry key="button.insert.tooltip">Insert</entry>
+
+</properties>

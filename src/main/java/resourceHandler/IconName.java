@@ -1,5 +1,8 @@
 package resourceHandler;
 
+/**
+ * Имена иконок
+ * */
 public enum IconName
 {
     // control_panel

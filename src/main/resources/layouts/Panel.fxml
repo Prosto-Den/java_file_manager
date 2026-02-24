@@ -13,9 +13,9 @@
               maxHeight="Infinity"/ -->
     <TableView fx:id="fileViewer" VBox.vgrow="ALWAYS" maxHeight="Infinity">
         <columns>
-            <TableColumn text="Имя файла" prefWidth="300" fx:id="fileNameColumn" minWidth="75"/>
-            <TableColumn text="Размер файла" prefWidth="150" fx:id="fileSizeColumn" minWidth="75"/>
-            <TableColumn text="Дата изменения" prefWidth="200" fx:id="fileEditDateColumn" minWidth="130"/>
+            <TableColumn prefWidth="300" fx:id="fileNameColumn" minWidth="150"/>
+            <TableColumn prefWidth="150" fx:id="fileSizeColumn" minWidth="75"/>
+            <TableColumn prefWidth="200" fx:id="fileEditDateColumn" minWidth="150"/>
         </columns>
     </TableView>
 

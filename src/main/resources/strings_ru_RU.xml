@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties>
+    <comment>Prosto File Manager - Russian strings</comment>
+
+    <entry key="title">Prosto File Manager</entry>
+    <entry key="button.add.text">Создать</entry>
+    <entry key="button.add.tooltip">Создать файл в директории</entry>
+    <entry key="panel.column.filename">Имя файла</entry>
+    <entry key="panel.column.fileSize">Размер файла</entry>
+    <entry key="panel.column.fileEditDate">Дата изменения</entry>
+    <entry key="combobox.disk.tooltip">Сменить диск</entry>
+    <entry key="button.back.tooltip">Назад</entry>
+    <entry key="button.forward.tooltip">Вперёд</entry>
+    <entry key="button.insert.tooltip">Вставить</entry>
+</properties>

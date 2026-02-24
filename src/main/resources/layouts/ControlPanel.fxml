@@ -9,6 +9,9 @@
 <?import javafx.scene.image.ImageView?>
 
 <?import javafx.scene.image.Image?>
+
+<!--TODO надо убрать отсюда иконки. Так как они размерные, будем их заполнять в коде -->
+<!--TODO а нужны ли вообще размерные иконки?-->
 <fx:root xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
          type="javafx.scene.layout.HBox"
@@ -22,28 +25,34 @@
     </padding>
 
     <ImageView HBox.hgrow="ALWAYS">
-        <Image url="/icons/control_panel/24x24/disk.png"/>
+        <Image url="/icons/24x24/disk.png"/>
     </ImageView>
     <ComboBox fx:id="diskComboBox" HBox.hgrow="ALWAYS"/>
-    <Button text="Создать" textAlignment="RIGHT" fx:id="addButton" HBox.hgrow="ALWAYS"/>
+    <Button textAlignment="RIGHT" fx:id="createButton" HBox.hgrow="ALWAYS"/>
     <Button fx:id="backButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30">
         <graphic>
             <ImageView>
-                <Image url="/icons/control_panel/24x24/back_arrow.png" preserveRatio="true"/>
+                <Image url="/icons/24x24/back_arrow.png" preserveRatio="true"/>
             </ImageView>
         </graphic>
+        <tooltip>
+            <Tooltip text="Назад"/>
+        </tooltip>
     </Button>
     <Button fx:id="forwardButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30">
         <graphic>
             <ImageView>
-                <Image url="/icons/control_panel/24x24/forward_arrow.png" preserveRatio="true"/>
+                <Image url="/icons/24x24/forward_arrow.png" preserveRatio="true"/>
             </ImageView>
         </graphic>
+        <tooltip>
+            <Tooltip text="Вперёд"/>
+        </tooltip>
     </Button>
     <Button fx:id="insertButton" HBox.hgrow="ALWAYS">
         <graphic>
             <ImageView>
-                <Image url="/icons/control_panel/24x24/insert.png" preserveRatio="true"/>
+                <Image url="/icons/24x24/insert.png" preserveRatio="true"/>
             </ImageView>
         </graphic>
     </Button>
