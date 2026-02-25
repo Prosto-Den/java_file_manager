@@ -1,5 +1,6 @@
 package utils;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,8 +10,10 @@ import java.util.regex.Pattern;
 import javafx.beans.property.SimpleStringProperty;
 import types.OSType;
 import javafx.beans.property.StringProperty;
+import java.awt.Desktop;
 
 
+// TODO может быть статические методы всё-таки вынести в отдельную утилиту для удобства
 /**
  * Класс для работы с файловой системой
  * */
@@ -218,8 +221,48 @@ public final class FileSystem
      * */
     public StringProperty getCurrentPathProperty() {return currentPath;}
 
+    // TODO после вызова метода могут возникать ошибки, нужно реализовать возврат кода ошибки,
+    //  чтобы потом можно было показывать диалоговые окна с предупреждением
+    /**
+     * Открыть файл соответствующей программой на ПК
+     * */
+    public void openFile(String path)
+    {
+        File file = new File(buildPath(path));
+
+        if (file.isFile())
+        {
+            if (!Desktop.isDesktopSupported())
+            {
+                //TODO добавить логгер
+                System.err.println("Desktop API не поддерживается на данной системе");
+                return;
+            }
+
+            Desktop desktop = Desktop.getDesktop();
+
+            try
+            {
+                desktop.open(file);
+            }
+            catch (IOException ex)
+            {
+                System.err.println("Не удалось открыть файл: " + ex.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Проверить тип операционной системы
+     * @param type тип ОС
+     * @return True, если переданный тип совпадает с типом ОС компьютера, иначе False
+     * */
     static public boolean checkOS(OSType type) {return osType.equals(type); }
 
+    /**
+     * Определить разделитель для текущей операционной системы
+     * @return используемый в ОС этого компьютера разделитель
+     * */
     static private String calcDelimiter()
     {
         if (osType == OSType.WINDOWS)

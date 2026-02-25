@@ -130,9 +130,17 @@ public class Panel extends VBox implements IWidget
         String fileName = fileInfo.getNameValue();
 
         if (fileName.equals(".."))
+        {
             fileSystem.goBack();
+            refreshTable();
+        }
         else if (fileInfo.isDirectory())
+        {
             fileSystem.goForward(fileName);
+            refreshTable();
+        }
+        else
+            fileSystem.openFile(fileName);
 
         refreshTable();
     }
