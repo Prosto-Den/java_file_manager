@@ -8,6 +8,7 @@ import java.util.List;
 import java.io.File;
 import java.util.regex.Pattern;
 import javafx.beans.property.SimpleStringProperty;
+import types.FileSystemErrors;
 import types.OSType;
 import javafx.beans.property.StringProperty;
 import java.awt.Desktop;
@@ -225,31 +226,17 @@ public final class FileSystem
     //  чтобы потом можно было показывать диалоговые окна с предупреждением
     /**
      * Открыть файл соответствующей программой на ПК
+     * @param filename имя файла. Файл должен располагаться в текущей директории,
+     *                 на которую указывает текущий экземпляр файлового менеджера
+     * @return один из следующих кодов ошибок: FILE_NOT_FOUND - файл не найден в директории;
+     * DESKTOP_NOT_SUPPORTED - Desktop API не поддерживается системой;
+     * OPEN_FILE_ERROR - ошибка открытия файла;
+     * NOT_A_FILE - переданное имя не является файлом;
+     * OK - ошибок нет
      * */
-    public void openFile(String path)
+    public FileSystemErrors openFile(String filename)
     {
-        File file = new File(buildPath(path));
-
-        if (file.isFile())
-        {
-            if (!Desktop.isDesktopSupported())
-            {
-                //TODO добавить логгер
-                System.err.println("Desktop API не поддерживается на данной системе");
-                return;
-            }
-
-            Desktop desktop = Desktop.getDesktop();
-
-            try
-            {
-                desktop.open(file);
-            }
-            catch (IOException ex)
-            {
-                System.err.println("Не удалось открыть файл: " + ex.getMessage());
-            }
-        }
+        return FileOpener.openFile(osType, buildPath(filename));
     }
 
     /**
