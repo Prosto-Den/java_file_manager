@@ -228,14 +228,11 @@ public final class FileSystem
      * Открыть файл соответствующей программой на ПК
      * @param filename имя файла. Файл должен располагаться в текущей директории,
      *                 на которую указывает текущий экземпляр файлового менеджера
-     * @return один из следующих кодов ошибок: FILE_NOT_FOUND - файл не найден в директории;
-     * DESKTOP_NOT_SUPPORTED - Desktop API не поддерживается системой;
-     * OPEN_FILE_ERROR - ошибка открытия файла;
-     * NOT_A_FILE - переданное имя не является файлом;
-     * OK - ошибок нет
+     * @return код ошибки
      * */
     public FileSystemErrors openFile(String filename)
     {
+        // логику работы с открытием файла вынес в отдельную утилиту, так как там много нюансов
         return FileOpener.openFile(osType, buildPath(filename));
     }
 

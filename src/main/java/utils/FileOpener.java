@@ -8,11 +8,23 @@ import java.io.File;
 import java.io.IOException;
 
 
+/**
+ * Утилита для открытия файлов
+ * */
 public class FileOpener
 {
+    // TODO вынести команды в отдельный класс
+    // команда открытия файла для Windows
     private static final String windowsExecCommand = "explorer %s";
+    // возможные команды для открытия файла на Linux
     private static final String[] linuxExecCommands = {"gnome-open %s", "kde-open %s", "xdg-open %s"};
 
+    /**
+     * Открыть файл соответствующей для него программой
+     * @param osType тип операционной системы
+     * @param path путь к файлу
+     * @return код ошибки открытия файла
+     * */
     public static FileSystemErrors openFile(OSType osType, String path)
     {
         File file = new File(path);
@@ -27,7 +39,7 @@ public class FileOpener
         // потом пробуем открыть файл системными средствами
         FileSystemErrors res = openSystemCommands(osType, path);
 
-        // если не получилось, использует java.awt.Desktop
+        // если не получилось, пробуем java.awt.Desktop
         if (res != FileSystemErrors.OK)
             res = openDesktop(file);
 
@@ -35,6 +47,12 @@ public class FileOpener
     }
 
     // TODO необходимы тесты на Linux
+    /**
+     * Открытие файла средствами операционной системы
+     * @param osType тип операционной системы
+     * @param path путь к файлу
+     * @return код ошибки открытия файла
+     * */
     private static FileSystemErrors openSystemCommands(OSType osType, String path)
     {
         FileSystemErrors res = FileSystemErrors.UNKNOWN_ERROR;
@@ -56,6 +74,13 @@ public class FileOpener
         return res;
     }
 
+    // TODO в будущем команд может стать больше, нужно создать отдельную утилиту для их запуска
+    /**
+     * Запустить команду на выполнение
+     * @param command команда
+     * @param arg аргумент команды
+     * @return код ошибки открытия файла
+     * */
     private static FileSystemErrors runCommand(String command, String arg)
     {
         String[] commandParts = prepareCommand(command, arg);
@@ -85,12 +110,23 @@ public class FileOpener
         return res;
     }
 
+    /**
+     * Подготовить команду к выполнению
+     * @param command команда
+     * @param arg аргумент команды
+     * @return команду, разделённую по словам
+     * */
     private static String[] prepareCommand(String command, String arg)
     {
         String readyCommand = String.format(command, arg);
         return readyCommand.split(" ");
     }
 
+    /**
+     * Открыть файл с помощью DesktopAPI
+     * @param file объект открываемого файла
+     * @return код ошибки открытия файла
+     * */
     private static FileSystemErrors openDesktop(File file)
     {
         if (!Desktop.isDesktopSupported())
