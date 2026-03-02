@@ -21,13 +21,6 @@ public class App extends Application
 
         FXMLLoader mainLoader = new FXMLLoader(getClass().getResource("/layouts/MainLayout.fxml"));
         Parent layout = mainLoader.load();
-        MainController controller = mainLoader.getController();
-
-        if (controller != null)
-        {
-            controller.setLeftFileSystem(new FileSystem());
-            controller.setRightFileSystem(new FileSystem());
-        }
 
         Scene scene = new Scene(layout);
         stage.setMinHeight(600);

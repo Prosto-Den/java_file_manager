@@ -3,8 +3,13 @@ package controllers;
 import javafx.fxml.FXML;
 import utils.FileSystem;
 import widgets.*;
+import javafx.fxml.Initializable;
 
-public class MainController
+import java.net.URL;
+import java.util.ResourceBundle;
+
+
+public class MainController implements Initializable
 {
     @FXML
     private ControlPanel leftControlPanel;
@@ -18,15 +23,16 @@ public class MainController
     @FXML
     private Panel rightPanel;
 
-    public void setLeftFileSystem(FileSystem fileSystem)
+    @Override
+    public void initialize(URL location, ResourceBundle resources)
     {
-        leftControlPanel.setFileSystem(fileSystem);
-        leftPanel.setFileSystem(fileSystem);
-    }
+        FileSystem leftFileSystem = new FileSystem();
+        FileSystem rightFileSystem = new FileSystem();
 
-    public void setRightFileSystem(FileSystem fileSystem)
-    {
-        rightControlPanel.setFileSystem(fileSystem);
-        rightPanel.setFileSystem(fileSystem);
+        leftControlPanel.setFileSystem(leftFileSystem);
+        leftPanel.setFileSystem(leftFileSystem);
+
+        rightControlPanel.setFileSystem(rightFileSystem);
+        rightPanel.setFileSystem(rightFileSystem);
     }
 }
