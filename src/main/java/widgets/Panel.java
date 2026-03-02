@@ -17,20 +17,25 @@ import utils.FileSystem;
 import models.FileData;
 
 
+/**
+ * Класс панели. Отображает содержимое директории
+ * */
 public class Panel extends VBox implements IWidget
 {
     @FXML
-    private TableView<FileData> fileViewer;
-
+    private TableView<FileData> fileViewer; // виджет отображения файлов
     @FXML
-    private TableColumn<FileData, String> fileNameColumn;
+    private TableColumn<FileData, String> fileNameColumn; // колонка с именем файла
     @FXML
-    private TableColumn<FileData, String> fileSizeColumn;
+    private TableColumn<FileData, String> fileSizeColumn; // размер файла
     @FXML
-    private TableColumn<FileData, String> fileEditDateColumn;
+    private TableColumn<FileData, String> fileEditDateColumn; // дата последнего изменения файла
 
-    private FileSystem fileSystem;
+    private FileSystem fileSystem; // экземпляр файловой системы
 
+    /**
+     * Конструктор
+     * */
     public Panel()
     {
         load("/layouts/Panel.fxml");
@@ -39,6 +44,12 @@ public class Panel extends VBox implements IWidget
         ResourceHandler.addStringListener(this::updateText);
     }
 
+    /**
+     * Выставить файловую систему для панели. Нужна для отображения текущей директории, перехода по ней и т.п.
+     * Так панелей несколько и каждая должна работать независимо от другой, у каждой панели должен быть свой
+     * экземпляр файловой системы
+     * @param fileSystem файловая система
+     * */
     public void setFileSystem(FileSystem fileSystem)
     {
         this.fileSystem = fileSystem;
@@ -55,6 +66,9 @@ public class Panel extends VBox implements IWidget
         // тут не получится вызвать refreshTable, так как файловая система ещё не создана
     }
 
+    /**
+     * Настроить колонки таблицы
+     * */
     private void setupTableColumns()
     {
         // настраиваем колонку с именем файла
@@ -63,6 +77,9 @@ public class Panel extends VBox implements IWidget
         {
             private final ImageView imageView = new ImageView();
 
+            /**
+             * Метод обновления содержимого ячейки таблицы
+             * */
             @Override
             protected void updateItem(String item, boolean isEmpty)
             {
@@ -125,18 +142,32 @@ public class Panel extends VBox implements IWidget
         updateText();
     }
 
+    /**
+     * Обработка двойного нажатия на ряд таблицы
+     * */
     private void handleDoubleClick(FileData fileInfo)
     {
         String fileName = fileInfo.getNameValue();
 
         if (fileName.equals(".."))
+        {
             fileSystem.goBack();
+            refreshTable();
+        }
         else if (fileInfo.isDirectory())
+        {
             fileSystem.goForward(fileName);
+            refreshTable();
+        }
+        else
+            fileSystem.openFile(fileName);
 
         refreshTable();
     }
 
+    /**
+     * Обновить содержимое таблицы
+     * */
     private void refreshTable()
     {
         ObservableList<FileData> fileData = FXCollections.observableArrayList();
@@ -160,6 +191,10 @@ public class Panel extends VBox implements IWidget
         fileViewer.refresh();
     }
 
+    /**
+     * Обновить текста заголовков таблицы. Нужно для первой инициализации, а также для перезаполнения
+     * при смене языка
+     * */
     private void updateText()
     {
         fileNameColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILENAME));
