@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+
+<ContextMenu xmlns="http://javafx.com/javafx"
+             xmlns:fx="http://javafx.com/fxml">
+    <items>
+        <MenuItem fx:id="openMenuItem" text="Open">
+            <graphic>
+                <ImageView>
+                    <!-- В коде иконку будем менять в зависимости от файла, но по умолчанию тоже выставим -->
+                    <Image url="@/icons/16x16/open_file.png"/>
+                </ImageView>
+            </graphic>
+        </MenuItem>
+
+        <MenuItem fx:id="copyMenuItem" text="Copy">
+            <graphic>
+                <ImageView>
+                    <Image url="@/icons/16x16/copy.png"/>
+                </ImageView>
+            </graphic>
+        </MenuItem>
+
+        <MenuItem fx:id="deleteMenuItem" text="Delete">
+            <graphic>
+                <ImageView>
+                    <Image url="@/icons/16x16/delete.png"/>
+                </ImageView>
+            </graphic>
+        </MenuItem>
+
+    </items>
+</ContextMenu>

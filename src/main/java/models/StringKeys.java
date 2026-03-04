@@ -16,4 +16,7 @@ public class StringKeys
     public static final String BUTTON_BACK_TOOLTIP = "button.back.tooltip";
     public static final String BUTTON_FORWARD_TOOLTIP = "button.forward.tooltip";
     public static final String BUTTON_INSERT_TOOLTIP = "button.insert.tooltip";
+    public static final String CONTEXT_MENU_OPEN_ITEM = "contextmenu.item.open";
+    public static final String CONTEXT_MENU_COPY_ITEM = "contextmenu.item.copy";
+    public static final String CONTEXT_MENU_DELETE_ITEM = "contextmenu.item.delete";
 }

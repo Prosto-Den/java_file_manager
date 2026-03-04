@@ -16,6 +16,8 @@ import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import types.OSType;
 import utils.FileSystem;
+import utils.FileSystemUtils;
+
 import java.util.ResourceBundle;
 
 
@@ -44,7 +46,7 @@ public class ControlPanel extends HBox implements IWidget
 
     public ControlPanel()
     {
-        load("/layouts/ControlPanel.fxml");
+        load(ResourceHandler.getLayout("ControlPanel.fxml"));
         initUI();
 
         ResourceHandler.addStringListener(this::updateText);
@@ -61,7 +63,7 @@ public class ControlPanel extends HBox implements IWidget
             createButton.setGraphic(addImage);
         }
 
-        diskComboBox.setVisible(FileSystem.checkOS(OSType.WINDOWS));
+        diskComboBox.setVisible(FileSystemUtils.checkOS(OSType.WINDOWS));
 
         updateDiskCombo();
         updateText();
@@ -74,9 +76,9 @@ public class ControlPanel extends HBox implements IWidget
 
     private void updateDiskCombo()
     {
-        if (FileSystem.checkOS(OSType.WINDOWS))
+        if (FileSystemUtils.checkOS(OSType.WINDOWS))
         {
-            diskComboBox.setItems(FXCollections.observableArrayList(FileSystem.getLogicalDrives()));
+            diskComboBox.setItems(FXCollections.observableArrayList(FileSystemUtils.getLogicalDrives()));
             diskComboBox.setValue(diskComboBox.getItems().getFirst());
         }
     }

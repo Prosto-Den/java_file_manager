@@ -25,7 +25,13 @@ public enum IconName
 
     // toolbar
     FIND_DUPLICATES("find_duplicates.png"),
-    SETTINGS("settings.png");
+    SETTINGS("settings.png"),
+
+    //context_menu
+    COPY("copy.png"),
+    DELETE("delete.png"),
+    OPEN_FILE("open_file.png"),
+    OPEN_FOLDER("open_folder.png");
 
     private final String iconName;
 

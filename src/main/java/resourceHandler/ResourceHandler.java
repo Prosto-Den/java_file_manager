@@ -19,8 +19,9 @@ import org.jetbrains.annotations.Nullable;
  * */
 public class ResourceHandler
 {
-    static private IconResourceManager iconManager;
-    static private volatile StringResourceManager stringManager;
+    private static IconResourceManager iconManager;
+    private static volatile StringResourceManager stringManager;
+    private static LayoutResourceManager layoutManager;
 
 
     // Методы для работы с иконками
@@ -30,7 +31,7 @@ public class ResourceHandler
      * @param iconName имя иконки
      * @return Image, если ресурс для иконки удалось найти, иначе null
      * */
-    static public Image getIcon(@NotNull IconSize size,
+    public static Image getIcon(@NotNull IconSize size,
                          @NotNull IconName iconName)
     {
         return getIconManager().getIcon(size, iconName);
@@ -42,7 +43,7 @@ public class ResourceHandler
      * Установить новую локаль для программы
      * @param locale новая локаль
      * */
-    static public void setLocale(Locale locale)
+    public static void setLocale(Locale locale)
     {
         getStringManager().setLocale(locale);
     }
@@ -51,26 +52,27 @@ public class ResourceHandler
      * Выдать текущую локаль
      * @return текущую локаль в качестве объекта Locale
      * */
-    static public Locale getLocale() {return getStringManager().getLocale();}
+    public static Locale getLocale() {return getStringManager().getLocale();}
 
     /**
      * Выдать текущую локаль в качестве свойства. Позволяет привязывать другие элементы к изменению языка
      * @return текущую локаль в качестве property
      * */
-    static public ObjectProperty<Locale> localeProperty() {return getStringManager().localeProperty();}
+    public static ObjectProperty<Locale> localeProperty() {return getStringManager().localeProperty();}
 
     /**
      * Получить хранилище строковых ресурсов
      * @return хранилище строковых ресурсов
      * */
-    static public ResourceBundle getStringBundle() {return getStringManager().getBundle();}
+    public static ResourceBundle getStringBundle() {return getStringManager().getBundle();}
 
+    //TODO немножко переделать метод, мне не нравится блок catch
     /**
      * Получить строковый ресурс по ключу
      * @param key ключ, по которому строковый ресурс расположен в хранилище
      * @return строковый ресурс, если он есть в хранилище
      * */
-    static public String getString(String key)
+    public static String getString(String key)
     {
         try
         {
@@ -89,7 +91,7 @@ public class ResourceHandler
      * @param args аргументы для форматирования
      * @return отформатированная строка
      * */
-    static public String getString(String key, Object... args)
+    public static String getString(String key, Object... args)
     {
         String pattern = getString(key);
         return String.format(pattern, args);
@@ -99,20 +101,34 @@ public class ResourceHandler
      * Подписать слушателя на изменения локали
      * @param listener слушатель изменения локали
      * */
-    static public void addStringListener(Runnable listener) {getStringManager().addListener(listener);}
+    public static void addStringListener(Runnable listener) {getStringManager().addListener(listener);}
 
     /**
      * Отписать слушателя от изменения локали
      * @param listener слушатель изменения локали
      * */
-    static public void removeStringListener(Runnable listener) {getStringManager().removeListener(listener);}
+    public static void removeStringListener(Runnable listener) {getStringManager().removeListener(listener);}
+
+
+    // Методы работы с ресурсами лайаутов
+    /**
+     * Получить лайаут для виджета по названию файла
+     * @param layoutFileName название файла с описанием интерфейса
+     * @return URL, если файл с таким названием есть в ресурсах, иначе null
+     * */
+    @Nullable
+    public static URL getLayout(String layoutFileName)
+    {
+        LayoutResourceManager manager = new LayoutResourceManager();
+        return manager.getResource(layoutFileName);
+    }
 
     // Приватные методы класса
     /**
      * Выдать объект менеджера ресурсов иконок. Если его нет, сначала создаст его
      * @return менеджер ресурсов иконок
      * */
-    static private IconResourceManager getIconManager()
+    private static IconResourceManager getIconManager()
     {
         if (iconManager == null)
             iconManager = new IconResourceManager();
@@ -123,11 +139,22 @@ public class ResourceHandler
      * Выдать объекта менеджера строковых ресурсов. Если его нет, сначала создаст его
      * @return менеджер строковых ресурсов
      * */
-    static private StringResourceManager getStringManager()
+    private static StringResourceManager getStringManager()
     {
         if (stringManager == null)
             stringManager = new StringResourceManager();
         return stringManager;
+    }
+
+    /**
+     * Выдать объект менеджера ресурсов интерфейса. Если его нет, сначала создаст его
+     * @return менеджер ресурсов интерфейса
+     * */
+    private static LayoutResourceManager getLayoutManager()
+    {
+        if (layoutManager == null)
+            layoutManager = new LayoutResourceManager();
+        return layoutManager;
     }
 }
 
@@ -246,5 +273,24 @@ class StringResourceManager
             System.err.println("Не найден файл ресурсов для локали: " + locale);
             bundle = ResourceBundle.getBundle("strings", Locale.of("ru", "RU"), control);
         }
+    }
+}
+
+/**
+ * Класс для работы с файлами интерфейсов
+ * */
+class LayoutResourceManager
+{
+    private final String layoutPath = "/layouts";
+
+    /**
+     * Получить URL для интерфейса из ресурсов
+     * @param layoutFileName название файла с интерфейсом
+     * @return URL интерфейса или null, если файл с переданным именем не будет найден в ресурсах
+     * */
+    @Nullable
+    public URL getResource(String layoutFileName)
+    {
+        return getClass().getResource(String.join("/", layoutPath, layoutFileName));
     }
 }

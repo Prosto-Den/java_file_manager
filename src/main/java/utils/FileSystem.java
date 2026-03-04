@@ -1,9 +1,6 @@
 package utils;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.io.File;
 import java.util.regex.Pattern;
@@ -11,7 +8,6 @@ import javafx.beans.property.SimpleStringProperty;
 import types.FileSystemErrors;
 import types.OSType;
 import javafx.beans.property.StringProperty;
-import java.awt.Desktop;
 
 
 // TODO может быть статические методы всё-таки вынести в отдельную утилиту для удобства
@@ -23,8 +19,6 @@ public final class FileSystem
     // Абсолютный путь к текущей директории. Хранится в property из JavaFX, так как таким образом можно легко
     // отследить изменения текущей директории (для передачи данных между виджетами)
     private final StringProperty currentPath = new SimpleStringProperty("");
-    static private final OSType osType = calcOSType(); // тип ОС
-    static private final String delimiter = calcDelimiter(); // разделитель для путей этой ОС
 
     /**
      * Конструктор по умолчанию. После создания будет указывать на корень системы
@@ -37,7 +31,7 @@ public final class FileSystem
          должен знать про настройки, т.е. имеет смысл присылать путь извне (реализовал для этого конструктор)
         *
         */
-        currentPath.setValue(getDefaultPath());
+        currentPath.setValue(FileSystemUtils.getDefaultPath());
     }
     /**
      * Конструктор с передачей пути, на который объект будет указывать после создания.
@@ -45,7 +39,7 @@ public final class FileSystem
      * */
     public FileSystem(String path)
     {
-        currentPath.setValue(isDir(path) ? path : getDefaultPath());
+        currentPath.setValue(FileSystemUtils.isDir(path) ? path : FileSystemUtils.getDefaultPath());
     }
 
     /**
@@ -74,7 +68,7 @@ public final class FileSystem
      * */
     public String buildPath(String fileName)
     {
-        return String.join(delimiter, currentPath.getValue(), fileName);
+        return FileSystemUtils.adjustPath(getCurrentPath(), fileName);
     }
 
     /**
@@ -82,7 +76,7 @@ public final class FileSystem
      * */
     public void setCurrentPath(String currentPath)
     {
-        if (osType == OSType.WINDOWS)
+        if (FileSystemUtils.checkOS(OSType.WINDOWS))
             currentPath = currentPath.replace("\\\\", "\\");
         this.currentPath.setValue(currentPath);
     }
@@ -132,148 +126,15 @@ public final class FileSystem
     }
 
     /**
-     * Существует ли файл (директория) по этому пути
-     * @param path Путь к файлу/директории
-     * @return True если существует, иначе False
-     * */
-    static public boolean isExist(String path)
-    {
-        return new File(path).exists();
-    }
-
-    /**
-     * Возвращает список со всеми логическими дисками системы (C:\, D:\ и т.д).
-     * Вызов функции актуален только для Windows.
-     * @return Список со всеми логическими дисками системы для Windows, пустой список для Linux.
-     * */
-    static public List<String> getLogicalDrives()
-    {
-        List<String> logicalDrives = new ArrayList<>();
-
-        if (osType == OSType.WINDOWS)
-        {
-            for (char letter = 'A'; letter <= 'Z'; letter++)
-            {
-                String path = String.format("%s:\\", letter);
-                if (isExist(path))
-                    logicalDrives.add(path);
-            }
-        }
-
-        return logicalDrives;
-    }
-
-    /**
-     * Является ли переданный путь директорией
-     * @param path Путь
-     * @return True - если переданный путь существует и является директорией, иначе False
-     * */
-    static public boolean isDir(String path)
-    {
-        return new File(path).isDirectory();
-    }
-
-    //TODO возможно стоит сделать метод более гибким (например, задать возможность выбора размерности)
-    /**
-     * Получить строку с информацией о размере файла
-     * @param filePath Абсолютный путь к файлу
-     * @return Строка с размером файла
-     * */
-    static public String getFileSize(String filePath)
-    {
-        String[] units = {"B", "KB", "MB", "GB", "TB"};
-        int unitIndex = 0;
-        double size = new File(filePath).length();
-
-        while (size >= 1024 && unitIndex < units.length - 1)
-        {
-            size /= 1024;
-            unitIndex++;
-        }
-
-        return String.format("%.2f %s", size, units[unitIndex]);
-    }
-
-    /**
-     * Получить имя файла из абсолютного пути к нему
-     * @param filePath Абсолютный путь к файлу
-     * @return Имя файла
-     * */
-    static public String getFilenameFromPath(String filePath)
-    {
-        return new File(filePath).getName();
-    }
-
-    /**
-     * Получить дату последнего изменения файла
-     * */
-    static public String lastModifiedDate(String filePath)
-    {
-        //TODO формат для даты вынести в строковые ресурсы
-        long lastModified = new File(filePath).lastModified();
-        Date date = new Date(lastModified);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        return dateFormat.format(date);
-    }
-
-    /**
      * Выдать property текущего пути
      * @return Property текущего пути
      * */
     public StringProperty getCurrentPathProperty() {return currentPath;}
 
-    // TODO после вызова метода могут возникать ошибки, нужно реализовать возврат кода ошибки,
-    //  чтобы потом можно было показывать диалоговые окна с предупреждением
-    /**
-     * Открыть файл соответствующей программой на ПК
-     * @param filename имя файла. Файл должен располагаться в текущей директории,
-     *                 на которую указывает текущий экземпляр файлового менеджера
-     * @return код ошибки
-     * */
-    public FileSystemErrors openFile(String filename)
-    {
-        // логику работы с открытием файла вынес в отдельную утилиту, так как там много нюансов
-        return FileOpener.openFile(osType, buildPath(filename));
-    }
 
-    /**
-     * Проверить тип операционной системы
-     * @param type тип ОС
-     * @return True, если переданный тип совпадает с типом ОС компьютера, иначе False
-     * */
-    static public boolean checkOS(OSType type) {return osType.equals(type); }
-
-    /**
-     * Определить разделитель для текущей операционной системы
-     * @return используемый в ОС этого компьютера разделитель
-     * */
-    static private String calcDelimiter()
+    public FileSystemErrors openFile(String fileName)
     {
-        if (osType == OSType.WINDOWS)
-            return "\\";
-        return "/";
-    }
-
-    /**
-     * Выдать корень файловой системы (C:\ для Windows и / для Linux)
-     * @return Корень системы
-     * */
-    private String getDefaultPath()
-    {
-        if (osType == OSType.WINDOWS)
-            return "C:\\";
-        return "/";
-    }
-
-    /**
-     * Определить операционную систему. Пока все ОС делятся на Windows и Linux (всё что не Windows, то Linux)
-     * @return Тип ОС
-     * */
-    static private OSType calcOSType()
-    {
-        String osName = System.getProperty("os.name");
-        if (osName.contains("Windows"))
-            return OSType.WINDOWS;
-        return OSType.LINUX;
+        String path = FileSystemUtils.adjustPath(getCurrentPath(), fileName);
+        return FileSystemUtils.openFile(path);
     }
 }

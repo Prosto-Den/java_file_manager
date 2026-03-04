@@ -14,4 +14,7 @@
     <entry key="button.back.tooltip">Назад</entry>
     <entry key="button.forward.tooltip">Вперёд</entry>
     <entry key="button.insert.tooltip">Вставить</entry>
+    <entry key="contextmenu.item.open">Открыть</entry>
+    <entry key="contextmenu.item.copy">Скопировать</entry>
+    <entry key="contextmenu.item.delete">Удалить</entry>
 </properties>

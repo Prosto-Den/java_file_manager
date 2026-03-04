@@ -11,15 +11,19 @@ import java.util.ResourceBundle;
 
 public class MainController implements Initializable
 {
+    // левая контрольная панель
     @FXML
     private ControlPanel leftControlPanel;
 
+    // левая панель с отображаемыми файлами директории
     @FXML
     private Panel leftPanel;
 
+    // правая контрольная панель
     @FXML
     private ControlPanel rightControlPanel;
 
+    // правая панель с отображаемыми файлами директории
     @FXML
     private Panel rightPanel;
 

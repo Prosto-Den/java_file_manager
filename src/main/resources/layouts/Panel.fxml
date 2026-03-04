@@ -8,9 +8,6 @@
       xmlns:fx="http://javafx.com/fxml/1"
       type="javafx.scene.layout.VBox">
 
-    <!--ListView fx:id="fileViewer"
-              VBox.vgrow="ALWAYS"
-              maxHeight="Infinity"/ -->
     <TableView fx:id="fileViewer" VBox.vgrow="ALWAYS" maxHeight="Infinity">
         <columns>
             <TableColumn prefWidth="300" fx:id="fileNameColumn" minWidth="150"/>

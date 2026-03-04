@@ -7,14 +7,19 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
+
+import java.io.IOException;
 import java.util.List;
 
+import javafx.util.Pair;
 import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
+import utils.ContextMenuManager;
 import utils.FileSystem;
 import models.FileData;
+import utils.FileSystemUtils;
 
 
 /**
@@ -36,9 +41,9 @@ public class Panel extends VBox implements IWidget
     /**
      * Конструктор
      * */
-    public Panel()
+    public Panel() throws IOException
     {
-        load("/layouts/Panel.fxml");
+        load(ResourceHandler.getLayout("Panel.fxml"));
         initUI();
 
         ResourceHandler.addStringListener(this::updateText);
@@ -101,7 +106,7 @@ public class Panel extends VBox implements IWidget
                     else
                     {
                         String fullPath = fileSystem.buildPath(file.getNameValue());
-                        if (FileSystem.isDir(fullPath))
+                        if (FileSystemUtils.isDir(fullPath))
                             icon = ResourceHandler.getIcon(IconSize.BIG, IconName.FOLDER);
                         else
                             icon = ResourceHandler.getIcon(IconSize.BIG, IconName.FILE);
@@ -135,6 +140,42 @@ public class Panel extends VBox implements IWidget
                     handleDoubleClick(fileInfo);
                 }
             });
+
+            // задаём поведение при вызове контекстного меню
+            row.setOnContextMenuRequested(event -> {
+                FileData fileInfo = row.getItem();
+
+                // в зависимости от того, было вызвано меню по ряду файла или ряду папки, будет отображаться разная
+                // иконка
+                if (fileInfo != null)
+                {
+                    MenuItem openItem = ContextMenuManager.getOpenMenuItem();
+                    
+                    if (openItem != null)
+                    {
+                        openItem.setOnAction(actionEvent -> onContextItemOpenClick(fileInfo.getNameValue()));
+                        //Pair<FileSystem, String> data = new Pair<>(fileSystem, fileInfo.getNameValue());
+                        
+                        
+                        // Помещаем абсолютный путь к файлу в item, так будет проще работать с открытием
+                        //openItem.setUserData(data);
+
+                        Image icon;
+                        if (fileInfo.isDirectory())
+                            icon = ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FOLDER);
+                        else
+                            icon = ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FILE);
+
+                        if (icon != null)
+                            openItem.setGraphic(new ImageView(icon));
+                    }
+
+                }
+            });
+
+
+            row.setContextMenu(ContextMenuManager.getPanelContextMenu());
+            row.setStyle("-fx-font-size: 14px;");
 
             return row;
         });
@@ -178,11 +219,11 @@ public class Panel extends VBox implements IWidget
         List<String> files = fileSystem.listCurrentPath(false);
         for (String file : files)
         {
-            String fileSize = FileSystem.getFileSize(file);
-            String fileEditDate = FileSystem.lastModifiedDate(file);
+            String fileSize = FileSystemUtils.getFileSize(file);
+            String fileEditDate = FileSystemUtils.lastModifiedDate(file);
 
-            FileData fileInfo = new FileData(FileSystem.getFilenameFromPath(file), fileSize, fileEditDate,
-                    FileSystem.isDir(file));
+            FileData fileInfo = new FileData(FileSystemUtils.getFilenameFromPath(file), fileSize, fileEditDate,
+                    FileSystemUtils.isDir(file));
             fileData.add(fileInfo);
         }
 
@@ -200,5 +241,22 @@ public class Panel extends VBox implements IWidget
         fileNameColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILENAME));
         fileSizeColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILE_SIZE));
         fileEditDateColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
+    }
+
+    /**
+     * Действия на нажатии кнопки "Открыть" в контекстном меню
+     * @param fileName имя файла в текущей директории
+     * */
+    private void onContextItemOpenClick(String fileName)
+    {
+        String path = fileSystem.buildPath(fileName);
+
+        if (FileSystemUtils.isDir(path))
+        {
+            fileSystem.goForward(fileName);
+            refreshTable();
+        }
+        else
+            fileSystem.openFile(fileName);
     }
 }

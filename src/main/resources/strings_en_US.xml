@@ -14,5 +14,7 @@
     <entry key="button.back.tooltip">Back</entry>
     <entry key="button.forward.tooltip">Forward</entry>
     <entry key="button.insert.tooltip">Insert</entry>
-
+    <entry key="contextmenu.item.open">Open</entry>
+    <entry key="contextmenu.item.copy">Copy</entry>
+    <entry key="contextmenu.item.delete">Delete</entry>
 </properties>
