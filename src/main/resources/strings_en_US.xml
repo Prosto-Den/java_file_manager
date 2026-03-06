@@ -17,4 +17,5 @@
     <entry key="contextmenu.item.open">Open</entry>
     <entry key="contextmenu.item.copy">Copy</entry>
     <entry key="contextmenu.item.delete">Delete</entry>
+    <entry key="fileviewer.row.back">..</entry>
 </properties>

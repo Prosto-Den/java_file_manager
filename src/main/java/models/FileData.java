@@ -5,28 +5,27 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 
-public class FileData
+/**
+ * Класс для хранения информации по файлу. Необходимо для отображения данных в менеджере
+ *
+ */
+public record FileData(StringProperty name, StringProperty size, StringProperty date, boolean isDirectory)
 {
-    private final StringProperty name;
-    private final StringProperty size;
-    private final StringProperty date;
-    private final boolean isDirectory;
-
     public FileData(String name, String size, String date, boolean isDirectory)
     {
-        this.name = new SimpleStringProperty(name);
-        this.size = new SimpleStringProperty(size);
-        this.date = new SimpleStringProperty(date);
-        this.isDirectory = isDirectory;
+        this(new SimpleStringProperty(name), new SimpleStringProperty(size), new SimpleStringProperty(date),
+                isDirectory);
     }
 
-    public StringProperty getName() {return name;}
-    public StringProperty getSize() {return size;}
-    public StringProperty getDate() {return date;}
+    public String getNameValue() {
+        return name.getValue();
+    }
 
-    public String getNameValue() {return name.getValue();}
-    public String getSizeValue() {return size.getValue();}
-    public String getDateValue() {return date.getValue();}
+    public String getSizeValue() {
+        return size.getValue();
+    }
 
-    public boolean isDirectory() {return this.isDirectory;}
+    public String getDateValue() {
+        return date.getValue();
+    }
 }

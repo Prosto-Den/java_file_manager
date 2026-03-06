@@ -17,4 +17,5 @@
     <entry key="contextmenu.item.open">Открыть</entry>
     <entry key="contextmenu.item.copy">Скопировать</entry>
     <entry key="contextmenu.item.delete">Удалить</entry>
+    <entry key="fileviewer.row.back">..</entry>
 </properties>

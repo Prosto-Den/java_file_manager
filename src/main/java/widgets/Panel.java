@@ -5,13 +5,13 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 
 import java.io.IOException;
 import java.util.List;
 
-import javafx.util.Pair;
 import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
@@ -77,7 +77,7 @@ public class Panel extends VBox implements IWidget
     private void setupTableColumns()
     {
         // настраиваем колонку с именем файла
-        fileNameColumn.setCellValueFactory(cellData -> cellData.getValue().getName());
+        fileNameColumn.setCellValueFactory(cellData -> cellData.getValue().name());
         fileNameColumn.setCellFactory(column -> new TableCell<FileData, String>()
         {
             private final ImageView imageView = new ImageView();
@@ -101,7 +101,7 @@ public class Panel extends VBox implements IWidget
                     String fileName = file.getNameValue();
                     Image icon;
 
-                    if (fileName.equals(".."))
+                    if (fileName.equals(ResourceHandler.getString(StringKeys.FILEVIEWER_ROW_BACK)))
                         icon = ResourceHandler.getIcon(IconSize.BIG, IconName.BACK);
                     else
                     {
@@ -124,57 +124,45 @@ public class Panel extends VBox implements IWidget
         });
 
         // настраиваем колонку с размером файла
-        fileSizeColumn.setCellValueFactory(cellData -> cellData.getValue().getSize());
+        fileSizeColumn.setCellValueFactory(cellData -> cellData.getValue().size());
         // настраиваем колонку с датой последнего изменения
-        fileEditDateColumn.setCellValueFactory(cellData -> cellData.getValue().getDate());
+        fileEditDateColumn.setCellValueFactory(cellData -> cellData.getValue().date());
 
         // задаём поведение при двойном нажатии ЛКМ по ряду таблицы
         fileViewer.setRowFactory( tv ->
         {
-            TableRow<FileData> row = new TableRow<>();
-            row.setOnMouseClicked(event ->
-            {
-                if (event.getClickCount() == 2 && !row.isEmpty())
+            TableRow<FileData> row = new TableRow<>() {
+                // переопределяем метод обновления ряда, чтобы убрать вызов контекстного меню для кнопки "назад"
+                // TODO после реализации контекстного меню для пустого места поменять
+                @Override
+                protected void updateItem(FileData item, boolean empty)
                 {
-                    FileData fileInfo = row.getItem();
-                    handleDoubleClick(fileInfo);
-                }
-            });
+                    super.updateItem(item, empty);
 
-            // задаём поведение при вызове контекстного меню
-            row.setOnContextMenuRequested(event -> {
-                FileData fileInfo = row.getItem();
-
-                // в зависимости от того, было вызвано меню по ряду файла или ряду папки, будет отображаться разная
-                // иконка
-                if (fileInfo != null)
-                {
-                    MenuItem openItem = ContextMenuManager.getOpenMenuItem();
-                    
-                    if (openItem != null)
+                    if (empty || item == null || item.getNameValue().equals(ResourceHandler
+                            .getString(StringKeys.FILEVIEWER_ROW_BACK)))
                     {
-                        openItem.setOnAction(actionEvent -> onContextItemOpenClick(fileInfo.getNameValue()));
-                        //Pair<FileSystem, String> data = new Pair<>(fileSystem, fileInfo.getNameValue());
-                        
-                        
-                        // Помещаем абсолютный путь к файлу в item, так будет проще работать с открытием
-                        //openItem.setUserData(data);
-
-                        Image icon;
-                        if (fileInfo.isDirectory())
-                            icon = ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FOLDER);
-                        else
-                            icon = ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FILE);
-
-                        if (icon != null)
-                            openItem.setGraphic(new ImageView(icon));
+                        setContextMenu(null);
                     }
+                    else
+                    {
+                        setContextMenu(ContextMenuManager.createPanelContextMenu(fileSystem, this,
+                                Panel.this::refreshTable));
+                    }
+                }
+            };
 
+            row.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.PRIMARY)
+                {
+                    if (event.getClickCount() == 2 && !row.isEmpty())
+                    {
+                        FileData fileInfo = row.getItem();
+                        handleDoubleClick(fileInfo);
+                    }
                 }
             });
 
-
-            row.setContextMenu(ContextMenuManager.getPanelContextMenu());
             row.setStyle("-fx-font-size: 14px;");
 
             return row;
@@ -241,22 +229,5 @@ public class Panel extends VBox implements IWidget
         fileNameColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILENAME));
         fileSizeColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILE_SIZE));
         fileEditDateColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
-    }
-
-    /**
-     * Действия на нажатии кнопки "Открыть" в контекстном меню
-     * @param fileName имя файла в текущей директории
-     * */
-    private void onContextItemOpenClick(String fileName)
-    {
-        String path = fileSystem.buildPath(fileName);
-
-        if (FileSystemUtils.isDir(path))
-        {
-            fileSystem.goForward(fileName);
-            refreshTable();
-        }
-        else
-            fileSystem.openFile(fileName);
     }
 }

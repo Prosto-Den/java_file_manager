@@ -19,4 +19,5 @@ public class StringKeys
     public static final String CONTEXT_MENU_OPEN_ITEM = "contextmenu.item.open";
     public static final String CONTEXT_MENU_COPY_ITEM = "contextmenu.item.copy";
     public static final String CONTEXT_MENU_DELETE_ITEM = "contextmenu.item.delete";
+    public static final String FILEVIEWER_ROW_BACK = "fileviewer.row.back";
 }
