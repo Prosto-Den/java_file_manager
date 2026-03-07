@@ -1,12 +1,17 @@
 package utils;
 
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import types.FileSystemErrors;
 import types.OSType;
 
+import java.awt.*;
 import java.io.File;
+import java.nio.file.*;
+import java.io.IOException;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -122,10 +127,84 @@ public class FileSystemUtils
         return new File(path).isDirectory();
     }
 
-
+    /**
+     * Провести конкатенацию пути и имени файла / директории
+     * @param path путь к родительской директории
+     * @param filename название файла / директории в родительской директории
+     * @return путь до файла / директории
+     * */
     public static String adjustPath(String path, String filename)
     {
         return String.join(delimiter, path, filename);
+    }
+
+    public static boolean delete(String path)
+    {
+        if (!isDir(path))
+            return new File(path).delete();
+        else
+            return deleteRecursively(path);
+    }
+
+    public static boolean moveToTrash(String filePath)
+    {
+        boolean res = false;
+
+        File file = new File(filePath);
+
+        if (Desktop.isDesktopSupported())
+            res = Desktop.getDesktop().moveToTrash(file);
+
+        return res;
+    }
+
+    public static void copyToClipboard(String path)
+    {
+        File file = new File(path);
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent content = new ClipboardContent();
+
+        content.putFiles(Collections.singletonList(file));
+        clipboard.setContent(content);
+    }
+
+    public static boolean isClipBoardEmpty()
+    {
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+
+        return !clipboard.hasFiles();
+    }
+
+    public static void insert(String path)
+    {
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+
+        if (clipboard.hasFiles())
+        {
+            List<File> files = clipboard.getFiles();
+
+            for (File file : files)
+            {
+                File destFile = new File(FileSystemUtils.adjustPath(path, file.getName()));
+
+                try
+                {
+                    Files.copy(file.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
+                catch (IOException ex)
+                {
+                    System.err.println("gneg :)");
+                }
+            }
+        }
+    }
+
+
+    public static void clearClipboard()
+    {
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+
+        clipboard.clear();
     }
 
 
@@ -163,5 +242,45 @@ public class FileSystemUtils
         if (osType == OSType.WINDOWS)
             return "\\";
         return "/";
+    }
+
+    private static boolean deleteRecursively(String rawPath)
+    {
+        boolean res = false;
+
+        Path path = Paths.get(rawPath);
+
+        try
+        {
+            if (Files.isDirectory(path))
+            {
+                Files.walk(path)
+                        .sorted(Comparator.reverseOrder())
+                        .forEach(p -> {
+                            try
+                            {
+                                if (Files.isDirectory(p))
+                                    deleteRecursively(p.getParent().toString());
+                                else
+                                    Files.delete(p);
+                            }
+                            catch (IOException ex)
+                            {
+                                System.err.println("не удалось удалить: " + p);
+                            }
+                        });
+            }
+            else
+                Files.delete(path);
+
+            res = true;
+        }
+        catch (IOException ex)
+        {
+            ex.printStackTrace();
+            res = false;
+        }
+
+        return res;
     }
 }

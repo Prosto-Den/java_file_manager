@@ -1,6 +1,9 @@
 package widgets;
 
 
+import events.ButtonClickedEvent;
+import events.ClipboardEvent;
+import events.EventBus;
 import javafx.collections.FXCollections;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -47,6 +50,7 @@ public class ControlPanel extends HBox implements IWidget
     public ControlPanel()
     {
         load(ResourceHandler.getLayout("ControlPanel.fxml"));
+        insertButton.setOnAction(event -> onInsertItemClick());
         initUI();
 
         ResourceHandler.addStringListener(this::updateText);
@@ -65,6 +69,11 @@ public class ControlPanel extends HBox implements IWidget
 
         diskComboBox.setVisible(FileSystemUtils.checkOS(OSType.WINDOWS));
 
+        insertButton.setDisable(true);
+        EventBus.subscribe(ClipboardEvent.class, event -> {
+            insertButton.setDisable(!event.isHasFiles());
+        });
+
         updateDiskCombo();
         updateText();
     }
@@ -72,6 +81,17 @@ public class ControlPanel extends HBox implements IWidget
     public void setFileSystem(FileSystem fileSystem)
     {
         currentPathField.textProperty().bind(fileSystem.getCurrentPathProperty());
+    }
+
+    public void dispose()
+    {
+        ResourceHandler.removeStringListener(this::updateText);
+    }
+
+    public void onInsertItemClick()
+    {
+        FileSystemUtils.insert(currentPathField.getText());
+        EventBus.publish(new ButtonClickedEvent());
     }
 
     private void updateDiskCombo()
@@ -93,10 +113,4 @@ public class ControlPanel extends HBox implements IWidget
         forwardButton.setTooltip(new Tooltip(bundle.getString(StringKeys.BUTTON_FORWARD_TOOLTIP)));
         insertButton.setTooltip(new Tooltip(bundle.getString(StringKeys.BUTTON_INSERT_TOOLTIP)));
     }
-
-    public void dispose()
-    {
-        ResourceHandler.removeStringListener(this::updateText);
-    }
-
 }

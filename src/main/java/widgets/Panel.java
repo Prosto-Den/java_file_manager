@@ -1,5 +1,7 @@
 package widgets;
 
+import events.ButtonClickedEvent;
+import events.EventBus;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -45,6 +47,11 @@ public class Panel extends VBox implements IWidget
     {
         load(ResourceHandler.getLayout("Panel.fxml"));
         initUI();
+
+        //TODO в будущем ButtonClickedEvent будет абстрактным, надо будет подписаться на более конкретное событие
+        EventBus.subscribe(ButtonClickedEvent.class, event -> {
+            refreshTable();
+        });
 
         ResourceHandler.addStringListener(this::updateText);
     }
@@ -128,7 +135,7 @@ public class Panel extends VBox implements IWidget
         // настраиваем колонку с датой последнего изменения
         fileEditDateColumn.setCellValueFactory(cellData -> cellData.getValue().date());
 
-        // задаём поведение при двойном нажатии ЛКМ по ряду таблицы
+        // задаём настройки для ряда
         fileViewer.setRowFactory( tv ->
         {
             TableRow<FileData> row = new TableRow<>() {

@@ -10,13 +10,11 @@ import javafx.scene.control.TableRow;
 import javafx.scene.image.ImageView;
 import models.FileData;
 import models.StringKeys;
-import org.jetbrains.annotations.Nullable;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import models.ContextMenuItemId;
 
-import java.io.File;
 import java.io.IOException;
 
 
@@ -37,7 +35,9 @@ public class ContextMenuManager
 
             commonItemConfiguration(menu);
 
-            MenuItem openItem = (MenuItem) loader.getNamespace().get(ContextMenuItemId.OPEN_ITEM);
+            MenuItem openItem = getMenuItem(loader, ContextMenuItemId.OPEN_ITEM);
+            MenuItem copyItem = getMenuItem(loader, ContextMenuItemId.COPY_ITEM);
+            MenuItem deleteItem = getMenuItem(loader, ContextMenuItemId.DELETE_ITEM);
 
             ContextMenu tempVar = menu;
             menu.setOnShowing(event -> {
@@ -51,7 +51,14 @@ public class ContextMenuManager
                 }
             });
 
-            openItem.setOnAction(event -> onOpenItemClick(event, fileSystem, onRefresh));
+            if (openItem != null)
+                openItem.setOnAction(event -> onOpenItemClick(event, fileSystem, onRefresh));
+
+            if (copyItem != null)
+                copyItem.setOnAction(event -> onCopyItemClick(event, fileSystem));
+
+            if (deleteItem != null)
+                deleteItem.setOnAction(event -> onDeleteItemClick(event, fileSystem, onRefresh));
         }
         catch (IOException ex)
         {
@@ -86,6 +93,23 @@ public class ContextMenuManager
             FileSystemUtils.openFile(fileSystem.buildPath(fileInfo.getNameValue()));
     }
 
+    private static void onCopyItemClick(ActionEvent event, FileSystem fileSystem)
+    {
+        MenuItem item = (MenuItem) event.getSource();
+        FileData fileInfo = (FileData) item.getUserData();
+        String path = fileSystem.buildPath(fileInfo.getNameValue());
+        FileSystemUtils.copyToClipboard(path);
+    }
+
+    private static void onDeleteItemClick(ActionEvent event, FileSystem fileSystem, Runnable onRefresh)
+    {
+        MenuItem item = (MenuItem) event.getSource();
+        FileData fileInfo = (FileData) item.getUserData();
+        String path = fileSystem.buildPath(fileInfo.getNameValue());
+        FileSystemUtils.delete(path);
+        onRefresh.run();
+    }
+
     private static void setUserData(ContextMenu menu, Object userData)
     {
         for (MenuItem item : menu.getItems())
@@ -110,5 +134,10 @@ public class ContextMenuManager
             if (!text.isEmpty())
                 item.setText(text);
         }
+    }
+
+    private static MenuItem getMenuItem(FXMLLoader loader, String id)
+    {
+        return (MenuItem) loader.getNamespace().get(id);
     }
 }
