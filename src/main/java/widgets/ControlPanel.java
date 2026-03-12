@@ -53,6 +53,7 @@ public class ControlPanel extends HBox implements IWidget
         insertButton.setOnAction(event -> onInsertItemClick());
         initUI();
 
+        //TODO заменить на шину событий
         ResourceHandler.addStringListener(this::updateText);
     }
 
@@ -75,7 +76,8 @@ public class ControlPanel extends HBox implements IWidget
         });
 
         updateDiskCombo();
-        updateText();
+        // вызывать updateText при инициализации не требуется, так как loader загружает текста виджетов
+        // уже с нужной локалью
     }
 
     public void setFileSystem(FileSystem fileSystem)
@@ -105,12 +107,10 @@ public class ControlPanel extends HBox implements IWidget
 
     private void updateText()
     {
-        ResourceBundle bundle = ResourceHandler.getStringBundle();
-
-        createButton.setText(bundle.getString(StringKeys.BUTTON_ADD_TEXT));
-        createButton.setTooltip(new Tooltip(bundle.getString(StringKeys.BUTTON_ADD_TOOLTIP)));
-        backButton.setTooltip(new Tooltip(bundle.getString(StringKeys.BUTTON_BACK_TOOLTIP)));
-        forwardButton.setTooltip(new Tooltip(bundle.getString(StringKeys.BUTTON_FORWARD_TOOLTIP)));
-        insertButton.setTooltip(new Tooltip(bundle.getString(StringKeys.BUTTON_INSERT_TOOLTIP)));
+        createButton.setText(ResourceHandler.getString(StringKeys.BUTTON_ADD_TEXT));
+        createButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_ADD_TOOLTIP)));
+        backButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_BACK_TOOLTIP)));
+        forwardButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_FORWARD_TOOLTIP)));
+        insertButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_INSERT_TOOLTIP)));
     }
 }

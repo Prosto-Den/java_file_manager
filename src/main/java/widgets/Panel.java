@@ -76,6 +76,7 @@ public class Panel extends VBox implements IWidget
         fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         setupTableColumns();
         // тут не получится вызвать refreshTable, так как файловая система ещё не создана
+        //TODO переделать создание виджетов, чтобы не передавать fileSystem после его создания
     }
 
     /**
@@ -140,7 +141,6 @@ public class Panel extends VBox implements IWidget
         {
             TableRow<FileData> row = new TableRow<>() {
                 // переопределяем метод обновления ряда, чтобы убрать вызов контекстного меню для кнопки "назад"
-                // TODO после реализации контекстного меню для пустого места поменять
                 @Override
                 protected void updateItem(FileData item, boolean empty)
                 {
@@ -149,6 +149,7 @@ public class Panel extends VBox implements IWidget
                     if (empty || item == null || item.getNameValue().equals(ResourceHandler
                             .getString(StringKeys.FILEVIEWER_ROW_BACK)))
                     {
+                        // TODO после реализации контекстного меню для пустого места поменять
                         setContextMenu(null);
                     }
                     else
@@ -159,6 +160,7 @@ public class Panel extends VBox implements IWidget
                 }
             };
 
+            // Настраиваем поведение при двойном щелчке ЛКМ
             row.setOnMouseClicked(event -> {
                 if (event.getButton() == MouseButton.PRIMARY)
                 {
@@ -170,12 +172,11 @@ public class Panel extends VBox implements IWidget
                 }
             });
 
+            //TODO стоит ли это вынести в отдельную переменную?
             row.setStyle("-fx-font-size: 14px;");
 
             return row;
         });
-
-        updateText();
     }
 
     /**
@@ -228,8 +229,7 @@ public class Panel extends VBox implements IWidget
     }
 
     /**
-     * Обновить текста заголовков таблицы. Нужно для первой инициализации, а также для перезаполнения
-     * при смене языка
+     * Обновить текста заголовков таблицы. Нужно для для перезаполнения при смене языка
      * */
     private void updateText()
     {

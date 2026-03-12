@@ -10,9 +10,9 @@
 
     <TableView fx:id="fileViewer" VBox.vgrow="ALWAYS" maxHeight="Infinity">
         <columns>
-            <TableColumn prefWidth="300" fx:id="fileNameColumn" minWidth="150"/>
-            <TableColumn prefWidth="150" fx:id="fileSizeColumn" minWidth="75"/>
-            <TableColumn prefWidth="200" fx:id="fileEditDateColumn" minWidth="150"/>
+            <TableColumn prefWidth="300" fx:id="fileNameColumn" minWidth="150" text="%panel.column.filename"/>
+            <TableColumn prefWidth="150" fx:id="fileSizeColumn" minWidth="75" text="%panel.column.fileSize"/>
+            <TableColumn prefWidth="200" fx:id="fileEditDateColumn" minWidth="150" text="%panel.column.fileEditDate"/>
         </columns>
     </TableView>
 

@@ -30,10 +30,11 @@ public class ContextMenuManager
 
         try
         {
-            FXMLLoader loader = new FXMLLoader(ResourceHandler.getLayout("ContextMenu.fxml"));
+            FXMLLoader loader = new FXMLLoader(ResourceHandler.getLayout("ContextMenu.fxml"),
+                    ResourceHandler.getStringBundle());
             menu = loader.load();
 
-            commonItemConfiguration(menu);
+
 
             MenuItem openItem = getMenuItem(loader, ContextMenuItemId.OPEN_ITEM);
             MenuItem copyItem = getMenuItem(loader, ContextMenuItemId.COPY_ITEM);
@@ -128,30 +129,6 @@ public class ContextMenuManager
         for (MenuItem item : menu.getItems())
             if (!(item instanceof SeparatorMenuItem))
                 item.setUserData(userData);
-    }
-
-    private static void commonItemConfiguration(ContextMenu menu)
-    {
-        for (MenuItem item : menu.getItems())
-        {
-            if (item instanceof SeparatorMenuItem)
-                continue;
-
-            String text = "";
-
-            switch (item.getId())
-            {
-                case ContextMenuItemId.OPEN_ITEM -> text = ResourceHandler.getString(StringKeys.CONTEXT_MENU_OPEN_ITEM);
-                case ContextMenuItemId.COPY_ITEM -> text = ResourceHandler.getString(StringKeys.CONTEXT_MENU_COPY_ITEM);
-                case ContextMenuItemId.DELETE_ITEM -> text = ResourceHandler.getString(
-                        StringKeys.CONTEXT_MENU_DELETE_ITEM);
-                case ContextMenuItemId.MOVE_TO_TRASH_ITEM -> text = ResourceHandler.getString(
-                        StringKeys.CONTEXT_MENU_MOVE_TO_TRASH_ITEM);
-            }
-
-            if (!text.isEmpty())
-                item.setText(text);
-        }
     }
 
     private static MenuItem getMenuItem(FXMLLoader loader, String id)

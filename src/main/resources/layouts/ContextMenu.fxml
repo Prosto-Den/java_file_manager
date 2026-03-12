@@ -9,7 +9,7 @@
 <ContextMenu xmlns="http://javafx.com/javafx"
              xmlns:fx="http://javafx.com/fxml">
     <items>
-        <MenuItem fx:id="openMenuItem">
+        <MenuItem fx:id="openMenuItem" text="%contextmenu.item.open">
             <graphic>
                 <ImageView>
                     <!-- В коде иконку будем менять в зависимости от файла, но по умолчанию тоже выставим -->
@@ -18,7 +18,7 @@
             </graphic>
         </MenuItem>
 
-        <MenuItem fx:id="copyMenuItem">
+        <MenuItem fx:id="copyMenuItem" text="%contextmenu.item.copy">
             <graphic>
                 <ImageView>
                     <Image url="@/icons/16x16/copy.png"/>
@@ -28,7 +28,7 @@
 
         <SeparatorMenuItem/>
 
-        <MenuItem fx:id="deleteMenuItem">
+        <MenuItem fx:id="deleteMenuItem" text="%contextmenu.item.delete">
             <graphic>
                 <ImageView>
                     <Image url="@/icons/16x16/delete.png"/>
@@ -36,7 +36,7 @@
             </graphic>
         </MenuItem>
 
-        <MenuItem fx:id="moveToTrashMenuItem">
+        <MenuItem fx:id="moveToTrashMenuItem" text="%contextmenu.item.moveToTrash">
             <graphic>
                 <ImageView>
                     <Image url="@/icons/16x16/trash.png"/>

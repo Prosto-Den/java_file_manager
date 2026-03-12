@@ -18,5 +18,6 @@
     <entry key="contextmenu.item.copy">Copy</entry>
     <entry key="contextmenu.item.delete">Delete</entry>
     <entry key="fileviewer.row.back">..</entry>
-    <entry key="contextmenu.item.move_to_trash">Move to trash</entry>
+    <entry key="contextmenu.item.moveToTrash">Move to trash</entry>
+    <entry key="textfield.currentPath.tooltip">Path to current directory</entry>
 </properties>

@@ -13,6 +13,7 @@
       fx:controller="controllers.MainController">
 
     <!--Метка HBox.hgrow="ALWAYS" позволяет виджету растягиваться по горизонтали !-->
+    <!--Левая панель-->
     <BorderPane HBox.hgrow="ALWAYS">
         <top>
             <ControlPanel fx:id="leftControlPanel"/>
@@ -22,6 +23,7 @@
         </center>
     </BorderPane>
 
+    <!--Правая панель-->
     <BorderPane HBox.hgrow="ALWAYS">
         <top>
            <ControlPanel fx:id="rightControlPanel"/>

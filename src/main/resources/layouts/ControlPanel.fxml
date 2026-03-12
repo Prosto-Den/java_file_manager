@@ -24,11 +24,20 @@
         <Insets bottom="5" top="5" left="5"/>
     </padding>
 
+    <!--Комбобокс с выбором диска. Не актуален для Linux-->
     <ImageView HBox.hgrow="ALWAYS">
         <Image url="/icons/24x24/disk.png"/>
     </ImageView>
     <ComboBox fx:id="diskComboBox" HBox.hgrow="ALWAYS"/>
-    <Button textAlignment="RIGHT" fx:id="createButton" HBox.hgrow="ALWAYS"/>
+
+    <!--Кнопка создать-->
+    <Button textAlignment="RIGHT" fx:id="createButton" HBox.hgrow="ALWAYS" text="%button.add.text">
+        <tooltip>
+            <Tooltip text="%button.add.tooltip"/>
+        </tooltip>
+    </Button>
+
+    <!--Кнопка "Назад"-->
     <Button fx:id="backButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30">
         <graphic>
             <ImageView>
@@ -36,9 +45,11 @@
             </ImageView>
         </graphic>
         <tooltip>
-            <Tooltip text="Назад"/>
+            <Tooltip text="%button.back.tooltip"/>
         </tooltip>
     </Button>
+
+    <!--Кнопка "Вперёд"-->
     <Button fx:id="forwardButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30">
         <graphic>
             <ImageView>
@@ -46,15 +57,26 @@
             </ImageView>
         </graphic>
         <tooltip>
-            <Tooltip text="Вперёд"/>
+            <Tooltip text="%button.forward.tooltip"/>
         </tooltip>
     </Button>
+
+    <!--Кнопка вставки-->
     <Button fx:id="insertButton" HBox.hgrow="ALWAYS">
         <graphic>
             <ImageView>
                 <Image url="/icons/24x24/insert.png" preserveRatio="true"/>
             </ImageView>
         </graphic>
+        <tooltip>
+            <Tooltip text="%button.insert.tooltip"/>
+        </tooltip>
     </Button>
-    <TextField fx:id="currentPathField" HBox.hgrow="ALWAYS" editable="false"/>
+
+    <!--Текстовое поле с текущей директорией-->
+    <TextField fx:id="currentPathField" HBox.hgrow="ALWAYS" editable="false">
+        <tooltip>
+            <Tooltip text="%textfield.currentPath.tooltip"/>
+        </tooltip>
+    </TextField>
 </fx:root>
