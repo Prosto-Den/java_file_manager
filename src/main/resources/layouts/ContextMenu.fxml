@@ -26,10 +26,20 @@
             </graphic>
         </MenuItem>
 
+        <SeparatorMenuItem/>
+
         <MenuItem fx:id="deleteMenuItem">
             <graphic>
                 <ImageView>
                     <Image url="@/icons/16x16/delete.png"/>
+                </ImageView>
+            </graphic>
+        </MenuItem>
+
+        <MenuItem fx:id="moveToTrashMenuItem">
+            <graphic>
+                <ImageView>
+                    <Image url="@/icons/16x16/trash.png"/>
                 </ImageView>
             </graphic>
         </MenuItem>

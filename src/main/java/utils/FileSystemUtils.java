@@ -13,6 +13,10 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Stream;
+
+
+//TODO некоторые утилиты не нужны для линукса. Возможно, стоит завезти отдельный класс WindowsFileSystemUtils?
 
 /**
  * Статические методы для работы с файловой системой
@@ -138,6 +142,7 @@ public class FileSystemUtils
         return String.join(delimiter, path, filename);
     }
 
+
     public static boolean delete(String path)
     {
         if (!isDir(path))
@@ -146,6 +151,7 @@ public class FileSystemUtils
             return deleteRecursively(path);
     }
 
+    //TODO на Linux корзины нет (не на всех рабочих столах). Нужно проверить, как эта функция себя поведёт
     public static boolean moveToTrash(String filePath)
     {
         boolean res = false;
@@ -200,14 +206,6 @@ public class FileSystemUtils
     }
 
 
-    public static void clearClipboard()
-    {
-        Clipboard clipboard = Clipboard.getSystemClipboard();
-
-        clipboard.clear();
-    }
-
-
     // Приватные методы
 
     /**
@@ -244,6 +242,8 @@ public class FileSystemUtils
         return "/";
     }
 
+    //TODO подозреваю, что директории с большим количеством файлов будут удаляться долго, поэтому думаю, что
+    // удаление всего надо вынести в отдельный поток + создать окно с индикацией удаления
     private static boolean deleteRecursively(String rawPath)
     {
         boolean res = false;
@@ -254,21 +254,23 @@ public class FileSystemUtils
         {
             if (Files.isDirectory(path))
             {
-                Files.walk(path)
-                        .sorted(Comparator.reverseOrder())
-                        .forEach(p -> {
-                            try
-                            {
-                                if (Files.isDirectory(p))
-                                    deleteRecursively(p.getParent().toString());
-                                else
-                                    Files.delete(p);
-                            }
-                            catch (IOException ex)
-                            {
-                                System.err.println("не удалось удалить: " + p);
-                            }
-                        });
+                try (Stream<Path> stream = Files.walk(path))
+                {
+                    stream.sorted(Comparator.reverseOrder())
+                            .forEach(p -> {
+                                try
+                                {
+                                    if (Files.isDirectory(p))
+                                        deleteRecursively(p.getParent().toString());
+                                    else
+                                        Files.delete(p);
+                                }
+                                catch (IOException ex)
+                                {
+                                    System.err.println("не удалось удалить: " + p);
+                                }
+                            });
+                }
             }
             else
                 Files.delete(path);
@@ -278,7 +280,6 @@ public class FileSystemUtils
         catch (IOException ex)
         {
             ex.printStackTrace();
-            res = false;
         }
 
         return res;

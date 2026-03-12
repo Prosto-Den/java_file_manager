@@ -38,6 +38,7 @@ public class ContextMenuManager
             MenuItem openItem = getMenuItem(loader, ContextMenuItemId.OPEN_ITEM);
             MenuItem copyItem = getMenuItem(loader, ContextMenuItemId.COPY_ITEM);
             MenuItem deleteItem = getMenuItem(loader, ContextMenuItemId.DELETE_ITEM);
+            MenuItem moveToTrashItem = getMenuItem(loader, ContextMenuItemId.MOVE_TO_TRASH_ITEM);
 
             ContextMenu tempVar = menu;
             menu.setOnShowing(event -> {
@@ -59,6 +60,9 @@ public class ContextMenuManager
 
             if (deleteItem != null)
                 deleteItem.setOnAction(event -> onDeleteItemClick(event, fileSystem, onRefresh));
+
+            if (moveToTrashItem != null)
+                moveToTrashItem.setOnAction(event -> onMoveToTrashItemClick(event, fileSystem, onRefresh));
         }
         catch (IOException ex)
         {
@@ -110,6 +114,15 @@ public class ContextMenuManager
         onRefresh.run();
     }
 
+    private static void onMoveToTrashItemClick(ActionEvent event, FileSystem fileSystem, Runnable onRefresh)
+    {
+        MenuItem item = (MenuItem) event.getSource();
+        FileData fileInfo = (FileData) item.getUserData();
+        String path = fileSystem.buildPath(fileInfo.getNameValue());
+        FileSystemUtils.moveToTrash(path);
+        onRefresh.run();
+    }
+
     private static void setUserData(ContextMenu menu, Object userData)
     {
         for (MenuItem item : menu.getItems())
@@ -121,6 +134,9 @@ public class ContextMenuManager
     {
         for (MenuItem item : menu.getItems())
         {
+            if (item instanceof SeparatorMenuItem)
+                continue;
+
             String text = "";
 
             switch (item.getId())
@@ -129,6 +145,8 @@ public class ContextMenuManager
                 case ContextMenuItemId.COPY_ITEM -> text = ResourceHandler.getString(StringKeys.CONTEXT_MENU_COPY_ITEM);
                 case ContextMenuItemId.DELETE_ITEM -> text = ResourceHandler.getString(
                         StringKeys.CONTEXT_MENU_DELETE_ITEM);
+                case ContextMenuItemId.MOVE_TO_TRASH_ITEM -> text = ResourceHandler.getString(
+                        StringKeys.CONTEXT_MENU_MOVE_TO_TRASH_ITEM);
             }
 
             if (!text.isEmpty())

@@ -1,4 +1,3 @@
-import controllers.MainController;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -7,8 +6,6 @@ import javafx.fxml.FXMLLoader;
 import models.StringKeys;
 import monitors.ClipboardMonitor;
 import resourceHandler.ResourceHandler;
-import utils.FileSystemUtils;
-
 import java.util.Locale;
 
 

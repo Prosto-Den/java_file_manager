@@ -18,4 +18,5 @@
     <entry key="contextmenu.item.copy">Скопировать</entry>
     <entry key="contextmenu.item.delete">Удалить</entry>
     <entry key="fileviewer.row.back">..</entry>
+    <entry key="contextmenu.item.move_to_trash">Переместить в корзину</entry>
 </properties>
