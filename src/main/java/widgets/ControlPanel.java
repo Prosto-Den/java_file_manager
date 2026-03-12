@@ -19,6 +19,7 @@ import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import types.OSType;
 import utils.FileSystem;
+import utils.FileSystemController;
 import utils.FileSystemUtils;
 
 import java.util.ResourceBundle;
@@ -47,10 +48,12 @@ public class ControlPanel extends HBox implements IWidget
     @FXML
     private TextField currentPathField; // текстовое поле текущей директории
 
-    public ControlPanel()
+
+    public ControlPanel(String fileSystemId)
     {
         load(ResourceHandler.getLayout("ControlPanel.fxml"));
         insertButton.setOnAction(event -> onInsertItemClick());
+        currentPathField.textProperty().bind(FileSystemController.get(fileSystemId).getCurrentPathProperty());
         initUI();
 
         //TODO заменить на шину событий
@@ -78,11 +81,6 @@ public class ControlPanel extends HBox implements IWidget
         updateDiskCombo();
         // вызывать updateText при инициализации не требуется, так как loader загружает текста виджетов
         // уже с нужной локалью
-    }
-
-    public void setFileSystem(FileSystem fileSystem)
-    {
-        currentPathField.textProperty().bind(fileSystem.getCurrentPathProperty());
     }
 
     public void dispose()

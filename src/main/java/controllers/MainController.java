@@ -1,42 +1,40 @@
 package controllers;
 
 import javafx.fxml.FXML;
-import utils.FileSystem;
+import javafx.scene.layout.BorderPane;
+import utils.FileSystemController;
 import widgets.*;
 import javafx.fxml.Initializable;
-
 import java.net.URL;
 import java.util.ResourceBundle;
 
 
+/**
+ * Класс для инициализации интерфейса приложения
+ * */
 public class MainController implements Initializable
 {
-    // левая контрольная панель
-    @FXML
-    private ControlPanel leftControlPanel;
-
     // левая панель с отображаемыми файлами директории
     @FXML
-    private Panel leftPanel;
-
-    // правая контрольная панель
-    @FXML
-    private ControlPanel rightControlPanel;
+    private BorderPane leftContainer;
 
     // правая панель с отображаемыми файлами директории
     @FXML
-    private Panel rightPanel;
+    private BorderPane rightContainer;
 
     @Override
-    public void initialize(URL location, ResourceBundle resources)
+    public void initialize(URL url, ResourceBundle bundle)
     {
-        FileSystem leftFileSystem = new FileSystem();
-        FileSystem rightFileSystem = new FileSystem();
+        // Создаём экземпляры файловых систем
+        String leftFileSystemID = FileSystemController.create();
+        String rightFileSystemID = FileSystemController.create();
 
-        leftControlPanel.setFileSystem(leftFileSystem);
-        leftPanel.setFileSystem(leftFileSystem);
+        // настраиваем левую часть окна
+        leftContainer.setTop(new ControlPanel(leftFileSystemID));
+        leftContainer.setCenter(new Panel(leftFileSystemID));
 
-        rightControlPanel.setFileSystem(rightFileSystem);
-        rightPanel.setFileSystem(rightFileSystem);
+        // настраиваем правую часть окна
+        rightContainer.setTop(new ControlPanel(rightFileSystemID));
+        rightContainer.setCenter(new Panel(rightFileSystemID));
     }
 }

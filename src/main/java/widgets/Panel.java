@@ -11,7 +11,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 
-import java.io.IOException;
 import java.util.List;
 
 import models.StringKeys;
@@ -21,6 +20,7 @@ import resourceHandler.ResourceHandler;
 import utils.ContextMenuManager;
 import utils.FileSystem;
 import models.FileData;
+import utils.FileSystemController;
 import utils.FileSystemUtils;
 
 
@@ -38,13 +38,18 @@ public class Panel extends VBox implements IWidget
     @FXML
     private TableColumn<FileData, String> fileEditDateColumn; // дата последнего изменения файла
 
-    private FileSystem fileSystem; // экземпляр файловой системы
+    private final String fileSystemID;
 
     /**
      * Конструктор
+     * @param fileSystemId идентификатор файловой системы для данной панели. Идентификатор можно получить
+     *                     через FileSystemController. ВАЖНО!!! внутри конструктора нет проверки, что объект ФС
+     *                     по этому ID существует, так что передавать нужно точно валидный ID
      * */
-    public Panel() throws IOException
+    public Panel(String fileSystemId)
     {
+        fileSystemID = fileSystemId;
+
         load(ResourceHandler.getLayout("Panel.fxml"));
         initUI();
 
@@ -54,17 +59,7 @@ public class Panel extends VBox implements IWidget
         });
 
         ResourceHandler.addStringListener(this::updateText);
-    }
 
-    /**
-     * Выставить файловую систему для панели. Нужна для отображения текущей директории, перехода по ней и т.п.
-     * Так панелей несколько и каждая должна работать независимо от другой, у каждой панели должен быть свой
-     * экземпляр файловой системы
-     * @param fileSystem файловая система
-     * */
-    public void setFileSystem(FileSystem fileSystem)
-    {
-        this.fileSystem = fileSystem;
         refreshTable();
     }
 
@@ -113,7 +108,7 @@ public class Panel extends VBox implements IWidget
                         icon = ResourceHandler.getIcon(IconSize.BIG, IconName.BACK);
                     else
                     {
-                        String fullPath = fileSystem.buildPath(file.getNameValue());
+                        String fullPath = getFileSystem().buildPath(file.getNameValue());
                         if (FileSystemUtils.isDir(fullPath))
                             icon = ResourceHandler.getIcon(IconSize.BIG, IconName.FOLDER);
                         else
@@ -154,7 +149,7 @@ public class Panel extends VBox implements IWidget
                     }
                     else
                     {
-                        setContextMenu(ContextMenuManager.createPanelContextMenu(fileSystem, this,
+                        setContextMenu(ContextMenuManager.createPanelContextMenu(getFileSystem(), this,
                                 Panel.this::refreshTable));
                     }
                 }
@@ -188,16 +183,16 @@ public class Panel extends VBox implements IWidget
 
         if (fileName.equals(".."))
         {
-            fileSystem.goBack();
+            getFileSystem().goBack();
             refreshTable();
         }
         else if (fileInfo.isDirectory())
         {
-            fileSystem.goForward(fileName);
+            getFileSystem().goForward(fileName);
             refreshTable();
         }
         else
-            fileSystem.openFile(fileName);
+            getFileSystem().openFile(fileName);
 
         refreshTable();
     }
@@ -209,10 +204,10 @@ public class Panel extends VBox implements IWidget
     {
         ObservableList<FileData> fileData = FXCollections.observableArrayList();
 
-        if (!fileSystem.isCurrentPathRoot())
+        if (!getFileSystem().isCurrentPathRoot())
             fileData.add(new FileData("..", "", "", true));
 
-        List<String> files = fileSystem.listCurrentPath(false);
+        List<String> files = getFileSystem().listCurrentPath(false);
         for (String file : files)
         {
             String fileSize = FileSystemUtils.getFileSize(file);
@@ -237,4 +232,11 @@ public class Panel extends VBox implements IWidget
         fileSizeColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILE_SIZE));
         fileEditDateColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
     }
+
+    /**
+     * Получить экземпляр файловой системы дял данной панели. Метод нужен просто для более простого доступа
+     * к экземпляру, так как имя метода короче, чем полный вызов
+     * @return объект файловой системы для данной панели
+     * */
+    private FileSystem getFileSystem() { return FileSystemController.get(fileSystemID); }
 }

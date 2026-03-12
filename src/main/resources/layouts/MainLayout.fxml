@@ -1,36 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
+
 <?import javafx.scene.layout.*?>
 <?import widgets.*?>
 
-<?import javafx.geometry.Insets?>
+
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="controllers.MainController">
 
     <!--Метка HBox.hgrow="ALWAYS" позволяет виджету растягиваться по горизонтали !-->
     <!--Левая панель-->
-    <BorderPane HBox.hgrow="ALWAYS">
-        <top>
-            <ControlPanel fx:id="leftControlPanel"/>
-        </top>
-        <center>
-            <Panel fx:id="leftPanel"/>
-        </center>
-    </BorderPane>
+    <BorderPane HBox.hgrow="ALWAYS" fx:id="leftContainer"/>
 
     <!--Правая панель-->
-    <BorderPane HBox.hgrow="ALWAYS">
-        <top>
-           <ControlPanel fx:id="rightControlPanel"/>
-        </top>
-        <center>
-            <Panel fx:id="rightPanel"/>
-        </center>
-    </BorderPane>
-
+    <BorderPane HBox.hgrow="ALWAYS" fx:id="rightContainer"/>
 </HBox>
