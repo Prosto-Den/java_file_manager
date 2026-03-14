@@ -90,10 +90,10 @@ public class ContextMenuManager
     {
         if (item != null)
         {
+            // если выбранный файл является директорией - меняем иконку. Если же это файл, то ничего делать не надо,
+            // иконка для файла уже выставлена в fxml
             if (fileInfo.isDirectory())
                 item.setGraphic(new ImageView(ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FOLDER)));
-            else
-                item.setGraphic(new ImageView(ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FILE)));
         }
     }
 

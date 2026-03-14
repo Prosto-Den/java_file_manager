@@ -9,6 +9,7 @@
 <ContextMenu xmlns="http://javafx.com/javafx"
              xmlns:fx="http://javafx.com/fxml">
     <items>
+        <!--Кнопка "Открыть"-->
         <MenuItem fx:id="openMenuItem" text="%contextmenu.item.open">
             <graphic>
                 <ImageView>
@@ -18,6 +19,7 @@
             </graphic>
         </MenuItem>
 
+        <!--Кнопка "Скопировать"-->
         <MenuItem fx:id="copyMenuItem" text="%contextmenu.item.copy">
             <graphic>
                 <ImageView>
@@ -28,6 +30,7 @@
 
         <SeparatorMenuItem/>
 
+        <!--Кнопка "Удалить"-->
         <MenuItem fx:id="deleteMenuItem" text="%contextmenu.item.delete">
             <graphic>
                 <ImageView>
@@ -36,6 +39,7 @@
             </graphic>
         </MenuItem>
 
+        <!--Кнопка "Переместить в корзину"-->
         <MenuItem fx:id="moveToTrashMenuItem" text="%contextmenu.item.moveToTrash">
             <graphic>
                 <ImageView>

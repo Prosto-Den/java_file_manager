@@ -165,9 +165,6 @@ public class Panel extends VBox implements IWidget
                 }
             });
 
-            //TODO стоит ли это вынести в отдельную переменную?
-            row.setStyle("-fx-font-size: 14px;");
-
             return row;
         });
     }

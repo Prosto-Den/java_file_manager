@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+
+<ToolBar xmlns="http://javafx.com/javafx"
+         xmlns:fx="http://javafx.com/fxml"
+         fx:controller="controllers.ToolBarController"
+         maxHeight="24">
+    <!--Кнопка "Поиск дубликатов файла"-->
+    <Button fx:id="findDuplicateButton">
+        <graphic>
+            <ImageView>
+                <Image url="@/icons/24x24/find_duplicates.png"/>
+            </ImageView>
+        </graphic>
+    </Button>
+
+    <!--Кнопка "Настройки"-->
+    <Button fx:id="settingsButton">
+        <graphic>
+            <ImageView>
+                <Image url="@/icons/24x24/settings.png"/>
+            </ImageView>
+        </graphic>
+    </Button>
+
+</ToolBar>

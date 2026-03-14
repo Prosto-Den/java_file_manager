@@ -1,8 +1,7 @@
 import javafx.application.Application;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.scene.Parent;
 import javafx.fxml.FXMLLoader;
 import models.StringKeys;
 import monitors.ClipboardMonitor;
@@ -27,7 +26,7 @@ public class App extends Application
 
             FXMLLoader mainLoader = new FXMLLoader(Objects.requireNonNull(
                     getClass().getResource("/layouts/MainLayout.fxml")));
-            HBox layout = mainLoader.load();
+            VBox layout = mainLoader.load();
 
 
             Scene scene = new Scene(layout);

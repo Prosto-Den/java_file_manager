@@ -25,7 +25,7 @@ public class ResourceHandler
     private static volatile IconResourceManager iconManager;
     private static volatile StringResourceManager stringManager;
     private static volatile LayoutResourceManager layoutManager;
-
+    private static volatile StylesResourceManager stylesManager;
 
     // Методы для работы с иконками
     /**
@@ -105,8 +105,19 @@ public class ResourceHandler
     @Nullable
     public static URL getLayout(String layoutFileName)
     {
-        LayoutResourceManager manager = new LayoutResourceManager();
-        return manager.getResource(layoutFileName);
+        return getLayoutManager().getResource(layoutFileName);
+    }
+
+    // Методы работы с ресурсами стилей
+    /**
+     * Получить стиль для виджета по названию файла
+     * @param styleFileName название файла со стилем
+     * @return URL, если файл с таким названием есть в ресурсах, иначе null
+     * */
+    @Nullable
+    public static URL getStyle(String styleFileName)
+    {
+        return getStylesManager().getResource(styleFileName);
     }
 
     // Приватные методы класса
@@ -141,6 +152,13 @@ public class ResourceHandler
         if (layoutManager == null)
             layoutManager = new LayoutResourceManager();
         return layoutManager;
+    }
+
+    private static StylesResourceManager getStylesManager()
+    {
+        if (stylesManager == null)
+            stylesManager = new StylesResourceManager();
+        return stylesManager;
     }
 }
 
@@ -245,5 +263,17 @@ class LayoutResourceManager
     public URL getResource(String layoutFileName)
     {
         return getClass().getResource(String.join("/", layoutPath, layoutFileName));
+    }
+}
+
+
+class StylesResourceManager
+{
+    private final String stylesPath = "/styles";
+
+    @Nullable
+    public URL getResource(String styleFileName)
+    {
+        return getClass().getResource(String.join("/", stylesPath, styleFileName));
     }
 }

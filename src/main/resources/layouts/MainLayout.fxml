@@ -2,17 +2,21 @@
 
 
 <?import javafx.scene.layout.*?>
-<?import widgets.*?>
 
 
-<HBox xmlns="http://javafx.com/javafx"
+<VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="controllers.MainController">
 
-    <!--Метка HBox.hgrow="ALWAYS" позволяет виджету растягиваться по горизонтали !-->
-    <!--Левая панель-->
-    <BorderPane HBox.hgrow="ALWAYS" fx:id="leftContainer"/>
+    <!--Панель инструментов файлового менеджера-->
+    <fx:include source="ToolBar.fxml" VBox.vgrow="ALWAYS"/>
 
-    <!--Правая панель-->
-    <BorderPane HBox.hgrow="ALWAYS" fx:id="rightContainer"/>
-</HBox>
+    <HBox VBox.vgrow="ALWAYS">
+        <!--Метка HBox.hgrow="ALWAYS" позволяет виджету растягиваться по горизонтали !-->
+        <!--Левая панель-->
+        <BorderPane HBox.hgrow="ALWAYS" fx:id="leftContainer"/>
+        <!--Правая панель-->
+        <BorderPane HBox.hgrow="ALWAYS" fx:id="rightContainer"/>
+    </HBox>
+
+</VBox>

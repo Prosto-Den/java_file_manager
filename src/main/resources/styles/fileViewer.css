@@ -1,0 +1,14 @@
+.table-row-cell:hover
+{
+    -fx-background-color: #e6f2ff;
+}
+
+.table-row-cell:selected:hover
+{
+    -fx-background-color: #0096c9;
+}
+
+.table-row-cell
+{
+    -fx-font-size: 14px;
+}
