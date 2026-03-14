@@ -1,5 +1,6 @@
 package events;
 
+
 public class ClipboardEvent
 {
     private final boolean hasFiles;

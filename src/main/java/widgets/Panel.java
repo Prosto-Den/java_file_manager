@@ -1,7 +1,8 @@
 package widgets;
 
-import events.ButtonClickedEvent;
 import events.EventBus;
+import events.InsertButtonClickedEvent;
+import events.LocaleChangedEvent;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -54,11 +55,8 @@ public class Panel extends VBox implements IWidget
         initUI();
 
         //TODO в будущем ButtonClickedEvent будет абстрактным, надо будет подписаться на более конкретное событие
-        EventBus.subscribe(ButtonClickedEvent.class, event -> {
-            refreshTable();
-        });
-
-        ResourceHandler.addStringListener(this::updateText);
+        EventBus.subscribe(InsertButtonClickedEvent.class, event -> refreshTable());
+        EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
 
         refreshTable();
     }

@@ -1,9 +1,10 @@
 package widgets;
 
 
-import events.ButtonClickedEvent;
 import events.ClipboardEvent;
 import events.EventBus;
+import events.InsertButtonClickedEvent;
+import events.LocaleChangedEvent;
 import javafx.collections.FXCollections;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -18,11 +19,8 @@ import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import types.OSType;
-import utils.FileSystem;
 import utils.FileSystemController;
 import utils.FileSystemUtils;
-
-import java.util.ResourceBundle;
 
 
 /**
@@ -49,6 +47,11 @@ public class ControlPanel extends HBox implements IWidget
     private TextField currentPathField; // текстовое поле текущей директории
 
 
+    /**
+     * Конструктор
+     * @param fileSystemId идентификатор файловой системы. Так же, как и Panel не проверяет, что файловая
+     *                     система с этим ID существует
+     * */
     public ControlPanel(String fileSystemId)
     {
         load(ResourceHandler.getLayout("ControlPanel.fxml"));
@@ -56,8 +59,7 @@ public class ControlPanel extends HBox implements IWidget
         currentPathField.textProperty().bind(FileSystemController.get(fileSystemId).getCurrentPathProperty());
         initUI();
 
-        //TODO заменить на шину событий
-        ResourceHandler.addStringListener(this::updateText);
+        EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
     }
 
     @Override
@@ -83,17 +85,18 @@ public class ControlPanel extends HBox implements IWidget
         // уже с нужной локалью
     }
 
-    public void dispose()
-    {
-        ResourceHandler.removeStringListener(this::updateText);
-    }
-
+    /**
+     * Действия при нажатии кнопки "Вставить"
+     * */
     public void onInsertItemClick()
     {
         FileSystemUtils.insert(currentPathField.getText());
-        EventBus.publish(new ButtonClickedEvent());
+        EventBus.publish(new InsertButtonClickedEvent());
     }
 
+    /**
+     * Обновить наполнение выпадающего меню с логическими дисками
+     * */
     private void updateDiskCombo()
     {
         if (FileSystemUtils.checkOS(OSType.WINDOWS))
@@ -103,6 +106,9 @@ public class ControlPanel extends HBox implements IWidget
         }
     }
 
+    /**
+     * Заменить текста элементов управления (нужно при смене языка)
+     * */
     private void updateText()
     {
         createButton.setText(ResourceHandler.getString(StringKeys.BUTTON_ADD_TEXT));

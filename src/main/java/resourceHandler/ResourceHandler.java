@@ -5,6 +5,9 @@ import java.net.URL;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
+import events.EventBus;
+import events.LocaleChangedEvent;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -19,9 +22,9 @@ import org.jetbrains.annotations.Nullable;
  * */
 public class ResourceHandler
 {
-    private static IconResourceManager iconManager;
+    private static volatile IconResourceManager iconManager;
     private static volatile StringResourceManager stringManager;
-    private static LayoutResourceManager layoutManager;
+    private static volatile LayoutResourceManager layoutManager;
 
 
     // Методы для работы с иконками
@@ -46,6 +49,7 @@ public class ResourceHandler
     public static void setLocale(Locale locale)
     {
         getStringManager().setLocale(locale);
+        EventBus.publish(LocaleChangedEvent.class);
     }
 
     /**
@@ -53,12 +57,6 @@ public class ResourceHandler
      * @return текущую локаль в качестве объекта Locale
      * */
     public static Locale getLocale() {return getStringManager().getLocale();}
-
-    /**
-     * Выдать текущую локаль в качестве свойства. Позволяет привязывать другие элементы к изменению языка
-     * @return текущую локаль в качестве property
-     * */
-    public static ObjectProperty<Locale> localeProperty() {return getStringManager().localeProperty();}
 
     /**
      * Получить хранилище строковых ресурсов
@@ -96,18 +94,6 @@ public class ResourceHandler
         String pattern = getString(key);
         return String.format(pattern, args);
     }
-
-    /**
-     * Подписать слушателя на изменения локали
-     * @param listener слушатель изменения локали
-     * */
-    public static void addStringListener(Runnable listener) {getStringManager().addListener(listener);}
-
-    /**
-     * Отписать слушателя от изменения локали
-     * @param listener слушатель изменения локали
-     * */
-    public static void removeStringListener(Runnable listener) {getStringManager().removeListener(listener);}
 
 
     // Методы работы с ресурсами лайаутов
@@ -194,41 +180,31 @@ class StringResourceManager
     // контроллер для хранилища строковых ресурсов
     private final StringResourceBundleControl control = new StringResourceBundleControl();
     // текущая локаль (в виде property)
-    private final ObjectProperty<Locale> currentLocaleProperty = new SimpleObjectProperty<>();
-    // слушатели изменения локали
-    private final ObservableSet<Runnable> listeners = FXCollections.observableSet();
-
+    private Locale currentLocale;
     // значение локали по умолчанию
     private static final Locale defaultLocale = Locale.of("en", "US");
 
+    //TODO так как локаль будет хранится в настройках нужно ещё добавить конструктор по локали
     public StringResourceManager()
     {
-        currentLocaleProperty.addListener((obs, oldVal, newVal) -> {
-            loadBundle(newVal);
-            notifyListeners();
-        });
-
         setLocale(defaultLocale);
-        loadBundle(getLocale());
     }
 
     /**
      * Установить локаль. После установки локали будет произведена перезагрузка строковых ресурсов
      * @param locale новая используемая локаль
      * */
-    public void setLocale(Locale locale) { currentLocaleProperty.set(locale); }
+    public void setLocale(Locale locale)
+    {
+        currentLocale = locale;
+        loadBundle();
+    }
 
     /**
      * Выдать текущую локаль
      * @return текущую локаль в качестве объекта Locale
      * */
-    public Locale getLocale() {return currentLocaleProperty.get();}
-
-    /**
-     * Выдать текущую локаль в качестве свойства. Позволяет привязывать другие элементы к изменению языка
-     * @return текущую локаль в качестве property
-     * */
-    public ObjectProperty<Locale> localeProperty() {return currentLocaleProperty;}
+    public Locale getLocale() {return currentLocale;}
 
     /**
      * Получить хранилище строковых ресурсов
@@ -237,41 +213,18 @@ class StringResourceManager
     public ResourceBundle getBundle() {return bundle;}
 
     /**
-     * Добавить слушателя обновления локали
-     * @param listener слушатель изменения локали
-     * */
-    public void addListener(Runnable listener) {listeners.add(listener);}
-
-    /**
-     * Удалить слушателя изменения локали
-     * @param listener слушатель изменения локали
-     * */
-    public void removeListener(Runnable listener) {listeners.remove(listener);}
-
-    /**
-     * Оповестить всех слушателей об изменении локали
-     * */
-    private void notifyListeners()
-    {
-        listeners.forEach(Runnable::run);
-    }
-
-    /**
      * Загрузить хранилище строковых ресурсов для данной локали
-     * @param locale локаль, для которой нужно загрузить хранилище. Если файл для такой локали будет не найден,
-     *               будет загружена локаль по умолчанию
      * */
-    private void loadBundle(Locale locale)
+    private void loadBundle()
     {
         try
         {
-            bundle = ResourceBundle.getBundle("strings", locale, control);
+            bundle = ResourceBundle.getBundle("strings", currentLocale, control);
         }
         catch (MissingResourceException e)
         {
-            //TODO вынести локаль по умолчанию в соответствующее поле класса
-            System.err.println("Не найден файл ресурсов для локали: " + locale);
-            bundle = ResourceBundle.getBundle("strings", Locale.of("ru", "RU"), control);
+            System.err.println("Не найден файл ресурсов для локали: " + currentLocale);
+            bundle = ResourceBundle.getBundle("strings", defaultLocale, control);
         }
     }
 }

@@ -9,13 +9,23 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableRow;
 import javafx.scene.image.ImageView;
 import models.FileData;
-import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
-import models.ContextMenuItemId;
-
 import java.io.IOException;
+import java.util.Optional;
+
+
+/**
+ * Идентификаторы элементов контекстного меню
+ * */
+class ContextMenuItemId
+{
+    public static final String OPEN_ITEM = "openMenuItem";
+    public static final String COPY_ITEM = "copyMenuItem";
+    public static final String DELETE_ITEM = "deleteMenuItem";
+    public static final String MOVE_TO_TRASH_ITEM = "moveToTrashMenuItem";
+}
 
 
 /**
@@ -23,56 +33,59 @@ import java.io.IOException;
  * */
 public class ContextMenuManager
 {
+    // шаблон контекстного меню для панели
+    private static ContextMenu panelMenuTemplate = null;
+
+    /**
+     * Создать контекстное меню для панели
+     * @param fileSystem файловая система, используемая данной панелью
+     * @param row ряд с данными по файлу
+     * @param onRefresh функция перерисовки панели. Нужно для некоторых действий
+     * */
+    //TODO заменить передачу объекта файловой системы на ID файловой системы
+    //TODO заменить ряд на объекта FileInfo?
     public static ContextMenu createPanelContextMenu(FileSystem fileSystem, TableRow<FileData> row,
                                                      Runnable onRefresh)
     {
-        ContextMenu menu = null;
+        createPanelMenuTemplate();
 
-        try
-        {
-            FXMLLoader loader = new FXMLLoader(ResourceHandler.getLayout("ContextMenu.fxml"),
-                    ResourceHandler.getStringBundle());
-            menu = loader.load();
+        ContextMenu menu = copyMenu(panelMenuTemplate);
 
+        Optional<MenuItem> openItem = getMenuItem(menu, ContextMenuItemId.OPEN_ITEM);
+        Optional<MenuItem> copyItem = getMenuItem(menu, ContextMenuItemId.COPY_ITEM);
+        Optional<MenuItem> deleteItem = getMenuItem(menu, ContextMenuItemId.DELETE_ITEM);
+        Optional<MenuItem> moveToTrashItem = getMenuItem(menu, ContextMenuItemId.MOVE_TO_TRASH_ITEM);
 
+        menu.setOnShowing(event -> {
+            FileData fileInfo = row.getItem();
+            if (fileInfo == null)
+                event.consume();
+            else
+            {
+                openItem.ifPresent(menuItem -> configureOpenItem(menuItem, fileInfo));
+                setUserData(menu, fileInfo);
+            }
+        });
 
-            MenuItem openItem = getMenuItem(loader, ContextMenuItemId.OPEN_ITEM);
-            MenuItem copyItem = getMenuItem(loader, ContextMenuItemId.COPY_ITEM);
-            MenuItem deleteItem = getMenuItem(loader, ContextMenuItemId.DELETE_ITEM);
-            MenuItem moveToTrashItem = getMenuItem(loader, ContextMenuItemId.MOVE_TO_TRASH_ITEM);
+        openItem.ifPresent(item -> item.setOnAction(event ->
+                onOpenItemClick(event, fileSystem, onRefresh)));
 
-            ContextMenu tempVar = menu;
-            menu.setOnShowing(event -> {
-                FileData fileInfo = row.getItem();
-                if (fileInfo == null)
-                    event.consume();
-                else
-                {
-                    configureOpenItem(openItem, fileInfo);
-                    setUserData(tempVar, fileInfo);
-                }
-            });
+        copyItem.ifPresent(item -> item.setOnAction(event -> onCopyItemClick(event, fileSystem)));
 
-            if (openItem != null)
-                openItem.setOnAction(event -> onOpenItemClick(event, fileSystem, onRefresh));
+        deleteItem.ifPresent(item -> item.setOnAction(event ->
+                onDeleteItemClick(event, fileSystem, onRefresh)));
 
-            if (copyItem != null)
-                copyItem.setOnAction(event -> onCopyItemClick(event, fileSystem));
-
-            if (deleteItem != null)
-                deleteItem.setOnAction(event -> onDeleteItemClick(event, fileSystem, onRefresh));
-
-            if (moveToTrashItem != null)
-                moveToTrashItem.setOnAction(event -> onMoveToTrashItemClick(event, fileSystem, onRefresh));
-        }
-        catch (IOException ex)
-        {
-            System.err.println("Не удалось загрузить меню" + ex.getMessage());
-        }
+        moveToTrashItem.ifPresent(item -> item.setOnAction(event ->
+                onMoveToTrashItemClick(event, fileSystem, onRefresh)));
 
         return menu;
     }
 
+    /**
+     * Настроить кнопку "Открыть"
+     * @param item кнопка из контекстного меню
+     * @param fileInfo информация ою открываемом файле
+     * */
     private static void configureOpenItem(MenuItem item, FileData fileInfo)
     {
         if (item != null)
@@ -84,6 +97,12 @@ public class ContextMenuManager
         }
     }
 
+    /**
+     * Поведение при нажатии на кнопку "Открыть"
+     * @param event событие нажатия на кнопку
+     * @param fileSystem объект файловой системы, связанный с текущей панелью
+     * @param onRefresh действия по обновлению панели
+     * */
     private static void onOpenItemClick(ActionEvent event, FileSystem fileSystem, Runnable onRefresh)
     {
         MenuItem item = (MenuItem) event.getSource();
@@ -92,12 +111,18 @@ public class ContextMenuManager
         if (fileInfo.isDirectory())
         {
             fileSystem.goForward(fileInfo.getNameValue());
+            //TODO точно ли хорошая идея передавать сюда Runnable? Возможно стоит подключить шину событий
             onRefresh.run();
         }
         else
             FileSystemUtils.openFile(fileSystem.buildPath(fileInfo.getNameValue()));
     }
 
+    /**
+     * Поведение при нажатии кнопки "Скопировать"
+     * @param event событие нажатия на кнопку
+     * @param fileSystem объект файловой системы, связанный с текущей панелью
+     * */
     private static void onCopyItemClick(ActionEvent event, FileSystem fileSystem)
     {
         MenuItem item = (MenuItem) event.getSource();
@@ -106,24 +131,43 @@ public class ContextMenuManager
         FileSystemUtils.copyToClipboard(path);
     }
 
+    /**
+     * Поведение при нажатии на кнопку "Удалить"
+     * @param event событие нажатия на кнопку
+     * @param fileSystem объект файловой системы, связанный с текущей панелью
+     * @param onRefresh действия по обновлению панели
+     * */
     private static void onDeleteItemClick(ActionEvent event, FileSystem fileSystem, Runnable onRefresh)
     {
         MenuItem item = (MenuItem) event.getSource();
         FileData fileInfo = (FileData) item.getUserData();
         String path = fileSystem.buildPath(fileInfo.getNameValue());
         FileSystemUtils.delete(path);
+        //TODO точно ли хорошая идея передавать сюда Runnable? Возможно стоит подключить шину событий
         onRefresh.run();
     }
 
+    /**
+     * Поведение при нажатии на кнопку "Переместить в корзину"
+     * @param event события нажатия на кнопку
+     * @param fileSystem объект файловой системы, связанный с текущей панелью
+     * @param onRefresh действия по обновлению панели
+     * */
     private static void onMoveToTrashItemClick(ActionEvent event, FileSystem fileSystem, Runnable onRefresh)
     {
         MenuItem item = (MenuItem) event.getSource();
         FileData fileInfo = (FileData) item.getUserData();
         String path = fileSystem.buildPath(fileInfo.getNameValue());
         FileSystemUtils.moveToTrash(path);
+        //TODO точно ли хорошая идея передавать сюда Runnable? Возможно стоит подключить шину событий
         onRefresh.run();
     }
 
+    /**
+     * Установить пользовательские данные всем объектам в контекстном меню
+     * @param menu контекстное меню
+     * @param userData пользовательские данные
+     * */
     private static void setUserData(ContextMenu menu, Object userData)
     {
         for (MenuItem item : menu.getItems())
@@ -131,8 +175,62 @@ public class ContextMenuManager
                 item.setUserData(userData);
     }
 
-    private static MenuItem getMenuItem(FXMLLoader loader, String id)
+    /**
+     * Получить item контекстного меню по его id
+     * @param menu меню, в котором ищется item
+     * @param id item id
+     * @return MenuItem, если он был найден
+     * */
+    private static Optional<MenuItem> getMenuItem(ContextMenu menu, String id)
     {
-        return (MenuItem) loader.getNamespace().get(id);
+        return menu.getItems().stream()
+                .filter(item -> item.getId() != null && item.getId().equals(id))
+                .findFirst();
+    }
+
+    /**
+     * Создать шаблон контекстного меню для панели
+     * */
+    private static void createPanelMenuTemplate()
+    {
+        if (panelMenuTemplate == null)
+        {
+            FXMLLoader loader = new FXMLLoader(ResourceHandler.getLayout("ContextMenu.fxml"),
+                    ResourceHandler.getStringBundle());
+            try
+            {
+                panelMenuTemplate = loader.load();
+            }
+            catch (IOException ex)
+            {
+                System.err.println("Не удалось загрузить контекстное меню панели :(");
+            }
+        }
+    }
+
+    /**
+     * Создаёт новое контекстное меню на основе шаблона. Пользовательские данные из меню-шаблона скопированы не будут
+     * @param template меню, выступающее в качестве шаблона
+     * @return копия меню-шаблона
+     * */
+    private static ContextMenu copyMenu(ContextMenu template)
+    {
+        ContextMenu result = new ContextMenu();
+
+        for (MenuItem item : template.getItems())
+        {
+            if (item instanceof  SeparatorMenuItem)
+                result.getItems().add(new SeparatorMenuItem());
+            else
+            {
+                MenuItem newItem = new MenuItem(item.getText());
+                newItem.setId(item.getId());
+                newItem.setGraphic(item.getGraphic());
+
+                result.getItems().add(newItem);
+            }
+        }
+
+        return result;
     }
 }
