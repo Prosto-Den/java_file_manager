@@ -216,6 +216,10 @@ public class Panel extends VBox implements IWidget
                         FileSystemUtils.isDir(file));
                 fileData.add(fileInfo);
             }
+
+            fileViewer.getItems().clear();
+            fileViewer.setItems(fileData);
+            fileViewer.refresh();
         }
     }
 

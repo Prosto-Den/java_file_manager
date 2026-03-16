@@ -28,8 +28,10 @@ public class MainController implements Initializable
     public void initialize(URL url, ResourceBundle bundle)
     {
         // Создаём экземпляры файловых систем
-        String leftFileSystemID = FileSystemController.create(FileSystemSide.LEFT);
-        String rightFileSystemID = FileSystemController.create(FileSystemSide.RIGHT);
+        String leftFileSystemID = FileSystemController.create(FileSystemSide.LEFT,
+                SettingsUtils.get("last.directory.left"));
+        String rightFileSystemID = FileSystemController.create(FileSystemSide.RIGHT,
+                SettingsUtils.get("last.directory.right"));
 
         // настраиваем левую часть окна
         leftContainer.setTop(new ControlPanel(leftFileSystemID));
