@@ -1,7 +1,9 @@
+import app.App;
+
+/**
+ * Класс для запуска программы
+ * */
 public class Launcher
-    /*
-        Класс для запуска программы
-    */
 {
     public static void main(String[] args)
     {

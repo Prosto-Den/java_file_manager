@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>prost0_den.PFM</groupId>
-    <artifactId>javaFX</artifactId>
-    <version>0.0.2-alpha</version>
+    <groupId>prost0_den</groupId>
+    <artifactId>PFM_JE</artifactId>
+    <version>0.0.5</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -41,7 +41,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>App</mainClass>
+                    <mainClass>app.App</mainClass>
                 </configuration>
             </plugin>
         </plugins>
