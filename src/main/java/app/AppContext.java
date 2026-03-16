@@ -16,6 +16,8 @@ public class AppContext
 {
     private static Stage mainStage;
     private static Stage settingsStage;
+    private static final String APP_NAME = "Prosto File Manager";
+
 
     public static void setMainStage(Stage stage) {mainStage = stage;}
     public static Optional<Stage> getMainStage() {return Optional.ofNullable(mainStage);}
@@ -26,6 +28,8 @@ public class AppContext
             createSettingsStage();
         return settingsStage;
     }
+
+    public static String getAppName() {return APP_NAME;}
 
     private static void createSettingsStage()
     {

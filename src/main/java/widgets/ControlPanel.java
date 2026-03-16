@@ -19,8 +19,11 @@ import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import types.OSType;
+import utils.FileSystem;
 import utils.FileSystemController;
 import utils.FileSystemUtils;
+
+import java.util.Optional;
 
 
 /**
@@ -56,7 +59,9 @@ public class ControlPanel extends HBox implements IWidget
     {
         load(ResourceHandler.getLayout("ControlPanel.fxml"));
         insertButton.setOnAction(event -> onInsertItemClick());
-        currentPathField.textProperty().bind(FileSystemController.get(fileSystemId).getCurrentPathProperty());
+
+        if (FileSystemController.get(fileSystemId) != null)
+            currentPathField.textProperty().bind(FileSystemController.get(fileSystemId).getCurrentPathProperty());
         initUI();
 
         EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());

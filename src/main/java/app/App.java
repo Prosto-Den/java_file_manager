@@ -8,6 +8,9 @@ import javafx.fxml.FXMLLoader;
 import models.StringKeys;
 import monitors.ClipboardMonitor;
 import resourceHandler.ResourceHandler;
+import utils.FileSystemUtils;
+import utils.SettingsUtils;
+
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Objects;
@@ -24,6 +27,7 @@ public class App extends Application
         try
         {
             AppContext.setMainStage(stage);
+            SettingsUtils.loadSettings();
 
             // TODO локаль должна указываться в настройках
             ResourceHandler.setLocale(Locale.of("ru", "RU"));
@@ -51,5 +55,7 @@ public class App extends Application
     public static void Launch(String[] args)
     {
         launch(args);
+        // код ниже сработает только после закрытия приложения
+        SettingsUtils.saveSettings();
     }
 }

@@ -1,6 +1,7 @@
 package resourceHandler;
 
 
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -8,10 +9,6 @@ import java.util.ResourceBundle;
 
 import events.EventBus;
 import events.LocaleChangedEvent;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableSet;
 import javafx.scene.image.Image;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,6 +23,13 @@ public class ResourceHandler
     private static volatile StringResourceManager stringManager;
     private static volatile LayoutResourceManager layoutManager;
     private static volatile StylesResourceManager stylesManager;
+    private static volatile DefaultSettingsResourceManager settingsManager;
+
+    private static final String ICONS_PATH = "/icons";
+    private static final String LAYOUTS_PATH = "/layouts";
+    private static final String STYLES_PATH = "/styles";
+    private static final String STRINGS_BASENAME = "strings";
+    private static final String SETTINGS_PATH = "/settings/settings.properties";
 
     // Методы для работы с иконками
     /**
@@ -120,6 +124,12 @@ public class ResourceHandler
         return getStylesManager().getResource(styleFileName);
     }
 
+    // Методы работы с настройками
+    public static InputStream getDefaultSettingsAsStream()
+    {
+        return getSettingsManager().getSettingsAsStream();
+    }
+
     // Приватные методы класса
     /**
      * Выдать объект менеджера ресурсов иконок. Если его нет, сначала создаст его
@@ -128,7 +138,7 @@ public class ResourceHandler
     private static IconResourceManager getIconManager()
     {
         if (iconManager == null)
-            iconManager = new IconResourceManager();
+            iconManager = new IconResourceManager(ICONS_PATH);
         return iconManager;
     }
 
@@ -139,7 +149,7 @@ public class ResourceHandler
     private static StringResourceManager getStringManager()
     {
         if (stringManager == null)
-            stringManager = new StringResourceManager();
+            stringManager = new StringResourceManager(STRINGS_BASENAME);
         return stringManager;
     }
 
@@ -150,15 +160,22 @@ public class ResourceHandler
     private static LayoutResourceManager getLayoutManager()
     {
         if (layoutManager == null)
-            layoutManager = new LayoutResourceManager();
+            layoutManager = new LayoutResourceManager(LAYOUTS_PATH);
         return layoutManager;
     }
 
     private static StylesResourceManager getStylesManager()
     {
         if (stylesManager == null)
-            stylesManager = new StylesResourceManager();
+            stylesManager = new StylesResourceManager(STYLES_PATH);
         return stylesManager;
+    }
+
+    private static DefaultSettingsResourceManager getSettingsManager()
+    {
+        if (settingsManager == null)
+            settingsManager = new DefaultSettingsResourceManager(SETTINGS_PATH);
+        return settingsManager;
     }
 }
 
@@ -168,7 +185,9 @@ public class ResourceHandler
  * */
 class IconResourceManager
 {
-    static private final String iconsPath = "/icons";
+    private final String iconsPath;
+
+    public IconResourceManager(String path) {iconsPath = path;}
 
     /**
      * Метод для получения иконки
@@ -200,12 +219,32 @@ class StringResourceManager
     // текущая локаль (в виде property)
     private Locale currentLocale;
     // значение локали по умолчанию
-    private static final Locale defaultLocale = Locale.of("en", "US");
+    private final Locale defaultLocale = Locale.of("en", "US");
 
-    //TODO так как локаль будет хранится в настройках нужно ещё добавить конструктор по локали
-    public StringResourceManager()
+    private final String bundleBaseName;
+
+    /**
+     * Конструктор по базовому имени файла строковых ресурсов. Локаль будет установлена в значение по умолчанию (en_US)
+     * @param baseName базовое имя файла строковых ресурсов (название файла бех имени локали). Например, если файл
+     *                 со строковыми ресурсами называется strings_en_US, то базовым именем является strings
+     * */
+    public StringResourceManager(String baseName)
+
     {
+        bundleBaseName = baseName;
         setLocale(defaultLocale);
+    }
+
+    /**
+     * Конструктор по базовому имени файла строковых ресурсов и локали
+     * @param baseName базовое имя файла строковых ресурсов (название файла бех имени локали). Например, если файл
+     *                 со строковыми ресурсами называется strings_en_US, то базовым именем является strings
+     * @param locale объект локали. Определяет, строковые ресурсы какого языка нужно загрузить
+     * */
+    public StringResourceManager(String baseName, Locale locale)
+    {
+        bundleBaseName = baseName;
+        setLocale(locale);
     }
 
     /**
@@ -237,12 +276,12 @@ class StringResourceManager
     {
         try
         {
-            bundle = ResourceBundle.getBundle("strings", currentLocale, control);
+            bundle = ResourceBundle.getBundle(bundleBaseName, currentLocale, control);
         }
         catch (MissingResourceException e)
         {
             System.err.println("Не найден файл ресурсов для локали: " + currentLocale);
-            bundle = ResourceBundle.getBundle("strings", defaultLocale, control);
+            bundle = ResourceBundle.getBundle(bundleBaseName, defaultLocale, control);
         }
     }
 }
@@ -252,7 +291,9 @@ class StringResourceManager
  * */
 class LayoutResourceManager
 {
-    private final String layoutPath = "/layouts";
+    private final String layoutPath;
+
+    public LayoutResourceManager(String path) {layoutPath = path;}
 
     /**
      * Получить URL для интерфейса из ресурсов
@@ -269,11 +310,26 @@ class LayoutResourceManager
 
 class StylesResourceManager
 {
-    private final String stylesPath = "/styles";
+    private final String stylesPath;
+
+    public StylesResourceManager(String path) {stylesPath = path;}
 
     @Nullable
     public URL getResource(String styleFileName)
     {
         return getClass().getResource(String.join("/", stylesPath, styleFileName));
+    }
+}
+
+
+class DefaultSettingsResourceManager
+{
+    private final String settingsPath;
+
+    public DefaultSettingsResourceManager(String path) {settingsPath = path;}
+
+    public InputStream getSettingsAsStream()
+    {
+        return getClass().getResourceAsStream(settingsPath);
     }
 }

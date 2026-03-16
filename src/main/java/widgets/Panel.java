@@ -13,16 +13,15 @@ import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 
 import java.util.List;
+import java.util.Optional;
 
+import models.FileSystemSide;
 import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
-import utils.ContextMenuManager;
-import utils.FileSystem;
+import utils.*;
 import models.FileData;
-import utils.FileSystemController;
-import utils.FileSystemUtils;
 
 
 /**
@@ -174,22 +173,25 @@ public class Panel extends VBox implements IWidget
      * */
     private void handleDoubleClick(FileData fileInfo)
     {
-        String fileName = fileInfo.getNameValue();
-
-        if (fileName.equals(".."))
+        if (getFileSystem() != null)
         {
-            getFileSystem().goBack();
-            refreshTable();
-        }
-        else if (fileInfo.isDirectory())
-        {
-            getFileSystem().goForward(fileName);
-            refreshTable();
-        }
-        else
-            getFileSystem().openFile(fileName);
+            String fileName = fileInfo.getNameValue();
 
-        refreshTable();
+            if (fileName.equals(".."))
+            {
+                getFileSystem().goBack();
+                updateSettings();
+                refreshTable();
+            }
+            else if (fileInfo.isDirectory())
+            {
+                getFileSystem().goForward(fileName);
+                updateSettings();
+                refreshTable();
+            }
+            else
+                getFileSystem().openFile(fileName);
+        }
     }
 
     /**
@@ -197,29 +199,28 @@ public class Panel extends VBox implements IWidget
      * */
     private void refreshTable()
     {
-        ObservableList<FileData> fileData = FXCollections.observableArrayList();
-
-        if (!getFileSystem().isCurrentPathRoot())
-            fileData.add(new FileData("..", "", "", true));
-
-        List<String> files = getFileSystem().listCurrentPath(false);
-        for (String file : files)
+        if (getFileSystem() != null)
         {
-            String fileSize = FileSystemUtils.getFileSize(file);
-            String fileEditDate = FileSystemUtils.lastModifiedDate(file);
+            ObservableList<FileData> fileData = FXCollections.observableArrayList();
 
-            FileData fileInfo = new FileData(FileSystemUtils.getFilenameFromPath(file), fileSize, fileEditDate,
-                    FileSystemUtils.isDir(file));
-            fileData.add(fileInfo);
+            if (!getFileSystem().isCurrentPathRoot())
+                fileData.add(new FileData("..", "", "", true));
+
+            List<String> files = getFileSystem().listCurrentPath(false);
+            for (String file : files)
+            {
+                String fileSize = FileSystemUtils.getFileSize(file);
+                String fileEditDate = FileSystemUtils.lastModifiedDate(file);
+
+                FileData fileInfo = new FileData(FileSystemUtils.getFilenameFromPath(file), fileSize, fileEditDate,
+                        FileSystemUtils.isDir(file));
+                fileData.add(fileInfo);
+            }
         }
-
-        fileViewer.getItems().clear();
-        fileViewer.setItems(fileData);
-        fileViewer.refresh();
     }
 
     /**
-     * Обновить текста заголовков таблицы. Нужно для для перезаполнения при смене языка
+     * Обновить текста заголовков таблицы. Нужно для перезаполнения при смене языка
      * */
     private void updateText()
     {
@@ -234,4 +235,20 @@ public class Panel extends VBox implements IWidget
      * @return объект файловой системы для данной панели
      * */
     private FileSystem getFileSystem() { return FileSystemController.get(fileSystemID); }
+    private FileSystemSide getFileSystemSide() {return FileSystemController.getSide(fileSystemID);}
+
+    private void updateSettings()
+    {
+        if (getFileSystem() != null)
+        {
+            String currentPath =  getFileSystem().getCurrentPath();
+            FileSystemSide side = getFileSystemSide();
+
+            switch (side)
+            {
+                case FileSystemSide.LEFT -> SettingsUtils.set("last.directory.left", currentPath);
+                case FileSystemSide.RIGHT -> SettingsUtils.set("last.directory.right", currentPath);
+            }
+        }
+    }
 }

@@ -1,15 +1,14 @@
 package utils;
 
+import app.AppContext;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import types.FileSystemErrors;
 import types.OSType;
-
 import java.awt.*;
 import java.io.File;
 import java.nio.file.*;
 import java.io.IOException;
-import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.stream.Stream;
 public class FileSystemUtils
 {
     private static final OSType osType = calcOSType(); // тип ОС
-    private static final String delimiter = calcDelimiter();
+    private static final String APP_FOLDER = createAppFolder();
 
     /**
      * Существует ли файл (директория) по этому пути
@@ -139,7 +138,7 @@ public class FileSystemUtils
      * */
     public static String adjustPath(String path, String filename)
     {
-        return String.join(delimiter, path, filename);
+        return String.join(System.getProperty("file.separator"), path, filename);
     }
 
 
@@ -205,6 +204,40 @@ public class FileSystemUtils
         }
     }
 
+    public static boolean createDir(String path)
+    {
+        File file = new File(path);
+        boolean res = false;
+
+        try
+        {
+            res = file.mkdir();
+        }
+        catch (SecurityException ex)
+        {
+            System.err.println("Ошибка доступа");
+        }
+
+        return res;
+    }
+
+    public static boolean createFile(String path)
+    {
+        File file = new File(path);
+        boolean res = false;
+        try
+        {
+            res = file.createNewFile();
+        }
+        catch (IOException ex)
+        {
+            System.err.println("Не удалось создать файл");
+        }
+
+        return res;
+    }
+
+    public static String getAppFolder() {return APP_FOLDER;}
 
     // Приватные методы
 
@@ -228,17 +261,6 @@ public class FileSystemUtils
     {
         if (osType == OSType.WINDOWS)
             return "C:\\";
-        return "/";
-    }
-
-    /**
-     * Определить разделитель для текущей операционной системы
-     * @return используемый в ОС этого компьютера разделитель
-     * */
-    private static String calcDelimiter()
-    {
-        if (osType == OSType.WINDOWS)
-            return "\\";
         return "/";
     }
 
@@ -283,5 +305,18 @@ public class FileSystemUtils
         }
 
         return res;
+    }
+
+    //TODO наверное этим должен заниматься всё-таки AppContext
+    private static String createAppFolder()
+    {
+        String userFolder = System.getProperty("user.home");
+        String path = adjustPath(userFolder, AppContext.getAppName());
+        boolean res = isExist(path);
+
+        if (!res)
+            res = createDir(path);
+
+        return res ? path : "";
     }
 }

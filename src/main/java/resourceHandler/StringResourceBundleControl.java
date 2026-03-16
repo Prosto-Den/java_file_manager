@@ -60,7 +60,7 @@ public class StringResourceBundleControl extends ResourceBundle.Control
         private final Map<String, String> resources = new HashMap<>();
 
         /**
-         * Создать хранилище строковых ресурсов их потока ввода
+         * Создать хранилище строковых ресурсов из потока ввода
          * @param stream поток ввода, содержащий строковые ресурсы в xml формате
          * */
         public StringResourceBundle(InputStream stream)

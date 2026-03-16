@@ -2,7 +2,9 @@ package controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.layout.BorderPane;
+import models.FileSystemSide;
 import utils.FileSystemController;
+import utils.SettingsUtils;
 import widgets.*;
 import javafx.fxml.Initializable;
 import java.net.URL;
@@ -26,8 +28,8 @@ public class MainController implements Initializable
     public void initialize(URL url, ResourceBundle bundle)
     {
         // Создаём экземпляры файловых систем
-        String leftFileSystemID = FileSystemController.create();
-        String rightFileSystemID = FileSystemController.create();
+        String leftFileSystemID = FileSystemController.create(FileSystemSide.LEFT);
+        String rightFileSystemID = FileSystemController.create(FileSystemSide.RIGHT);
 
         // настраиваем левую часть окна
         leftContainer.setTop(new ControlPanel(leftFileSystemID));

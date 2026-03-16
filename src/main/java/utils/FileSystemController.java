@@ -1,7 +1,10 @@
 package utils;
 
+import models.FileSystemSide;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -10,29 +13,31 @@ import java.util.UUID;
 public class FileSystemController
 {
     private static final Map<String, FileSystem> instances = new HashMap<>();
+    private static final Map<String, FileSystemSide> instancesSides = new HashMap<>();
 
-    public static String create()
+    public static String create(FileSystemSide side)
     {
         String id = UUID.randomUUID().toString();
         instances.put(id, new FileSystem());
+        instancesSides.put(id, side);
         return id;
     }
 
-    public static String create(String path)
+    public static String create(FileSystemSide side, String path)
     {
         String id = UUID.randomUUID().toString();
         instances.put(id, new FileSystem(path));
+        instancesSides.put(id, side);
         return id;
     }
 
     public static FileSystem get(String id)
     {
-        FileSystem fs = instances.get(id);
+        return instances.get(id);
+    }
 
-        //TODO создавать новую или выбрасывать исключение?
-        if (fs == null)
-            fs = instances.put(id, new FileSystem());
-
-        return fs;
+    public static FileSystemSide getSide(String id)
+    {
+        return instancesSides.get(id);
     }
 }
