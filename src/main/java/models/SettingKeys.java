@@ -6,7 +6,6 @@ package models;
 public class SettingKeys
 {
     public static final String LOCALE = "locale";
-    public static final String FONT_SIZE = "font.size";
 
     public static class LastDirectory
     {

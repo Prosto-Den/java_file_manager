@@ -17,7 +17,7 @@
     </padding>
 
     <GridPane VBox.vgrow="ALWAYS">
-        <Label text="%settings.language" GridPane.rowIndex="0" GridPane.columnIndex="0"
+        <Label fx:id="languageLabel" text="%settings.label.language" GridPane.rowIndex="0" GridPane.columnIndex="0"
                GridPane.halignment="RIGHT">
             <GridPane.margin>
                 <Insets right="10"/>
@@ -28,9 +28,9 @@
     </GridPane>
 
     <HBox alignment="BOTTOM_RIGHT" VBox.vgrow="ALWAYS" spacing="5">
-        <Button fx:id="saveButton" alignment="CENTER_RIGHT" text="%settings.button.save"/>
-        <Button fx:id="applyButton" alignment="CENTER_RIGHT" text="%settings.button.apply"/>
-        <Button fx:id="cancelButton" alignment="CENTER_RIGHT" text="%settings.button.cancel"/>
+        <Button fx:id="saveButton" text="%settings.button.save" minWidth="80" textAlignment="CENTER"/>
+        <Button fx:id="applyButton" text="%settings.button.apply" minWidth="80" textAlignment="CENTER"/>
+        <Button fx:id="cancelButton" text="%settings.button.cancel" minWidth="80" textAlignment="CENTER"/>
     </HBox>
 
 </VBox>

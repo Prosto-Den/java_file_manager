@@ -2,15 +2,18 @@ package controllers;
 
 
 import events.EventBus;
+import events.LocaleChangedEvent;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.stage.Stage;
 import models.Language;
 import models.SettingKeys;
+import models.StringKeys;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import utils.LanguageManager;
@@ -23,6 +26,8 @@ import utils.SettingsUtils;
 
 public class SettingsController implements Initializable
 {
+    @FXML
+    private Label languageLabel;
     @FXML
     private ComboBox<Language> localeBox;
     @FXML
@@ -37,6 +42,8 @@ public class SettingsController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
+        EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
+
         localeBox.setItems(FXCollections.observableArrayList(LanguageManager.getInstance().getAvailableLanguages()));
         localeBox.setValue(LanguageManager.getInstance().getCurrentLanguage());
 
@@ -93,5 +100,13 @@ public class SettingsController implements Initializable
     {
         if (dialogStage != null)
             dialogStage.close();
+    }
+
+    private void updateText()
+    {
+        languageLabel.setText(ResourceHandler.getString(StringKeys.SETTINGS_LANGUAGE_LABEL));
+        saveButton.setText(ResourceHandler.getString(StringKeys.SETTINGS_BUTTON_SAVE));
+        applyButton.setText(ResourceHandler.getString(StringKeys.SETTINGS_BUTTON_APPLY));
+        cancelButton.setText(ResourceHandler.getString(StringKeys.SETTINGS_BUTTON_CANCEL));
     }
 }
