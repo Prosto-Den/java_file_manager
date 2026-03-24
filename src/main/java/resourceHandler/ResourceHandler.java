@@ -23,13 +23,14 @@ public class ResourceHandler
     private static volatile StringResourceManager stringManager;
     private static volatile LayoutResourceManager layoutManager;
     private static volatile StylesResourceManager stylesManager;
-    private static volatile DefaultSettingsResourceManager settingsManager;
+    private static volatile ResourcesAsStreamManager streamManager;
 
     private static final String ICONS_PATH = "/icons";
     private static final String LAYOUTS_PATH = "/layouts";
     private static final String STYLES_PATH = "/styles";
     private static final String STRINGS_BASENAME = "strings";
     private static final String SETTINGS_PATH = "/settings/settings.properties";
+    private static final String LANGUAGES_PATH = "/languages.yaml";
 
     // Методы для работы с иконками
     /**
@@ -44,6 +45,10 @@ public class ResourceHandler
         return getIconManager().getIcon(size, iconName);
     }
 
+    public static Image getIcon(IconSize size, String name)
+    {
+        return getIconManager().getIcon(size, name);
+    }
 
     // Методы для работы со строками
     /**
@@ -53,7 +58,7 @@ public class ResourceHandler
     public static void setLocale(Locale locale)
     {
         getStringManager().setLocale(locale);
-        EventBus.publish(LocaleChangedEvent.class);
+        EventBus.publish(new LocaleChangedEvent());
     }
 
     /**
@@ -68,7 +73,6 @@ public class ResourceHandler
      * */
     public static ResourceBundle getStringBundle() {return getStringManager().getBundle();}
 
-    //TODO немножко переделать метод, мне не нравится блок catch
     /**
      * Получить строковый ресурс по ключу
      * @param key ключ, по которому строковый ресурс расположен в хранилище
@@ -80,6 +84,7 @@ public class ResourceHandler
         {
             return getStringBundle().getString(key);
         }
+        //TODO немножко переделать метод, мне не нравится этот блок
         catch (MissingResourceException ex)
         {
             System.err.println("Отсутствует ключ: " + key);
@@ -124,10 +129,23 @@ public class ResourceHandler
         return getStylesManager().getResource(styleFileName);
     }
 
-    // Методы работы с настройками
+    // Методы для получения ресурсов в виде потоков ввода
+    /**
+     * Получить поток ввода с настройками приложения по умолчанию
+     * @return поток ввода с данными по настройкам по умолчанию
+     * */
     public static InputStream getDefaultSettingsAsStream()
     {
-        return getSettingsManager().getSettingsAsStream();
+        return getStreamManager().getResourceAsStream(SETTINGS_PATH);
+    }
+
+    /**
+     * Получить поток ввода с данными по доступным языкам
+     * @return поток ввода с данными по языкам
+     * */
+    public static InputStream getLanguageDataAsStream()
+    {
+        return getStreamManager().getResourceAsStream(LANGUAGES_PATH);
     }
 
     // Приватные методы класса
@@ -164,6 +182,10 @@ public class ResourceHandler
         return layoutManager;
     }
 
+    /**
+     * Выдать объект менеджера ресурсов стилей. Если его нет, сначала создаст его
+     * @return менеджер ресурсов стилей
+     * */
     private static StylesResourceManager getStylesManager()
     {
         if (stylesManager == null)
@@ -171,11 +193,15 @@ public class ResourceHandler
         return stylesManager;
     }
 
-    private static DefaultSettingsResourceManager getSettingsManager()
+    /**
+     * Выдать объект менеджера чтения ресурсов в поток ввода. Если его нет, сначала создаст его
+     * @return менеджер чтения ресурсов в поток ввода
+     * */
+    private static ResourcesAsStreamManager getStreamManager()
     {
-        if (settingsManager == null)
-            settingsManager = new DefaultSettingsResourceManager(SETTINGS_PATH);
-        return settingsManager;
+        if (streamManager == null)
+            streamManager = new ResourcesAsStreamManager();
+        return streamManager;
     }
 }
 
@@ -199,7 +225,14 @@ class IconResourceManager
     public Image getIcon(@NotNull IconSize size,
                          @NotNull IconName iconName)
     {
-        URL url = getClass().getResource(String.join("/", iconsPath, size.getValue(), iconName.getValue()));
+        return getIcon(size, iconName.getValue());
+    }
+
+    @Nullable
+    public Image getIcon(@NotNull IconSize size,
+                         @NotNull String iconName)
+    {
+        URL url = getClass().getResource(String.join("/", iconsPath, size.getValue(), iconName));
         if (url != null)
             return new Image(url.toString());
         return null;
@@ -307,7 +340,9 @@ class LayoutResourceManager
     }
 }
 
-
+/**
+ * Класс для работы с ресурсами стилей
+ * */
 class StylesResourceManager
 {
     private final String stylesPath;
@@ -321,15 +356,12 @@ class StylesResourceManager
     }
 }
 
-
-class DefaultSettingsResourceManager
+/**
+ * Класс для чтения ресурсов в поток ввода
+ * */
+class ResourcesAsStreamManager
 {
-    private final String settingsPath;
+    public ResourcesAsStreamManager() { }
 
-    public DefaultSettingsResourceManager(String path) {settingsPath = path;}
-
-    public InputStream getSettingsAsStream()
-    {
-        return getClass().getResourceAsStream(settingsPath);
-    }
+    public InputStream getResourceAsStream(String path) {return getClass().getResourceAsStream(path);}
 }

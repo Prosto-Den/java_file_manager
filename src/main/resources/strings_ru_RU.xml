@@ -20,4 +20,9 @@
     <entry key="fileviewer.row.back">..</entry>
     <entry key="contextmenu.item.moveToTrash">Переместить в корзину</entry>
     <entry key="textfield.currentPath.tooltip">Путь к текущей директории</entry>
+    <entry key="settings.title">Настройки</entry>
+    <entry key="settings.language">Язык:</entry>
+    <entry key="settings.button.save">Сохранить</entry>
+    <entry key="settings.button.cancel">Отменить</entry>
+    <entry key="settings.button.apply">Применить</entry>
 </properties>

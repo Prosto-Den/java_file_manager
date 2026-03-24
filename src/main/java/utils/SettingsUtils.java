@@ -40,7 +40,7 @@ public class SettingsUtils
     }
 
     /**
-     * Сохранить настройки в файл
+     * Сохранить пользовательские настройки в файл
      * */
     public static void saveSettings()
     {

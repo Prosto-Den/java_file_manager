@@ -31,7 +31,11 @@ public enum IconName
     COPY("copy.png"),
     DELETE("delete.png"),
     OPEN_FILE("open_file.png"),
-    OPEN_FOLDER("open_folder.png");
+    OPEN_FOLDER("open_folder.png"),
+
+    //flags
+    RU_FLAG("ru.png"),
+    US_FLAG("us.png");
 
     private final String iconName;
 

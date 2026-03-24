@@ -5,10 +5,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
+import models.SettingKeys;
 import models.StringKeys;
 import monitors.ClipboardMonitor;
 import resourceHandler.ResourceHandler;
 import utils.FileSystemUtils;
+import utils.LanguageManager;
 import utils.SettingsUtils;
 
 import java.io.IOException;
@@ -28,9 +30,8 @@ public class App extends Application
         {
             AppContext.setMainStage(stage);
             SettingsUtils.loadSettings();
-
-            // TODO локаль должна указываться в настройках
-            ResourceHandler.setLocale(Locale.of("ru", "RU"));
+            LanguageManager.getInstance().setCurrentLanguage(SettingsUtils.get(SettingKeys.LOCALE));
+            ResourceHandler.setLocale(LanguageManager.getInstance().getCurrentLanguage().toLocale());
 
             ClipboardMonitor.start();
 

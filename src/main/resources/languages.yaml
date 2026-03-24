@@ -1,0 +1,8 @@
+languages:
+  - code: ru_RU
+    name: Русский
+    flag: ru.png
+
+  - code: en_US
+    name: English
+    flag: us.png

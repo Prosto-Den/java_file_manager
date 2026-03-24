@@ -20,4 +20,9 @@
     <entry key="fileviewer.row.back">..</entry>
     <entry key="contextmenu.item.moveToTrash">Move to trash</entry>
     <entry key="textfield.currentPath.tooltip">Path to current directory</entry>
+    <entry key="settings.title">Settings</entry>
+    <entry key="settings.language">Language:</entry>
+    <entry key="settings.button.save">Save</entry>
+    <entry key="settings.button.cancel">Cancel</entry>
+    <entry key="settings.button.apply">Apply</entry>
 </properties>

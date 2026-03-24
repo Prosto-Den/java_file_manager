@@ -21,4 +21,8 @@ public class StringKeys
     public static final String CONTEXT_MENU_DELETE_ITEM = "contextmenu.item.delete";
     public static final String FILEVIEWER_ROW_BACK = "fileviewer.row.back";
     public static final String CONTEXT_MENU_MOVE_TO_TRASH_ITEM = "contextmenu.item.moveToTrash";
+    public static final String SETTINGS_TITLE = "settings.title";
+    public static final String SETTINGS_BUTTON_SAVE = "settings.button.save";
+    public static final String SETTINGS_BUTTON_CANCEL = "settings.button.cancel";
+    public static final String SETTINGS_BUTTON_APPLY = "settings.button.apply";
 }

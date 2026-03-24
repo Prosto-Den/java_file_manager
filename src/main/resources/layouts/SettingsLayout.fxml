@@ -11,10 +11,26 @@
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="controllers.SettingsController"
       prefHeight="400.0" prefWidth="600.0">
+
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
 
-    <Label text="Язык: "/>
-    <ComboBox fx:id="localBox" prefWidth="200"/>
+    <GridPane VBox.vgrow="ALWAYS">
+        <Label text="%settings.language" GridPane.rowIndex="0" GridPane.columnIndex="0"
+               GridPane.halignment="RIGHT">
+            <GridPane.margin>
+                <Insets right="10"/>
+            </GridPane.margin>
+        </Label>
+
+        <ComboBox fx:id="localeBox" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="200"/>
+    </GridPane>
+
+    <HBox alignment="BOTTOM_RIGHT" VBox.vgrow="ALWAYS" spacing="5">
+        <Button fx:id="saveButton" alignment="CENTER_RIGHT" text="%settings.button.save"/>
+        <Button fx:id="applyButton" alignment="CENTER_RIGHT" text="%settings.button.apply"/>
+        <Button fx:id="cancelButton" alignment="CENTER_RIGHT" text="%settings.button.cancel"/>
+    </HBox>
+
 </VBox>
