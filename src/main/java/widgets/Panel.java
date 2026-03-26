@@ -11,24 +11,23 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
-
 import java.util.List;
-import java.util.Optional;
 
-import models.FileSystemSide;
-import models.Language;
 import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import utils.*;
 import models.FileData;
+import utils.settingsUtils.FileSystemSettingsHelper;
+import widgets.interfaces.IWidget;
+import widgets.interfaces.ITranslatable;
 
 
 /**
  * Класс панели. Отображает содержимое директории
  * */
-public class Panel extends VBox implements IWidget
+public class Panel extends VBox implements IWidget, ITranslatable
 {
     @FXML
     private TableView<FileData> fileViewer; // виджет отображения файлов
@@ -54,22 +53,10 @@ public class Panel extends VBox implements IWidget
         load(ResourceHandler.getLayout("Panel.fxml"));
         initUI();
 
-        //TODO в будущем ButtonClickedEvent будет абстрактным, надо будет подписаться на более конкретное событие
         EventBus.subscribe(InsertButtonClickedEvent.class, event -> refreshTable());
         EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
 
         refreshTable();
-    }
-
-    @Override
-    public void initUI()
-    {
-        // Меняем поведение fileViewer при увеличении размера окна. По умолчанию, будет создаваться четвёртая колонка.
-        // Тут же ставим, чтобы последняя колонка подстраивалась под новый размер окна
-        fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
-        setupTableColumns();
-        // тут не получится вызвать refreshTable, так как файловая система ещё не создана
-        //TODO переделать создание виджетов, чтобы не передавать fileSystem после его создания
     }
 
     /**
@@ -171,6 +158,7 @@ public class Panel extends VBox implements IWidget
 
     /**
      * Обработка двойного нажатия на ряд таблицы
+     * @param fileInfo данные файла
      * */
     private void handleDoubleClick(FileData fileInfo)
     {
@@ -224,36 +212,44 @@ public class Panel extends VBox implements IWidget
         }
     }
 
-    /**
-     * Обновить текста заголовков таблицы. Нужно для перезаполнения при смене языка
-     * */
-    private void updateText()
+    // IWidget
+    @Override
+    public void initUI()
+    {
+        // Меняем поведение fileViewer при увеличении размера окна. По умолчанию, будет создаваться четвёртая колонка.
+        // Тут же ставим, чтобы последняя колонка подстраивалась под новый размер окна
+        fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        setupTableColumns();
+        refreshTable();
+    }
+
+    // ITranslatable
+    @Override
+    public void updateText()
     {
         fileNameColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILENAME));
         fileSizeColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILE_SIZE));
         fileEditDateColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
     }
 
+    // Приватные методы
+
     /**
-     * Получить экземпляр файловой системы дял данной панели. Метод нужен просто для более простого доступа
+     * Получить экземпляр файловой системы дял данной панели. Метод нужен для более простого доступа
      * к экземпляру, так как имя метода короче, чем полный вызов
      * @return объект файловой системы для данной панели
      * */
     private FileSystem getFileSystem() { return FileSystemController.get(fileSystemID); }
-    private FileSystemSide getFileSystemSide() {return FileSystemController.getSide(fileSystemID);}
 
+    /**
+     * Записать директорию в настройки
+     * */
     private void updateSettings()
     {
         if (getFileSystem() != null)
         {
-            String currentPath =  getFileSystem().getCurrentPath();
-            FileSystemSide side = getFileSystemSide();
-
-            switch (side)
-            {
-                case FileSystemSide.LEFT -> SettingsUtils.set("last.directory.left", currentPath);
-                case FileSystemSide.RIGHT -> SettingsUtils.set("last.directory.right", currentPath);
-            }
+            String currentPath = getFileSystem().getCurrentPath();
+            FileSystemSettingsHelper.setPath(fileSystemID, currentPath);
         }
     }
 }

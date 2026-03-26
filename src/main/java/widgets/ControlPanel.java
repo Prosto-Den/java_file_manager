@@ -19,17 +19,16 @@ import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import types.OSType;
-import utils.FileSystem;
 import utils.FileSystemController;
 import utils.FileSystemUtils;
-
-import java.util.Optional;
+import widgets.interfaces.IWidget;
+import widgets.interfaces.ITranslatable;
 
 
 /**
  * Панель с элементами управления для текущей директории
  * */
-public class ControlPanel extends HBox implements IWidget
+public class ControlPanel extends HBox implements IWidget, ITranslatable
 {
     @FXML
     private Button createButton; // кнопка добавления файла в директорию
@@ -67,6 +66,16 @@ public class ControlPanel extends HBox implements IWidget
         EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
     }
 
+    /**
+     * Действия при нажатии кнопки "Вставить"
+     * */
+    public void onInsertItemClick()
+    {
+        FileSystemUtils.insert(currentPathField.getText());
+        EventBus.publish(new InsertButtonClickedEvent());
+    }
+
+    // IWidget
     @Override
     public void initUI()
     {
@@ -90,15 +99,18 @@ public class ControlPanel extends HBox implements IWidget
         // уже с нужной локалью
     }
 
-    /**
-     * Действия при нажатии кнопки "Вставить"
-     * */
-    public void onInsertItemClick()
+    // ITranslatable
+    @Override
+    public void updateText()
     {
-        FileSystemUtils.insert(currentPathField.getText());
-        EventBus.publish(new InsertButtonClickedEvent());
+        createButton.setText(ResourceHandler.getString(StringKeys.BUTTON_ADD_TEXT));
+        createButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_ADD_TOOLTIP)));
+        backButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_BACK_TOOLTIP)));
+        forwardButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_FORWARD_TOOLTIP)));
+        insertButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_INSERT_TOOLTIP)));
     }
 
+    // Приватные методы
     /**
      * Обновить наполнение выпадающего меню с логическими дисками
      * */
@@ -109,17 +121,5 @@ public class ControlPanel extends HBox implements IWidget
             diskComboBox.setItems(FXCollections.observableArrayList(FileSystemUtils.getLogicalDrives()));
             diskComboBox.setValue(diskComboBox.getItems().getFirst());
         }
-    }
-
-    /**
-     * Заменить текста элементов управления (нужно при смене языка)
-     * */
-    private void updateText()
-    {
-        createButton.setText(ResourceHandler.getString(StringKeys.BUTTON_ADD_TEXT));
-        createButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_ADD_TOOLTIP)));
-        backButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_BACK_TOOLTIP)));
-        forwardButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_FORWARD_TOOLTIP)));
-        insertButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_INSERT_TOOLTIP)));
     }
 }

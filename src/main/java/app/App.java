@@ -5,16 +5,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
-import models.SettingKeys;
-import models.StringKeys;
-import monitors.ClipboardMonitor;
-import resourceHandler.ResourceHandler;
-import utils.FileSystemUtils;
-import utils.LanguageManager;
-import utils.SettingsUtils;
-
+import utils.settingsUtils.SettingsUtils;
 import java.io.IOException;
-import java.util.Locale;
 import java.util.Objects;
 
 
@@ -26,15 +18,35 @@ public class App extends Application
     @Override
     public void start(Stage stage)
     {
+        // сначала подготовим всё необходимое для работы, потом запустимся
+        prepareApp(stage);
+        stage.show();
+    }
+
+    @Override
+    public void stop()
+    {
+        // при закрытии приложения сохраним настройки. Это нужно, чтобы запомнить последние открытые директории
+        SettingsUtils.saveSettings();
+    }
+
+    /**
+     * Метод запуска приложения. Нужен, чтобы Launcher смог запустить приложение
+     * */
+    public static void Launch(String[] args)
+    {
+        launch(args);
+    }
+
+    /**
+     * Предварительная подготовка для запуска приложения
+     * */
+    private void prepareApp(Stage stage)
+    {
+        AppContext.prepareApp(stage);
+
         try
         {
-            AppContext.setMainStage(stage);
-            SettingsUtils.loadSettings();
-            LanguageManager.getInstance().setCurrentLanguage(SettingsUtils.get(SettingKeys.LOCALE));
-            ResourceHandler.setLocale(LanguageManager.getInstance().getCurrentLanguage().toLocale());
-
-            ClipboardMonitor.start();
-
             FXMLLoader mainLoader = new FXMLLoader(Objects.requireNonNull(
                     getClass().getResource("/layouts/MainLayout.fxml")));
             VBox layout = mainLoader.load();
@@ -43,20 +55,12 @@ public class App extends Application
             stage.setMinHeight(600);
             stage.setMinWidth(800);
             stage.setScene(scene);
-            stage.setTitle(ResourceHandler.getString(StringKeys.TITLE));
-            stage.show();
+            stage.setTitle(AppContext.getAppName());
         }
         catch (IOException ex)
         {
             ex.printStackTrace();
             System.err.println("Не удалось загрузить приложение :(");
         }
-    }
-
-    public static void Launch(String[] args)
-    {
-        launch(args);
-        // код ниже сработает только после закрытия приложения
-        SettingsUtils.saveSettings();
     }
 }

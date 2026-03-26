@@ -26,11 +26,6 @@ public final class FileSystem
      * */
     public FileSystem()
     {
-        /*
-        TODO добавить чтение текущего пути из настроек. При этом сам класс файловой системы ничего не
-         должен знать про настройки, т.е. имеет смысл присылать путь извне (реализовал для этого конструктор)
-        *
-        */
         currentPath.setValue(FileSystemUtils.getDefaultPath());
     }
     /**

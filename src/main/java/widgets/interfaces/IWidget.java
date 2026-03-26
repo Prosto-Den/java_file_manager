@@ -1,4 +1,4 @@
-package widgets;
+package widgets.interfaces;
 
 
 import javafx.fxml.FXMLLoader;

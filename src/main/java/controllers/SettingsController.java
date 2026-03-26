@@ -18,11 +18,10 @@ import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import utils.LanguageManager;
 
-import javafx.event.ActionEvent;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.scene.image.ImageView;
-import utils.SettingsUtils;
+import utils.settingsUtils.SettingsUtils;
 
 public class SettingsController implements Initializable
 {

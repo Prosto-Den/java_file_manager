@@ -13,31 +13,33 @@ import java.util.UUID;
 public class FileSystemController
 {
     private static final Map<String, FileSystem> instances = new HashMap<>();
-    private static final Map<String, FileSystemSide> instancesSides = new HashMap<>();
 
-    public static String create(FileSystemSide side)
+    /**
+     * Создать файловую систему. После создания будет указывать на корень системы (C:\ у Windows и / у Linux)
+     * @return UUID созданной файловой системы
+     * */
+    public static String create()
     {
-        String id = UUID.randomUUID().toString();
-        instances.put(id, new FileSystem());
-        instancesSides.put(id, side);
-        return id;
+        return create("");
     }
 
-    public static String create(FileSystemSide side, String path)
+    /**
+     * Создать файловую систему. После создания будет указывать на переданный путь
+     * @param path путь, на который файловая системы должна указывать
+     * @return UUID созданной файловой системы
+     * */
+    public static String create(String path)
     {
         String id = UUID.randomUUID().toString();
         instances.put(id, new FileSystem(path));
-        instancesSides.put(id, side);
         return id;
     }
 
+    /**
+     * Получить файловую систему по её UUID
+     * */
     public static FileSystem get(String id)
     {
         return instances.get(id);
-    }
-
-    public static FileSystemSide getSide(String id)
-    {
-        return instancesSides.get(id);
     }
 }

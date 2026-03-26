@@ -2,9 +2,10 @@ package controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.layout.BorderPane;
-import models.FileSystemSide;
+import models.SettingKeys;
 import utils.FileSystemController;
-import utils.SettingsUtils;
+import utils.settingsUtils.FileSystemSettingsHelper;
+import utils.settingsUtils.SettingsUtils;
 import widgets.*;
 import javafx.fxml.Initializable;
 import java.net.URL;
@@ -28,10 +29,14 @@ public class MainController implements Initializable
     public void initialize(URL url, ResourceBundle bundle)
     {
         // Создаём экземпляры файловых систем
-        String leftFileSystemID = FileSystemController.create(FileSystemSide.LEFT,
-                SettingsUtils.get("last.directory.left"));
-        String rightFileSystemID = FileSystemController.create(FileSystemSide.RIGHT,
-                SettingsUtils.get("last.directory.right"));
+        String leftPath = SettingsUtils.get(SettingKeys.LastDirectory.LEFT);
+        String rightPath = SettingsUtils.get(SettingKeys.LastDirectory.RIGHT);
+        String leftFileSystemID = FileSystemController.create(leftPath == null ? "" : leftPath);
+        String rightFileSystemID = FileSystemController.create(rightPath == null ? "" : rightPath);
+
+        // устанавливаем связь между UUID файловой системы и ключом в настройках
+        FileSystemSettingsHelper.setFileSystemSettingsKey(leftFileSystemID, SettingKeys.LastDirectory.LEFT);
+        FileSystemSettingsHelper.setFileSystemSettingsKey(rightFileSystemID, SettingKeys.LastDirectory.RIGHT);
 
         // настраиваем левую часть окна
         leftContainer.setTop(new ControlPanel(leftFileSystemID));

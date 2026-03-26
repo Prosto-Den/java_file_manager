@@ -1,7 +1,9 @@
-package utils;
+package utils.settingsUtils;
 
 
+import app.AppContext;
 import resourceHandler.ResourceHandler;
+import utils.FileSystemUtils;
 
 import java.io.*;
 import java.util.Properties;
@@ -13,7 +15,7 @@ import java.util.Properties;
 public class SettingsUtils
 {
     private static final String SETTINGS_PATH = FileSystemUtils.adjustPath(
-            FileSystemUtils.getAppFolder(), "settings.properties");
+            AppContext.getAppFolder(), "settings.properties");
     private static Properties properties = new Properties();
 
     /**

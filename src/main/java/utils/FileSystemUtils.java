@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 public class FileSystemUtils
 {
     private static final OSType osType = calcOSType(); // тип ОС
-    private static final String APP_FOLDER = createAppFolder();
 
     /**
      * Существует ли файл (директория) по этому пути
@@ -237,8 +236,6 @@ public class FileSystemUtils
         return res;
     }
 
-    public static String getAppFolder() {return APP_FOLDER;}
-
     // Приватные методы
 
     /**
@@ -305,18 +302,5 @@ public class FileSystemUtils
         }
 
         return res;
-    }
-
-    //TODO наверное этим должен заниматься всё-таки AppContext
-    private static String createAppFolder()
-    {
-        String userFolder = System.getProperty("user.home");
-        String path = adjustPath(userFolder, AppContext.getAppName());
-        boolean res = isExist(path);
-
-        if (!res)
-            res = createDir(path);
-
-        return res ? path : "";
     }
 }
