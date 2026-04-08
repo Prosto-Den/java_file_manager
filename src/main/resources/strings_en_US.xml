@@ -25,4 +25,8 @@
     <entry key="settings.button.save">Save</entry>
     <entry key="settings.button.cancel">Cancel</entry>
     <entry key="settings.button.apply">Apply</entry>
+    <entry key="settings.language.title">Language settings</entry>
+    <entry key="settings.linux.title">Linux settings</entry>
+    <entry key="settings.linux.used_terminal">Used terminal:</entry>
+    <entry key="settings.linux.open_command">Open command:</entry>
 </properties>

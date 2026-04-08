@@ -12,6 +12,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import java.util.List;
+import java.util.Properties;
 
 import models.StringKeys;
 import resourceHandler.IconName;

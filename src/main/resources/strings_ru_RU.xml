@@ -25,4 +25,8 @@
     <entry key="settings.button.save">Сохранить</entry>
     <entry key="settings.button.cancel">Отменить</entry>
     <entry key="settings.button.apply">Применить</entry>
+    <entry key="settings.language.title">Настройки языка</entry>
+    <entry key="settings.linux.title">Настройки для Linux</entry>
+    <entry key="settings.linux.used_terminal">Используемый терминал:</entry>
+    <entry key="settings.linux.open_command">Команда открытия:</entry>
 </properties>

@@ -26,4 +26,8 @@ public class StringKeys
     public static final String SETTINGS_BUTTON_SAVE = "settings.button.save";
     public static final String SETTINGS_BUTTON_CANCEL = "settings.button.cancel";
     public static final String SETTINGS_BUTTON_APPLY = "settings.button.apply";
+    public static final String SETTINGS_LANGUAGE_TITLE = "settings.language.title";
+    public static final String SETTINGS_LINUX_TITLE = "settings.linux.title";
+    public static final String SETTINGS_LINUX_USED_TERMINAL = "settings.linux.used_terminal";
+    public static final String SETTINGS_LINUX_OPEN_COMMAND = "settings.linux.open_command";
 }

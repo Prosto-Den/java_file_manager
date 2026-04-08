@@ -6,37 +6,58 @@ import events.LocaleChangedEvent;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import models.Language;
 import models.SettingKeys;
 import models.StringKeys;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
+import types.OSType;
+import utils.FileSystemUtils;
 import utils.LanguageManager;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.scene.image.ImageView;
 import utils.settingsUtils.SettingsUtils;
+import widgets.interfaces.ITranslatable;
 
-public class SettingsController implements Initializable
+
+/**
+ * Контроллер для окна настроек
+ * */
+public class SettingsController implements Initializable, ITranslatable
 {
     @FXML
-    private Label languageLabel;
+    private Label languageLabel; // надпись "Язык"
     @FXML
-    private ComboBox<Language> localeBox;
+    private ComboBox<Language> localeBox; // комбобокс с выбором локали
     @FXML
-    private Button saveButton;
+    private Button saveButton; // кнопка "Сохранить"
     @FXML
-    private Button cancelButton;
+    private Button cancelButton; // кнопка "Отмена"
     @FXML
-    private Button applyButton;
+    private Button applyButton; // кнопка "Применить"
+    @FXML
+    private Separator linuxSettingsSeparator; // разделитель для Linux настроек
+    @FXML
+    private GridPane linuxSettings; // контейнер со всеми виджетами для Linux настроек
+    @FXML
+    private TextField terminalTextField; // поле ввода Linux терминала
+    @FXML
+    private TextField openCommandTextField; // поле ввода команды открытия для Linux
+    @FXML
+    private Label languageSettingsTitle; // заголовок настроек языка
+    @FXML
+    private Label linuxSettingsTitle; // заголовок Linux настроек
+    @FXML
+    private Label linuxUsedTerminalLabel; // надпись "Используемый терминал"
+    @FXML
+    private Label linuxOpenCommandLabel; // надпись "Команда открытия"
 
-    private Stage dialogStage;
+    private Stage dialogStage; // диалог настроек. Нужно сохранить диалог здесь, чтобы работала кнопка "Отменить"
 
     @Override
     public void initialize(URL location, ResourceBundle resources)
@@ -68,44 +89,98 @@ public class SettingsController implements Initializable
 
         saveButton.setOnAction(event -> onSaveButtonClick());
         applyButton.setOnAction(event -> onApplyButtonClicked());
-        cancelButton.setOnAction(event -> onCancelButtonCLicked());
+        cancelButton.setOnAction(event -> onCancelButtonClicked());
+
+        configureLinuxControls();
+
+        if (FileSystemUtils.checkOS(OSType.LINUX))
+        {
+            configureLinuxControls();
+        }
+        else
+            setLinuxControlsVisible(false);
     }
 
+    /**
+     * Выставить диалог настроек в контроллер
+     * @param stage диалог настроек
+     * */
     public void setStage(Stage stage) { dialogStage = stage; }
 
+    /**
+     * Реакция на нажатие кнопки "Сохранить"
+     * */
     private void onSaveButtonClick()
     {
         // применяем изменения
         onApplyButtonClicked();
 
         // в конце просто закрываем настройки
-        onCancelButtonCLicked();
+        onCancelButtonClicked();
     }
 
+    /**
+     * Реакция на нажатие кнопки "Применить"
+     * */
     private void onApplyButtonClicked()
     {
         // сохраняем локаль
         Language value = localeBox.getValue();
-        String currentCode = SettingsUtils.get(SettingKeys.LOCALE);
-
-        if (!value.code().equals(currentCode))
-        {
-            SettingsUtils.set(SettingKeys.LOCALE, value.code());
+        if (SettingsUtils.set(SettingKeys.LOCALE, value.code()))
             ResourceHandler.setLocale(value.toLocale());
+
+        // сохраняем настройки Linux
+        if (FileSystemUtils.checkOS(OSType.LINUX))
+        {
+            // сохраняем используемый терминал и команду открытия
+            String linuxTerminal = terminalTextField.getText();
+            String linuxOpenCommand = openCommandTextField.getText();
+
+            SettingsUtils.set(SettingKeys.LINUX_CONSOLE, linuxTerminal);
+            SettingsUtils.set(SettingKeys.LINUX_OPEN_COMMAND, linuxOpenCommand);
         }
     }
 
-    private void onCancelButtonCLicked()
+    /**
+     * Реакция на нажатие кнопки "Отменить"
+     * */
+    private void onCancelButtonClicked()
     {
         if (dialogStage != null)
             dialogStage.close();
     }
 
-    private void updateText()
+    @Override
+    public void updateText()
     {
         languageLabel.setText(ResourceHandler.getString(StringKeys.SETTINGS_LANGUAGE_LABEL));
         saveButton.setText(ResourceHandler.getString(StringKeys.SETTINGS_BUTTON_SAVE));
         applyButton.setText(ResourceHandler.getString(StringKeys.SETTINGS_BUTTON_APPLY));
         cancelButton.setText(ResourceHandler.getString(StringKeys.SETTINGS_BUTTON_CANCEL));
+        languageSettingsTitle.setText(ResourceHandler.getString(StringKeys.SETTINGS_LANGUAGE_TITLE));
+        linuxSettingsTitle.setText(ResourceHandler.getString(StringKeys.SETTINGS_LINUX_TITLE));
+        linuxUsedTerminalLabel.setText(ResourceHandler.getString(StringKeys.SETTINGS_LINUX_USED_TERMINAL));
+        linuxOpenCommandLabel.setText(ResourceHandler.getString(StringKeys.SETTINGS_LINUX_OPEN_COMMAND));
+    }
+
+    // Приватные методы
+
+    /**
+     * Выставить видимость для элементов управления настроек Linux
+     * @param visible флаг видимости
+     * */
+    private void setLinuxControlsVisible(boolean visible)
+    {
+        linuxSettingsSeparator.setVisible(visible);
+        linuxSettings.setVisible(visible);
+    }
+
+    /**
+     * Настроить элементы управления настроек Linux
+     * */
+    private void configureLinuxControls()
+    {
+        terminalTextField.setText(SettingsUtils.get(SettingKeys.LINUX_CONSOLE));
+        openCommandTextField.setText(SettingsUtils.get(SettingKeys.LINUX_OPEN_COMMAND));
     }
 }

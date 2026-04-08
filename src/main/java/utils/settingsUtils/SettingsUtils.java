@@ -16,7 +16,7 @@ public class SettingsUtils
 {
     private static final String SETTINGS_PATH = FileSystemUtils.adjustPath(
             AppContext.getAppFolder(), "settings.properties");
-    private static Properties properties = new Properties();
+    private static final Properties properties = new Properties();
 
     /**
      * Загрузить настройки из файла
@@ -69,14 +69,25 @@ public class SettingsUtils
     }
 
     /**
-     * Выставить значение в настройках
+     * Выставить значение в настройках. Изменит значение только если оно отличается от того, что записано в настройках
+     * в данный момент
      * @param key ключ
      * @param value значение
+     * @return true, если значение было изменено, иначе false
      * */
-    public static void set(String key, String value)
+    public static boolean set(String key, String value)
     {
-        properties.setProperty(key, value);
+        boolean result = false;
+        String oldValue = properties.getProperty(key);
+        if (!oldValue.equals(value))
+        {
+            properties.setProperty(key, value);
+            result = true;
+        }
+        return result;
     }
+
+    public static Properties getSettings() {return properties;}
 
     private static void loadDefaultSettings()
     {
