@@ -1,13 +1,11 @@
 package utils.settingsUtils;
 
 
-import app.AppContext;
 import models.StringKeys;
 import resourceHandler.ResourceHandler;
 import utils.FileSystemUtils;
 
 import java.io.*;
-import java.util.Map;
 import java.util.Properties;
 
 

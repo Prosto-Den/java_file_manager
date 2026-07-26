@@ -20,7 +20,6 @@ import resourceHandler.ResourceHandler;
 import utils.*;
 import models.FileData;
 import utils.settingsUtils.FileSystemSettingsHelper;
-import utils.settingsUtils.SettingsManager;
 import widgets.interfaces.IWidget;
 import widgets.interfaces.ITranslatable;
 

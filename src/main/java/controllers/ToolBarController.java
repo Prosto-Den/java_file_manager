@@ -6,7 +6,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import models.SettingKeys;
-import utils.LanguageManager;
 
 import java.net.URL;
 import java.util.ResourceBundle;
