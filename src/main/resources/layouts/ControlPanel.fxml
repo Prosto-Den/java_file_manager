@@ -25,7 +25,7 @@
     </padding>
 
     <!--Комбобокс с выбором диска. Не актуален для Linux-->
-    <ImageView HBox.hgrow="ALWAYS">
+    <ImageView HBox.hgrow="ALWAYS" fx:id="diskIcon">
         <Image url="/icons/24x24/disk.png"/>
     </ImageView>
     <ComboBox fx:id="diskComboBox" HBox.hgrow="ALWAYS"/>

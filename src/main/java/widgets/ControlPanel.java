@@ -6,14 +6,14 @@ import events.EventBus;
 import events.InsertButtonClickedEvent;
 import events.LocaleChangedEvent;
 import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.fxml.FXML;
 import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
@@ -21,8 +21,8 @@ import resourceHandler.ResourceHandler;
 import types.OSType;
 import utils.FileSystemController;
 import utils.FileSystemUtils;
-import widgets.interfaces.IWidget;
 import widgets.interfaces.ITranslatable;
+import widgets.interfaces.IWidget;
 
 
 /**
@@ -32,6 +32,9 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
 {
     @FXML
     private Button createButton; // кнопка добавления файла в директорию
+
+    @FXML
+    private ImageView diskIcon;
 
     @FXML
     private ComboBox<String> diskComboBox; // выпадающий список с логическими дисками системы
@@ -87,7 +90,7 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
             createButton.setGraphic(addImage);
         }
 
-        diskComboBox.setVisible(FileSystemUtils.checkOS(OSType.WINDOWS));
+        showDiskControlsVisibility(FileSystemUtils.checkOS(OSType.WINDOWS));
 
         insertButton.setDisable(true);
         EventBus.subscribe(ClipboardEvent.class, event -> {
@@ -121,5 +124,13 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
             diskComboBox.setItems(FXCollections.observableArrayList(FileSystemUtils.getLogicalDrives()));
             diskComboBox.setValue(diskComboBox.getItems().getFirst());
         }
+    }
+
+    private void showDiskControlsVisibility(boolean show)
+    {
+        diskComboBox.setVisible(show);
+        diskComboBox.setManaged(show);
+        diskIcon.setVisible(show);
+        diskIcon.setManaged(show);
     }
 }
