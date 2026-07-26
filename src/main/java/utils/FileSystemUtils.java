@@ -1,6 +1,5 @@
 package utils;
 
-import app.AppContext;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import types.FileSystemErrors;
@@ -23,6 +22,7 @@ import java.util.stream.Stream;
 public class FileSystemUtils
 {
     private static final OSType osType = calcOSType(); // тип ОС
+
 
     /**
      * Существует ли файл (директория) по этому пути
@@ -140,7 +140,11 @@ public class FileSystemUtils
         return String.join(System.getProperty("file.separator"), path, filename);
     }
 
-
+    /**
+     * Удалить файл (директорию)
+     * @param path путь к файлу (директории)
+     * @return true если удаление прошло успешно, иначе false
+     */
     public static boolean delete(String path)
     {
         if (!isDir(path))
@@ -149,7 +153,12 @@ public class FileSystemUtils
             return deleteRecursively(path);
     }
 
-    //TODO на Linux корзины нет (не на всех рабочих столах). Нужно проверить, как эта функция себя поведёт
+    // TODO проверить на директориях
+    /**
+     * Переместить файл (директорию) в корзину
+     * @param filePath путь к файлу(директории)
+     * @return true если перемещенеи в корзину прошло успешно, иначе false
+     */
     public static boolean moveToTrash(String filePath)
     {
         boolean res = false;
@@ -166,6 +175,12 @@ public class FileSystemUtils
         return res;
     }
 
+    // TODO а есть ли ещё варианты переместить файл в корзину? Возможно, стоит вынести это в настройки
+    /**
+     * Переместить файл (директорию) в коризину посредством gio. Актуально для Arch Linux
+     * @param filePath
+     * @return
+     */
     public static boolean moveToTrashViaGio(String filePath)
     {
         boolean result = false;

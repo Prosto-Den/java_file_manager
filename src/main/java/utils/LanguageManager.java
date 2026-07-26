@@ -2,6 +2,9 @@ package utils;
 
 
 import models.Language;
+import models.SettingKeys;
+import utils.settingsUtils.SettingsManager;
+
 import org.yaml.snakeyaml.Yaml;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,15 +16,24 @@ import java.util.Map;
 
 public class LanguageManager
 {
-    private static LanguageManager instance;
     private List<Language> languages;
     private Language currentLanguage;
+    private final SettingsManager settingsManager;
 
-    public static LanguageManager getInstance()
+    public LanguageManager(SettingsManager settingsManager)
+    {   
+        this.settingsManager = settingsManager;
+        loadLanguages();
+        initCurrentLanguage();
+    }
+    
+    private void initCurrentLanguage()
     {
-        if (instance == null)
-            instance = new LanguageManager();
-        return instance;
+        String langCode = settingsManager.get(SettingKeys.LOCALE);
+        if (langCode != null)
+            this.currentLanguage = getLanguageByCode(langCode);
+        else
+            this.currentLanguage = languages.isEmpty() ? null : languages.getFirst();
     }
 
     public Language getLanguageByCode(String code)
@@ -29,7 +41,7 @@ public class LanguageManager
         return languages.stream()
                 .filter(lang -> lang.code().equals(code))
                 .findFirst()
-                .orElse(languages.getFirst());
+                .orElse(languages.isEmpty() ? null : languages.getFirst());
     }
 
     public void setCurrentLanguage(Language language)
@@ -47,11 +59,6 @@ public class LanguageManager
     public List<Language> getAvailableLanguages()
     {
         return Collections.unmodifiableList(languages);
-    }
-
-    private LanguageManager()
-    {
-        loadLanguages();
     }
 
     private void loadLanguages()

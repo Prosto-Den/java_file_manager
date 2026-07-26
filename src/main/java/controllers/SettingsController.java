@@ -20,8 +20,9 @@ import utils.LanguageManager;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
 import javafx.scene.image.ImageView;
-import utils.settingsUtils.SettingsUtils;
+import utils.settingsUtils.SettingsManager;
 import widgets.interfaces.ITranslatable;
 
 
@@ -58,14 +59,13 @@ public class SettingsController implements Initializable, ITranslatable
     private Label linuxOpenCommandLabel; // надпись "Команда открытия"
 
     private Stage dialogStage; // диалог настроек. Нужно сохранить диалог здесь, чтобы работала кнопка "Отменить"
+    private SettingsManager settingsManager;
+    private LanguageManager languageManager;
 
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
         EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
-
-        localeBox.setItems(FXCollections.observableArrayList(LanguageManager.getInstance().getAvailableLanguages()));
-        localeBox.setValue(LanguageManager.getInstance().getCurrentLanguage());
 
         localeBox.setCellFactory(lv -> new ListCell<Language>() {
             @Override
@@ -90,15 +90,6 @@ public class SettingsController implements Initializable, ITranslatable
         saveButton.setOnAction(event -> onSaveButtonClick());
         applyButton.setOnAction(event -> onApplyButtonClicked());
         cancelButton.setOnAction(event -> onCancelButtonClicked());
-
-        configureLinuxControls();
-
-        if (FileSystemUtils.checkOS(OSType.LINUX))
-        {
-            configureLinuxControls();
-        }
-        else
-            setLinuxControlsVisible(false);
     }
 
     /**
@@ -107,6 +98,25 @@ public class SettingsController implements Initializable, ITranslatable
      * */
     public void setStage(Stage stage) { dialogStage = stage; }
 
+    public void init(Stage stage, SettingsManager settingsManager, LanguageManager languageManager)
+    {
+        dialogStage = stage;
+        this.settingsManager = settingsManager;
+        this.languageManager = languageManager;
+
+        localeBox.setItems(FXCollections.observableArrayList(this.languageManager.getAvailableLanguages()));
+        localeBox.setValue(this.languageManager.getCurrentLanguage());
+
+        if (FileSystemUtils.checkOS(OSType.LINUX))
+        {
+            configureLinuxControls();
+        }
+        else
+            setLinuxControlsVisible(false);
+
+        settingsManager.beginEdit();
+    }
+
     /**
      * Реакция на нажатие кнопки "Сохранить"
      * */
@@ -114,6 +124,8 @@ public class SettingsController implements Initializable, ITranslatable
     {
         // применяем изменения
         onApplyButtonClicked();
+        
+        settingsManager.commitEdit();
 
         // в конце просто закрываем настройки
         onCancelButtonClicked();
@@ -126,7 +138,7 @@ public class SettingsController implements Initializable, ITranslatable
     {
         // сохраняем локаль
         Language value = localeBox.getValue();
-        if (SettingsUtils.set(SettingKeys.LOCALE, value.code()))
+        if (settingsManager.set(SettingKeys.LOCALE, value.code()))
             ResourceHandler.setLocale(value.toLocale());
 
         // сохраняем настройки Linux
@@ -136,8 +148,8 @@ public class SettingsController implements Initializable, ITranslatable
             String linuxTerminal = terminalTextField.getText();
             String linuxOpenCommand = openCommandTextField.getText();
 
-            SettingsUtils.set(SettingKeys.LINUX_CONSOLE, linuxTerminal);
-            SettingsUtils.set(SettingKeys.LINUX_OPEN_COMMAND, linuxOpenCommand);
+            settingsManager.set(SettingKeys.LINUX_CONSOLE, linuxTerminal);
+            settingsManager.set(SettingKeys.LINUX_OPEN_COMMAND, linuxOpenCommand);
         }
     }
 
@@ -148,6 +160,7 @@ public class SettingsController implements Initializable, ITranslatable
     {
         if (dialogStage != null)
             dialogStage.close();
+        settingsManager.rollbackEdit();
     }
 
     @Override
@@ -180,7 +193,7 @@ public class SettingsController implements Initializable, ITranslatable
      * */
     private void configureLinuxControls()
     {
-        terminalTextField.setText(SettingsUtils.get(SettingKeys.LINUX_CONSOLE));
-        openCommandTextField.setText(SettingsUtils.get(SettingKeys.LINUX_OPEN_COMMAND));
+        terminalTextField.setText(settingsManager.get(SettingKeys.LINUX_CONSOLE));
+        openCommandTextField.setText(settingsManager.get(SettingKeys.LINUX_OPEN_COMMAND));
     }
 }

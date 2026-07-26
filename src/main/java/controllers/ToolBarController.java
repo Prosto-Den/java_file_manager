@@ -7,7 +7,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import models.SettingKeys;
 import utils.LanguageManager;
-import utils.settingsUtils.SettingsUtils;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -29,7 +28,7 @@ public class ToolBarController implements Initializable
 
     private void onSettingsButtonClick()
     {
-        LanguageManager.getInstance().setCurrentLanguage(SettingsUtils.get(SettingKeys.LOCALE));
+        AppContext.getLanguageManager().setCurrentLanguage(AppContext.getSettings().get(SettingKeys.LOCALE));
         AppContext.getSettingsStage().showAndWait();
     }
 }

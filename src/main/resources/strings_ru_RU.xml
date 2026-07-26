@@ -29,4 +29,9 @@
     <entry key="settings.linux.title">Настройки для Linux</entry>
     <entry key="settings.linux.used_terminal">Используемый терминал:</entry>
     <entry key="settings.linux.open_command">Команда открытия:</entry>
+
+
+    <entry key="error.load_user_settings">Не удалось загрузить файл пользовательских настроек. Будут применены настройки по умолчанию</entry>
+    <entry key="error.save_user_settings">Не удалось сохранить пользовательские настройки</entry>
+    <entry key="error.load_default_settings">Не удалось загрузить файл настроек по умолчанию</entry>
 </properties>

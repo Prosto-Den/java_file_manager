@@ -5,7 +5,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
-import utils.settingsUtils.SettingsUtils;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -13,7 +12,7 @@ import java.util.Objects;
 /**
  * Класс приложения. Тут происходит основная настройка
  * */
-public class App extends Application
+public final class App extends Application
 {
     @Override
     public void start(Stage stage)
@@ -27,7 +26,7 @@ public class App extends Application
     public void stop()
     {
         // при закрытии приложения сохраним настройки. Это нужно, чтобы запомнить последние открытые директории
-        SettingsUtils.saveSettings();
+        AppContext.getSettings().saveSettings();
     }
 
     /**
@@ -43,7 +42,7 @@ public class App extends Application
      * */
     private void prepareApp(Stage stage)
     {
-        AppContext.prepareApp(stage);
+        AppContext.init(stage);
 
         try
         {

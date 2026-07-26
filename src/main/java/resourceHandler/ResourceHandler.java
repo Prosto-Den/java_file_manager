@@ -29,7 +29,7 @@ public class ResourceHandler
     private static final String LAYOUTS_PATH = "/layouts";
     private static final String STYLES_PATH = "/styles";
     private static final String STRINGS_BASENAME = "strings";
-    private static final String SETTINGS_PATH = "/settings/settings.properties";
+    private static final String SETTINGS_PATH = "/settings/default_settings.properties";
     private static final String LANGUAGES_PATH = "/languages.yaml";
 
     // Методы для работы с иконками

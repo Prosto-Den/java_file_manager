@@ -12,7 +12,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import java.util.List;
-import java.util.Properties;
 
 import models.StringKeys;
 import resourceHandler.IconName;
@@ -21,6 +20,7 @@ import resourceHandler.ResourceHandler;
 import utils.*;
 import models.FileData;
 import utils.settingsUtils.FileSystemSettingsHelper;
+import utils.settingsUtils.SettingsManager;
 import widgets.interfaces.IWidget;
 import widgets.interfaces.ITranslatable;
 
@@ -40,6 +40,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
     private TableColumn<FileData, String> fileEditDateColumn; // дата последнего изменения файла
 
     private final String fileSystemID;
+    private final FileSystemSettingsHelper settingsHelper;
 
     /**
      * Конструктор
@@ -47,9 +48,10 @@ public class Panel extends VBox implements IWidget, ITranslatable
      *                     через FileSystemController. ВАЖНО!!! внутри конструктора нет проверки, что объект ФС
      *                     по этому ID существует, так что передавать нужно точно валидный ID
      * */
-    public Panel(String fileSystemId)
+    public Panel(String fileSystemId, FileSystemSettingsHelper helper)
     {
         fileSystemID = fileSystemId;
+        settingsHelper = helper;
 
         load(ResourceHandler.getLayout("Panel.fxml"));
         initUI();
@@ -250,7 +252,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
         if (getFileSystem() != null)
         {
             String currentPath = getFileSystem().getCurrentPath();
-            FileSystemSettingsHelper.setPath(fileSystemID, currentPath);
+            settingsHelper.setPath(fileSystemID, currentPath);
         }
     }
 }

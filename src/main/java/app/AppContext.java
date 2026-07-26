@@ -14,39 +14,57 @@ import monitors.ClipboardMonitor;
 import resourceHandler.ResourceHandler;
 import utils.FileSystemUtils;
 import utils.LanguageManager;
-import utils.settingsUtils.SettingsUtils;
+import utils.settingsUtils.FileSystemSettingsHelper;
+import utils.settingsUtils.SettingsManager;
 
 
 /**
  * Вспомогательный класс приложения. Хранит общую для приложения информацию, отвечает за работу с модальными окнами
  * */
-public class AppContext
+public final class AppContext
 {
     private static Stage mainStage; // главное окно приложения
-    private static final String APP_NAME = ResourceHandler.getString(StringKeys.TITLE); // название приложения
-    private static final String APP_FOLDER = createAppFolder(); // папка приложения
-    private static boolean isAppPrepared = false; // флаг готовности приложения к работе. Нужен, чтобы
-    // обезопасить метод prepareApp от повторного вызова
+    private static String appName; // название приложения
+    private static String appFolder;// папка приложения
+    private static SettingsManager settingsManager;
+    private static FileSystemSettingsHelper settingsHelper;
+    private static LanguageManager languageManager;
 
     /**
      * Выполнить первичную инициализацию для приложения. Будет определено главное окно приложения, загружены настройки,
      * определены локали и прочее. Обязателен для вызова перед началом работы программы
      * @param stage главное окно приложения
      * */
-    public static void prepareApp(Stage stage)
+    public static void init(Stage stage)
     {
-        if (!isAppPrepared)
-        {
-            mainStage = stage;
-            SettingsUtils.loadSettings();
-            LanguageManager.getInstance().setCurrentLanguage(SettingsUtils.get(SettingKeys.LOCALE));
-            ResourceHandler.setLocale(LanguageManager.getInstance().getCurrentLanguage().toLocale());
-            // TODO нужен ли этот монитор вообще? Может быть достаточно события на EventBus?
-            ClipboardMonitor.start();
-
-            isAppPrepared = true;
-        }
+        mainStage = stage;
+        appName = ResourceHandler.getString(StringKeys.TITLE);
+        appFolder = createAppFolder();
+        
+        String settingsPath = FileSystemUtils.adjustPath(appFolder, "user_settings.properties");
+        settingsManager = new SettingsManager(settingsPath);
+        settingsHelper = new FileSystemSettingsHelper(settingsManager);
+        languageManager = new LanguageManager(settingsManager);
     }
+
+    /**
+     * Выдать менеджер настроек приложения
+     * @return менеджер настроек
+     */
+    public static SettingsManager getSettings() { return settingsManager; }
+
+    /**
+     * Выдать вспомогательный менеджер для работы с настройками
+     * @return вспомогательный менеджер работы с настройками
+     */
+    public static FileSystemSettingsHelper getSettingsHelper() { return settingsHelper; }
+
+    /**
+     * Выдать менеджер переводов приложения
+     * @return менеджер переводов
+     */
+    public static LanguageManager getLanguageManager() { return languageManager; }
+
 
     // TODO нужно создать отдельный класс для работы с модальными окнами, в этом классе хранить его экземпляр,
     //  а в этом методы просто вызывать нужный метод из созданного класса
@@ -68,12 +86,13 @@ public class AppContext
                 FXMLLoader settingsLoader = new FXMLLoader(ResourceHandler.getLayout("SettingsLayout.fxml"),
                         ResourceHandler.getStringBundle());
                 Parent root = settingsLoader.load();
-                SettingsController controller = settingsLoader.getController();
-                controller.setStage(settingsStage);
-
+                
                 Scene scene = new Scene(root);
                 settingsStage.setScene(scene);
                 settingsStage.setTitle(ResourceHandler.getString(StringKeys.SETTINGS_TITLE));
+                
+                SettingsController controller = settingsLoader.getController();
+                controller.init(settingsStage, settingsManager, languageManager);
             }
             catch (IOException ex)
             {
@@ -88,13 +107,15 @@ public class AppContext
      * Получить путь к директории приложения
      * @return путь к директории
      * */
-    public static String getAppFolder() { return APP_FOLDER; }
+    public static String getAppFolder() { return appFolder; }
 
     /**
      * Получить название приложения
      * @return название приложения
      * */
-    public static String getAppName() {return APP_NAME;}
+    public static String getAppName() {return appName;}
+
+    // Приватные методы
 
     /**
      * Создать директорию приложения, если она ещё не создана
@@ -103,7 +124,7 @@ public class AppContext
     private static String createAppFolder()
     {
         String userFolder = System.getProperty("user.home");
-        String path = FileSystemUtils.adjustPath(userFolder, APP_NAME);
+        String path = FileSystemUtils.adjustPath(userFolder, appName);
 
         if (!FileSystemUtils.isExist(path))
             FileSystemUtils.createDir(path);

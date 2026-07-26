@@ -1,15 +1,16 @@
 package controllers;
 
+import java.net.URL;
+import java.util.ResourceBundle;
+
+import app.AppContext;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.layout.BorderPane;
 import models.SettingKeys;
 import utils.FileSystemController;
-import utils.settingsUtils.FileSystemSettingsHelper;
-import utils.settingsUtils.SettingsUtils;
-import widgets.*;
-import javafx.fxml.Initializable;
-import java.net.URL;
-import java.util.ResourceBundle;
+import widgets.ControlPanel;
+import widgets.Panel;
 
 
 /**
@@ -29,21 +30,21 @@ public class MainController implements Initializable
     public void initialize(URL url, ResourceBundle bundle)
     {
         // Создаём экземпляры файловых систем
-        String leftPath = SettingsUtils.get(SettingKeys.LastDirectory.LEFT);
-        String rightPath = SettingsUtils.get(SettingKeys.LastDirectory.RIGHT);
+        String leftPath = AppContext.getSettings().get(SettingKeys.LastDirectory.LEFT);
+        String rightPath = AppContext.getSettings().get(SettingKeys.LastDirectory.RIGHT);
         String leftFileSystemID = FileSystemController.create(leftPath == null ? "" : leftPath);
         String rightFileSystemID = FileSystemController.create(rightPath == null ? "" : rightPath);
 
         // устанавливаем связь между UUID файловой системы и ключом в настройках
-        FileSystemSettingsHelper.setFileSystemSettingsKey(leftFileSystemID, SettingKeys.LastDirectory.LEFT);
-        FileSystemSettingsHelper.setFileSystemSettingsKey(rightFileSystemID, SettingKeys.LastDirectory.RIGHT);
+        AppContext.getSettingsHelper().setFileSystemSettingsKey(leftFileSystemID, SettingKeys.LastDirectory.LEFT);
+        AppContext.getSettingsHelper().setFileSystemSettingsKey(rightFileSystemID, SettingKeys.LastDirectory.RIGHT);
 
         // настраиваем левую часть окна
         leftContainer.setTop(new ControlPanel(leftFileSystemID));
-        leftContainer.setCenter(new Panel(leftFileSystemID));
+        leftContainer.setCenter(new Panel(leftFileSystemID, AppContext.getSettingsHelper()));
 
         // настраиваем правую часть окна
         rightContainer.setTop(new ControlPanel(rightFileSystemID));
-        rightContainer.setCenter(new Panel(rightFileSystemID));
+        rightContainer.setCenter(new Panel(rightFileSystemID, AppContext.getSettingsHelper()));
     }
 }

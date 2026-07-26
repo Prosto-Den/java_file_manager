@@ -29,4 +29,9 @@
     <entry key="settings.linux.title">Linux settings</entry>
     <entry key="settings.linux.used_terminal">Used terminal:</entry>
     <entry key="settings.linux.open_command">Open command:</entry>
+
+
+    <entry key="error.load_user_settings">Loading user settings failed. Applying default settings</entry>
+    <entry key="error.save_user_settings">Failed to save settings</entry>
+    <entry key="error.load_default_settings">Failed to load default settings</entry>
 </properties>

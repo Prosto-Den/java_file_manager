@@ -30,4 +30,8 @@ public class StringKeys
     public static final String SETTINGS_LINUX_TITLE = "settings.linux.title";
     public static final String SETTINGS_LINUX_USED_TERMINAL = "settings.linux.used_terminal";
     public static final String SETTINGS_LINUX_OPEN_COMMAND = "settings.linux.open_command";
+
+    public static final String ERROR_LOAD_USER_SETTINGS = "error.load_user_settings";
+    public static final String ERROR_SAVE_USER_SETTINGS = "error.save_user_settings";
+    public static final String ERROR_LOAD_DEFAULT_SETTINGS = "error.load_default_settings";
 }
