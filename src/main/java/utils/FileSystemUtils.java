@@ -154,12 +154,34 @@ public class FileSystemUtils
     {
         boolean res = false;
 
-        File file = new File(filePath);
-
-        if (Desktop.isDesktopSupported())
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.MOVE_TO_TRASH))
+        {
+                
+            File file = new File(filePath);
             res = Desktop.getDesktop().moveToTrash(file);
+        }
+        else
+            res = moveToTrashViaGio(filePath);
 
         return res;
+    }
+
+    public static boolean moveToTrashViaGio(String filePath)
+    {
+        boolean result = false;
+
+        try
+        {
+            Process process = new ProcessBuilder("gio", "trash", filePath).start();
+            int exitCode = process.waitFor();
+            result = exitCode == 0;
+        }
+        catch (IOException | InterruptedException ex)
+        {
+            // TODO сюда логгирование
+        }
+
+        return result;
     }
 
     public static void copyToClipboard(String path)
