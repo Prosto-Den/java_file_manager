@@ -19,6 +19,7 @@ import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import types.OSType;
+import utils.ClipboardUtil;
 import utils.FileSystemController;
 import utils.FileSystemUtils;
 import widgets.interfaces.ITranslatable;
@@ -74,7 +75,7 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
      * */
     public void onInsertItemClick()
     {
-        FileSystemUtils.insert(currentPathField.getText());
+        ClipboardUtil.insert(currentPathField.getText());
         EventBus.publish(new InsertButtonClickedEvent());
     }
 
@@ -90,7 +91,7 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
             createButton.setGraphic(addImage);
         }
 
-        showDiskControlsVisibility(FileSystemUtils.checkOS(OSType.WINDOWS));
+        showDiskControlsVisibility(OSType.is(OSType.WINDOWS));
 
         insertButton.setDisable(true);
         EventBus.subscribe(ClipboardEvent.class, event -> {
@@ -119,7 +120,7 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
      * */
     private void updateDiskCombo()
     {
-        if (FileSystemUtils.checkOS(OSType.WINDOWS))
+        if (OSType.is(OSType.WINDOWS))
         {
             diskComboBox.setItems(FXCollections.observableArrayList(FileSystemUtils.getLogicalDrives()));
             diskComboBox.setValue(diskComboBox.getItems().getFirst());

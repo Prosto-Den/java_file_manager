@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import java.util.List;
 
+import app.AppContext;
 import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
@@ -181,7 +182,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
                 refreshTable();
             }
             else
-                getFileSystem().openFile(fileName);
+                AppContext.getIntegrationService().openFile(fileName);
         }
     }
 

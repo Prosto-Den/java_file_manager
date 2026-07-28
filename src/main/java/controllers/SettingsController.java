@@ -15,7 +15,6 @@ import models.StringKeys;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import types.OSType;
-import utils.FileSystemUtils;
 import utils.LanguageManager;
 
 import java.net.URL;
@@ -107,7 +106,7 @@ public class SettingsController implements Initializable, ITranslatable
         localeBox.setItems(FXCollections.observableArrayList(this.languageManager.getAvailableLanguages()));
         localeBox.setValue(this.languageManager.getCurrentLanguage());
 
-        if (FileSystemUtils.checkOS(OSType.LINUX))
+        if (OSType.is(OSType.LINUX))
         {
             configureLinuxControls();
         }
@@ -142,7 +141,7 @@ public class SettingsController implements Initializable, ITranslatable
             ResourceHandler.setLocale(value.toLocale());
 
         // сохраняем настройки Linux
-        if (FileSystemUtils.checkOS(OSType.LINUX))
+        if (OSType.is(OSType.LINUX))
         {
             // сохраняем используемый терминал и команду открытия
             String linuxTerminal = terminalTextField.getText();

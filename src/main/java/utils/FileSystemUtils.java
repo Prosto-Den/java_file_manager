@@ -57,26 +57,6 @@ public class FileSystemUtils
     }
 
     /**
-     * Проверить тип операционной системы
-     * @param type тип ОС
-     * @return True, если переданный тип совпадает с типом ОС компьютера, иначе False
-     * */
-    public static boolean checkOS(OSType type) { return osType.equals(type); }
-
-    // TODO после вызова метода могут возникать ошибки, нужно реализовать возврат кода ошибки,
-    //  чтобы потом можно было показывать диалоговые окна с предупреждением
-    /**
-     * Открыть файл соответствующей программой на ПК
-     * @param filePath путь к файлу
-     * @return код ошибки
-     * */
-    public static FileSystemErrors openFile(String filePath)
-    {
-        // логику работы с открытием файла вынес в отдельную утилиту, так как там много нюансов
-        return FileOpener.openFile(osType, filePath);
-    }
-
-    /**
      * Получить дату последнего изменения файла
      * */
     public static String lastModifiedDate(String filePath)
@@ -152,93 +132,12 @@ public class FileSystemUtils
         else
             return deleteRecursively(path);
     }
+    
+    
 
-    // TODO проверить на директориях
-    /**
-     * Переместить файл (директорию) в корзину
-     * @param filePath путь к файлу(директории)
-     * @return true если перемещенеи в корзину прошло успешно, иначе false
-     */
-    public static boolean moveToTrash(String filePath)
-    {
-        boolean res = false;
+    
 
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.MOVE_TO_TRASH))
-        {
-                
-            File file = new File(filePath);
-            res = Desktop.getDesktop().moveToTrash(file);
-        }
-        else
-            res = moveToTrashViaGio(filePath);
-
-        return res;
-    }
-
-    // TODO а есть ли ещё варианты переместить файл в корзину? Возможно, стоит вынести это в настройки
-    /**
-     * Переместить файл (директорию) в коризину посредством gio. Актуально для Arch Linux
-     * @param filePath
-     * @return
-     */
-    public static boolean moveToTrashViaGio(String filePath)
-    {
-        boolean result = false;
-
-        try
-        {
-            Process process = new ProcessBuilder("gio", "trash", filePath).start();
-            int exitCode = process.waitFor();
-            result = exitCode == 0;
-        }
-        catch (IOException | InterruptedException ex)
-        {
-            // TODO сюда логгирование
-        }
-
-        return result;
-    }
-
-    public static void copyToClipboard(String path)
-    {
-        File file = new File(path);
-        Clipboard clipboard = Clipboard.getSystemClipboard();
-        ClipboardContent content = new ClipboardContent();
-
-        content.putFiles(Collections.singletonList(file));
-        clipboard.setContent(content);
-    }
-
-    public static boolean isClipBoardEmpty()
-    {
-        Clipboard clipboard = Clipboard.getSystemClipboard();
-
-        return !clipboard.hasFiles();
-    }
-
-    public static void insert(String path)
-    {
-        Clipboard clipboard = Clipboard.getSystemClipboard();
-
-        if (clipboard.hasFiles())
-        {
-            List<File> files = clipboard.getFiles();
-
-            for (File file : files)
-            {
-                File destFile = new File(FileSystemUtils.adjustPath(path, file.getName()));
-
-                try
-                {
-                    Files.copy(file.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }
-                catch (IOException ex)
-                {
-                    System.err.println("gneg :)");
-                }
-            }
-        }
-    }
+    
 
     public static boolean createDir(String path)
     {
@@ -279,6 +178,7 @@ public class FileSystemUtils
      * Определить операционную систему. Пока все ОС делятся на Windows и Linux (всё что не Windows, то Linux)
      * @return Тип ОС
      * */
+    // TODO как будто тоже должно быть не тут
     private static OSType calcOSType()
     {
         String osName = System.getProperty("os.name");
@@ -298,8 +198,8 @@ public class FileSystemUtils
         return "/";
     }
 
-    //TODO подозреваю, что директории с большим количеством файлов будут удаляться долго, поэтому думаю, что
-    // удаление всего надо вынести в отдельный поток + создать окно с индикацией удаления
+    //TODO директории с большим количеством файлов будут удаляться долго, поэтому
+    // удаление надо вынести в отдельный поток + создать окно с индикацией удаления
     private static boolean deleteRecursively(String rawPath)
     {
         boolean res = false;

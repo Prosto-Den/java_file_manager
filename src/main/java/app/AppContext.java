@@ -10,8 +10,10 @@ import java.io.IOException;
 import javafx.fxml.FXMLLoader;
 import models.StringKeys;
 import resourceHandler.ResourceHandler;
+import types.OSType;
 import utils.FileSystemUtils;
 import utils.LanguageManager;
+import utils.OSIntegrationService;
 import utils.settingsUtils.FileSystemSettingsHelper;
 import utils.settingsUtils.SettingsManager;
 
@@ -27,6 +29,7 @@ public final class AppContext
     private static SettingsManager settingsManager;
     private static FileSystemSettingsHelper settingsHelper;
     private static LanguageManager languageManager;
+    private static OSIntegrationService integrationService;
 
     /**
      * Выполнить первичную инициализацию для приложения. Будет определено главное окно приложения, загружены настройки,
@@ -43,6 +46,7 @@ public final class AppContext
         settingsManager = new SettingsManager(settingsPath);
         settingsHelper = new FileSystemSettingsHelper(settingsManager);
         languageManager = new LanguageManager(settingsManager);
+        integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager);
     }
 
     /**
@@ -63,6 +67,11 @@ public final class AppContext
      */
     public static LanguageManager getLanguageManager() { return languageManager; }
 
+    /**
+     * Выдать сервис интергации с ОС
+     * @return сервис интеграции
+     */
+    public static OSIntegrationService getIntegrationService() { return integrationService; }
 
     // TODO нужно создать отдельный класс для работы с модальными окнами, в этом классе хранить его экземпляр,
     //  а в этом методы просто вызывать нужный метод из созданного класса
