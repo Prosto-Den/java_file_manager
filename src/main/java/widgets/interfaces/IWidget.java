@@ -2,10 +2,11 @@ package widgets.interfaces;
 
 
 import javafx.fxml.FXMLLoader;
-import resourceHandler.ResourceHandler;
 
 import java.io.IOException;
 import java.net.URL;
+
+import app.AppContext;
 
 /**
  * Интерфейс для создания кастомных виджетов
@@ -19,7 +20,7 @@ public interface IWidget
      * */
     default void load(URL url) throws RuntimeException
     {
-        FXMLLoader loader = new FXMLLoader(url, ResourceHandler.getStringBundle());
+        FXMLLoader loader = new FXMLLoader(url, AppContext.getLanguageManager().getBundle());
         loader.setRoot(this);
         loader.setController(this);
 

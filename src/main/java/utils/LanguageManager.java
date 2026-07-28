@@ -15,12 +15,25 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import resourceHandler.ResourceHandler;
+import java.util.ResourceBundle;
+
+import resourceHandler.StringResourceBundleControl;
 
 
 public class LanguageManager
 {
+    // хранилище строковых ресурсов
+    private static ResourceBundle bundle;
+    // контроллер для хранилища строковых ресурсов
+    private static final StringResourceBundleControl control = new StringResourceBundleControl();
+    // текущая локаль (в виде property)
+    private static Locale currentLocale;
+    // значение локали по умолчанию
+    private static final Locale DEFAULT_LOCALE = Locale.of("en", "US");
+    private static final String STRINGS_BASENAME = "strings";
+
     private List<Language> languages;
     private Language currentLanguage;
     private final SettingsManager settingsManager;
@@ -37,9 +50,25 @@ public class LanguageManager
     {
         String langCode = settingsManager.get(SettingKeys.LOCALE);
         if (langCode != null)
-            setCurrentLanguage(langCode);
+            this.currentLanguage = getLanguageByCode(langCode);
         else
-            setCurrentLanguage(languages.isEmpty() ? null : languages.getFirst());
+            this.currentLanguage = languages.isEmpty() ? null : languages.getFirst();
+
+        loadBundle();
+    }
+
+    private void loadBundle()
+    {
+        if (currentLanguage != null)
+        {
+            currentLocale = currentLanguage.toLocale();
+            bundle = ResourceBundle.getBundle(STRINGS_BASENAME, currentLocale, control);
+        }
+        else
+        {
+            currentLocale = DEFAULT_LOCALE;
+            bundle = ResourceBundle.getBundle(STRINGS_BASENAME, DEFAULT_LOCALE, control);
+        }
     }
 
     public Language getLanguageByCode(String code)
@@ -53,7 +82,7 @@ public class LanguageManager
     public void setCurrentLanguage(Language language)
     {
         this.currentLanguage = language;
-        ResourceHandler.setLocale(language.toLocale());
+        loadBundle();
         EventBus.publish(new LocaleChangedEvent());
     }
 
@@ -68,6 +97,22 @@ public class LanguageManager
     {
         return Collections.unmodifiableList(languages);
     }
+
+    public String getString(String key)
+    {
+        if (bundle != null && bundle.containsKey(key))
+            return bundle.getString(key);
+        // на случай, если перевода не окажется
+        return "!" + key + "!";
+    }
+
+    public String getString(String key, Object... args)
+    {
+        String pattern = getString(key);
+        return String.format(pattern, args);
+    }
+
+    public ResourceBundle getBundle() { return bundle; }
 
     private void loadLanguages()
     {

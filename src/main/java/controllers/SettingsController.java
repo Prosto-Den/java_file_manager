@@ -20,6 +20,7 @@ import utils.LanguageManager;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import app.AppContext;
 import javafx.scene.image.ImageView;
 import utils.settingsUtils.SettingsManager;
 import widgets.interfaces.ITranslatable;
@@ -138,7 +139,7 @@ public class SettingsController implements Initializable, ITranslatable
         // сохраняем локаль
         Language value = localeBox.getValue();
         if (settingsManager.set(SettingKeys.LOCALE, value.code()))
-            ResourceHandler.setLocale(value.toLocale());
+            languageManager.setCurrentLanguage(value);
 
         // сохраняем настройки Linux
         if (OSType.is(OSType.LINUX))
@@ -160,19 +161,21 @@ public class SettingsController implements Initializable, ITranslatable
         if (dialogStage != null)
             dialogStage.close();
         settingsManager.rollbackEdit();
+        // пересохраняем текущую локаль, чтобы сбросить изменения
+        languageManager.setCurrentLanguage(settingsManager.get(SettingKeys.LOCALE));
     }
 
     @Override
     public void updateText()
     {
-        languageLabel.setText(ResourceHandler.getString(StringKeys.SETTINGS_LANGUAGE_LABEL));
-        saveButton.setText(ResourceHandler.getString(StringKeys.SETTINGS_BUTTON_SAVE));
-        applyButton.setText(ResourceHandler.getString(StringKeys.SETTINGS_BUTTON_APPLY));
-        cancelButton.setText(ResourceHandler.getString(StringKeys.SETTINGS_BUTTON_CANCEL));
-        languageSettingsTitle.setText(ResourceHandler.getString(StringKeys.SETTINGS_LANGUAGE_TITLE));
-        linuxSettingsTitle.setText(ResourceHandler.getString(StringKeys.SETTINGS_LINUX_TITLE));
-        linuxUsedTerminalLabel.setText(ResourceHandler.getString(StringKeys.SETTINGS_LINUX_USED_TERMINAL));
-        linuxOpenCommandLabel.setText(ResourceHandler.getString(StringKeys.SETTINGS_LINUX_OPEN_COMMAND));
+        languageLabel.setText(AppContext.getLanguageManager().getString(StringKeys.SETTINGS_LANGUAGE_LABEL));
+        saveButton.setText(AppContext.getLanguageManager().getString(StringKeys.SETTINGS_BUTTON_SAVE));
+        applyButton.setText(AppContext.getLanguageManager().getString(StringKeys.SETTINGS_BUTTON_APPLY));
+        cancelButton.setText(AppContext.getLanguageManager().getString(StringKeys.SETTINGS_BUTTON_CANCEL));
+        languageSettingsTitle.setText(AppContext.getLanguageManager().getString(StringKeys.SETTINGS_LANGUAGE_TITLE));
+        linuxSettingsTitle.setText(AppContext.getLanguageManager().getString(StringKeys.SETTINGS_LINUX_TITLE));
+        linuxUsedTerminalLabel.setText(AppContext.getLanguageManager().getString(StringKeys.SETTINGS_LINUX_USED_TERMINAL));
+        linuxOpenCommandLabel.setText(AppContext.getLanguageManager().getString(StringKeys.SETTINGS_LINUX_OPEN_COMMAND));
     }
 
     // Приватные методы

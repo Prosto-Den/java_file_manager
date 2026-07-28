@@ -199,7 +199,7 @@ public class ContextMenuManager
         if (panelMenuTemplate == null)
         {
             FXMLLoader loader = new FXMLLoader(ResourceHandler.getLayout("ContextMenu.fxml"),
-                    ResourceHandler.getStringBundle());
+                    AppContext.getLanguageManager().getBundle());
             try
             {
                 panelMenuTemplate = loader.load();

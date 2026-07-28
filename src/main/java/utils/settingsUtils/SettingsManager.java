@@ -37,7 +37,7 @@ public class SettingsManager
             }
             catch (IOException ex)
             {
-                System.err.println(ResourceHandler.getString(StringKeys.ERROR_LOAD_USER_SETTINGS));
+                System.err.println("Не удалось загрузить пользовательские настройки из файла");
                 loadDefaultSettings();
             }
         }
@@ -59,7 +59,7 @@ public class SettingsManager
         }
         catch (IOException ex)
         {
-            System.err.println(ResourceHandler.getString(StringKeys.ERROR_SAVE_USER_SETTINGS));
+            System.err.println("Не удалось сохранить пользовательские настройки в файл");
         }
     }
 
@@ -139,7 +139,7 @@ public class SettingsManager
         catch (IOException ex)
         {
             // маловероятно, но пускай будет
-            System.err.println(ResourceHandler.getString(StringKeys.ERROR_LOAD_DEFAULT_SETTINGS));
+            System.err.println("Не удалось загрузить настройки по умолчанию");
         }
     }
 }

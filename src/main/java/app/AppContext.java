@@ -39,13 +39,13 @@ public final class AppContext
     public static void init(Stage stage)
     {
         mainStage = stage;
-        appName = ResourceHandler.getString(StringKeys.TITLE);
         appFolder = createAppFolder();
         
         String settingsPath = FileSystemUtils.adjustPath(appFolder, "user_settings.properties");
         settingsManager = new SettingsManager(settingsPath);
         settingsHelper = new FileSystemSettingsHelper(settingsManager);
         languageManager = new LanguageManager(settingsManager);
+        appName = languageManager.getString(StringKeys.TITLE);
         integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager);
     }
 
@@ -91,12 +91,12 @@ public final class AppContext
             try
             {
                 FXMLLoader settingsLoader = new FXMLLoader(ResourceHandler.getLayout("SettingsLayout.fxml"),
-                        ResourceHandler.getStringBundle());
+                        languageManager.getBundle());
                 Parent root = settingsLoader.load();
                 
                 Scene scene = new Scene(root);
                 settingsStage.setScene(scene);
-                settingsStage.setTitle(ResourceHandler.getString(StringKeys.SETTINGS_TITLE));
+                settingsStage.setTitle(languageManager.getString(StringKeys.SETTINGS_TITLE));
                 
                 SettingsController controller = settingsLoader.getController();
                 controller.init(settingsStage, settingsManager, languageManager);

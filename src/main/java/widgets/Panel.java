@@ -92,7 +92,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
                     String fileName = file.getNameValue();
                     Image icon;
 
-                    if (fileName.equals(ResourceHandler.getString(StringKeys.FILEVIEWER_ROW_BACK)))
+                    if (fileName.equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
                         icon = ResourceHandler.getIcon(IconSize.BIG, IconName.BACK);
                     else
                     {
@@ -129,7 +129,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
                 {
                     super.updateItem(item, empty);
 
-                    if (empty || item == null || item.getNameValue().equals(ResourceHandler
+                    if (empty || item == null || item.getNameValue().equals(AppContext.getLanguageManager()
                             .getString(StringKeys.FILEVIEWER_ROW_BACK)))
                     {
                         // TODO после реализации контекстного меню для пустого места поменять
@@ -230,9 +230,9 @@ public class Panel extends VBox implements IWidget, ITranslatable
     @Override
     public void updateText()
     {
-        fileNameColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILENAME));
-        fileSizeColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILE_SIZE));
-        fileEditDateColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
+        fileNameColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_FILENAME));
+        fileSizeColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_FILE_SIZE));
+        fileEditDateColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
     }
 
     // Приватные методы
