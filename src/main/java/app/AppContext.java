@@ -9,6 +9,7 @@ import utils.i18n.LanguageManager;
 import utils.platform.OSIntegrationService;
 import utils.settings.FileSystemSettingsHelper;
 import utils.settings.SettingsManager;
+import utils.ui.WindowManager;
 
 
 /**
