@@ -15,14 +15,14 @@ import models.StringKeys;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import types.OSType;
-import utils.LanguageManager;
+import utils.i18n.LanguageManager;
+import utils.settings.SettingsManager;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
 import app.AppContext;
 import javafx.scene.image.ImageView;
-import utils.settingsUtils.SettingsManager;
 import widgets.interfaces.ITranslatable;
 
 

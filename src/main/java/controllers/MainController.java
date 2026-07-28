@@ -8,7 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.BorderPane;
 import models.SettingKeys;
-import utils.FileSystemController;
+import utils.filesystem.FileSystemController;
 import widgets.ControlPanel;
 import widgets.Panel;
 

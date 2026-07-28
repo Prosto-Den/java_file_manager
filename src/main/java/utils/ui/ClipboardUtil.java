@@ -1,4 +1,4 @@
-package utils;
+package utils.ui;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +9,7 @@ import java.util.List;
 
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import utils.filesystem.FileSystemUtils;
 
 /**
  * Утилитный класс для работы с буфером обмена
@@ -17,8 +18,6 @@ public class ClipboardUtil
 {
     private static final Clipboard clipboard = Clipboard.getSystemClipboard();
 
-    // TODO проверить на директории
-    // TODO реализовать возможность записи нескольких файлов
     /**
      * Скопировать содержимое в буфер обмена
      * @param path - путь к файлу

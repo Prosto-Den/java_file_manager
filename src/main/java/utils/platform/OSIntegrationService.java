@@ -1,4 +1,4 @@
-package utils;
+package utils.platform;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,9 +9,9 @@ import java.awt.Desktop;
 import models.SettingKeys;
 import types.FileSystemErrors;
 import types.OSType;
-import utils.settingsUtils.SettingsManager;
+import utils.settings.SettingsManager;
 
-public class OSIntegrationService 
+public class OSIntegrationService
 {
     private final SettingsManager settings;
     private final OSType osType;
@@ -33,17 +33,14 @@ public class OSIntegrationService
     {
         File file = new File(path);
 
-        // сначала проверяем, что файл существует и вообще является файлом
         if (!file.exists())
             return FileSystemErrors.FILE_NOT_FOUND;
 
         if (!file.isFile())
             return FileSystemErrors.NOT_A_FILE;
 
-        // потом пробуем открыть файл системными средствами
         FileSystemErrors res = openSystemCommands(osType, path);
 
-        // если не получилось, пробуем java.awt.Desktop
         if (res != FileSystemErrors.OK)
             res = openDesktop(file);
 
@@ -61,7 +58,6 @@ public class OSIntegrationService
 
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.MOVE_TO_TRASH))
         {
-                
             File file = new File(filePath);
             res = Desktop.getDesktop().moveToTrash(file);
         }
@@ -71,7 +67,6 @@ public class OSIntegrationService
         return res;
     }
 
-    // TODO вынести команду для перемещения в корзину в файл настроек
     /**
      * Переместить файл (директорию) в корзину посредством gio. Актуально для Arch Linux
      * @param filePath - путь к файлу
@@ -89,21 +84,11 @@ public class OSIntegrationService
         }
         catch (IOException | InterruptedException ex)
         {
-            // TODO сюда логгирование
         }
 
         return result;
     }
 
-    // Приватные методы
-
-    // TODO необходимы тесты на Linux
-    /**
-     * Открытие файла средствами операционной системы
-     * @param osType тип операционной системы
-     * @param path путь к файлу
-     * @return код ошибки открытия файла
-     * */
     private FileSystemErrors openSystemCommands(OSType osType, String path)
     {
         FileSystemErrors res = FileSystemErrors.UNKNOWN_ERROR;
@@ -117,13 +102,6 @@ public class OSIntegrationService
         return res;
     }
 
-    // TODO в будущем команд может стать больше, нужно создать отдельную утилиту для их запуска
-    /**
-     * Запустить команду на выполнение
-     * @param command команда
-     * @param arg аргумент команды
-     * @return код ошибки открытия файла
-     * */
     private FileSystemErrors runCommand(String command, String arg)
     {
         FileSystemErrors result = FileSystemErrors.UNKNOWN_ERROR;
@@ -131,7 +109,6 @@ public class OSIntegrationService
         try
         {
             ProcessBuilder processBuilder = new ProcessBuilder(prepareCommand(command, arg));
-            // TODO сюда добавить редирект ошибок в логи
             processBuilder.redirectErrorStream(true);
 
             Process proc = processBuilder.start();
@@ -152,58 +129,20 @@ public class OSIntegrationService
         {
             ex.printStackTrace();
         }
-        
+
         return result;
-
-        // String[] commandParts = prepareCommand(command, arg);
-        // Runtime rt = Runtime.getRuntime();
-        // FileSystemErrors res;
-
-        // try
-        // {
-        //     Process proc = rt.exec(commandParts);
-
-        //     try
-        //     {
-        //         proc.exitValue();
-        //         res = FileSystemErrors.PROCESS_CLOSE_ERROR;
-        //     }
-        //     catch (IllegalThreadStateException ex) // если поймали такое исключение, значит процесс
-        //     // не закрылся сразу после создания - хороший знак
-        //     {
-        //         res = FileSystemErrors.OK;
-        //     }
-        // }
-        // catch (IOException ex)
-        // {
-        //     res = FileSystemErrors.PROCESS_IO_ERROR;
-        // }
-
-        // return res;
     }
 
-    /**
-     * Подготовить команду к выполнению
-     * @param command команда
-     * @param arg аргумент команды
-     * @return команду, разделённую по словам
-     * */
     private String[] prepareCommand(String command, String arg)
     {
         String readyCommand = String.format(command, arg);
         return readyCommand.split(" ");
     }
 
-    /**
-     * Открыть файл с помощью DesktopAPI
-     * @param file объект открываемого файла
-     * @return код ошибки открытия файла
-     * */
     private FileSystemErrors openDesktop(File file)
     {
         if (!Desktop.isDesktopSupported())
         {
-            //TODO добавить логгер
             System.err.println("Desktop API не поддерживается на данной системе");
             return FileSystemErrors.DESKTOP_NOT_SUPPORTED;
         }

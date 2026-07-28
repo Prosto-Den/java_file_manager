@@ -1,9 +1,7 @@
-package utils;
-
+package utils.i18n;
 
 import models.Language;
 import models.SettingKeys;
-import utils.settingsUtils.SettingsManager;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -20,7 +18,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import resourceHandler.StringResourceBundleControl;
-
+import utils.settings.SettingsManager;
 
 public class LanguageManager
 {
@@ -40,12 +38,12 @@ public class LanguageManager
     private final String LANGUAGES_FILE = "/languages.yaml";
 
     public LanguageManager(SettingsManager settingsManager)
-    {   
+    {
         this.settingsManager = settingsManager;
         loadLanguages();
         initCurrentLanguage();
     }
-    
+
     private void initCurrentLanguage()
     {
         String langCode = settingsManager.get(SettingKeys.LOCALE);
@@ -102,7 +100,6 @@ public class LanguageManager
     {
         if (bundle != null && bundle.containsKey(key))
             return bundle.getString(key);
-        // на случай, если перевода не окажется
         return "!" + key + "!";
     }
 
@@ -133,9 +130,4 @@ public class LanguageManager
             System.err.println("123");
         }
     }
-
-//    private void notifyLanguageChanged()
-//    {
-//        EventBus.publish(new LanguageChangedEvent(currentLanguage));
-//    }
 }

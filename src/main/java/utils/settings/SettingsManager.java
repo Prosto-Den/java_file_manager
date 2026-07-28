@@ -1,9 +1,7 @@
-package utils.settingsUtils;
+package utils.settings;
 
 
-import models.StringKeys;
-import resourceHandler.ResourceHandler;
-import utils.FileSystemUtils;
+import utils.filesystem.FileSystemUtils;
 
 import java.io.*;
 import java.util.Properties;

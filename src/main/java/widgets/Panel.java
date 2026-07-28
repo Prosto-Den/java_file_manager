@@ -18,12 +18,13 @@ import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
-import utils.*;
+import utils.settings.FileSystemSettingsHelper;
+import utils.ui.ContextMenuManager;
 import models.FileData;
-import utils.settingsUtils.FileSystemSettingsHelper;
 import widgets.interfaces.IWidget;
 import widgets.interfaces.ITranslatable;
 
+import utils.filesystem.*;
 
 /**
  * Класс панели. Отображает содержимое директории

@@ -1,21 +1,14 @@
 package app;
 
 
-import controllers.SettingsController;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import java.io.IOException;
-import javafx.fxml.FXMLLoader;
 import models.StringKeys;
-import resourceHandler.ResourceHandler;
 import types.OSType;
-import utils.FileSystemUtils;
-import utils.LanguageManager;
-import utils.OSIntegrationService;
-import utils.settingsUtils.FileSystemSettingsHelper;
-import utils.settingsUtils.SettingsManager;
+import utils.filesystem.FileSystemUtils;
+import utils.i18n.LanguageManager;
+import utils.platform.OSIntegrationService;
+import utils.settings.FileSystemSettingsHelper;
+import utils.settings.SettingsManager;
 
 
 /**
@@ -23,13 +16,13 @@ import utils.settingsUtils.SettingsManager;
  * */
 public final class AppContext
 {
-    private static Stage mainStage; // главное окно приложения
     private static String appName; // название приложения
     private static String appFolder;// папка приложения
     private static SettingsManager settingsManager;
     private static FileSystemSettingsHelper settingsHelper;
     private static LanguageManager languageManager;
     private static OSIntegrationService integrationService;
+    private static WindowManager windowManager;
 
     /**
      * Выполнить первичную инициализацию для приложения. Будет определено главное окно приложения, загружены настройки,
@@ -38,7 +31,6 @@ public final class AppContext
      * */
     public static void init(Stage stage)
     {
-        mainStage = stage;
         appFolder = createAppFolder();
         
         String settingsPath = FileSystemUtils.adjustPath(appFolder, "user_settings.properties");
@@ -47,6 +39,7 @@ public final class AppContext
         languageManager = new LanguageManager(settingsManager);
         appName = languageManager.getString(StringKeys.TITLE);
         integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager);
+        windowManager = new WindowManager(stage, settingsManager, languageManager);
     }
 
     /**
@@ -73,41 +66,14 @@ public final class AppContext
      */
     public static OSIntegrationService getIntegrationService() { return integrationService; }
 
-    // TODO нужно создать отдельный класс для работы с модальными окнами, в этом классе хранить его экземпляр,
-    //  а в этом методы просто вызывать нужный метод из созданного класса
     /**
-     * Создать окно для работы с настройками приложения
+     * Создать окно для работы с настройками приложения.
+     *
      * @return окно для работы с настройками
-     * */
+     */
     public static Stage getSettingsStage()
     {
-        Stage settingsStage = new Stage();
-
-        if (mainStage != null)
-        {
-            settingsStage.initModality(Modality.WINDOW_MODAL);
-            settingsStage.initOwner(mainStage);
-
-            try
-            {
-                FXMLLoader settingsLoader = new FXMLLoader(ResourceHandler.getLayout("SettingsLayout.fxml"),
-                        languageManager.getBundle());
-                Parent root = settingsLoader.load();
-                
-                Scene scene = new Scene(root);
-                settingsStage.setScene(scene);
-                settingsStage.setTitle(languageManager.getString(StringKeys.SETTINGS_TITLE));
-                
-                SettingsController controller = settingsLoader.getController();
-                controller.init(settingsStage, settingsManager, languageManager);
-            }
-            catch (IOException ex)
-            {
-                System.err.println("gnegli");
-            }
-        }
-
-        return settingsStage;
+        return windowManager.createSettingsStage();
     }
 
     /**

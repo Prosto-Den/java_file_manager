@@ -1,4 +1,4 @@
-package utils;
+package utils.filesystem;
 
 import types.OSType;
 import java.io.File;
@@ -9,7 +9,6 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Stream;
 
-
 //TODO некоторые утилиты не нужны для линукса. Возможно, стоит завезти отдельный класс WindowsFileSystemUtils?
 
 /**
@@ -18,7 +17,6 @@ import java.util.stream.Stream;
 public class FileSystemUtils
 {
     private static final OSType osType = calcOSType(); // тип ОС
-
 
     /**
      * Существует ли файл (директория) по этому пути
@@ -43,7 +41,7 @@ public class FileSystemUtils
         {
             for (char letter = 'A'; letter <= 'Z'; letter++)
             {
-                String path = String.format("%s:\\", letter);
+                String path = String.format("%s:", letter);
                 if (isExist(path))
                     logicalDrives.add(path);
             }
@@ -128,12 +126,6 @@ public class FileSystemUtils
         else
             return deleteRecursively(path);
     }
-    
-    
-
-    
-
-    
 
     public static boolean createDir(String path)
     {

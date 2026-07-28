@@ -20,9 +20,9 @@ import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import types.OSType;
-import utils.ClipboardUtil;
-import utils.FileSystemController;
-import utils.FileSystemUtils;
+import utils.filesystem.FileSystemController;
+import utils.filesystem.FileSystemUtils;
+import utils.ui.ClipboardUtil;
 import widgets.interfaces.ITranslatable;
 import widgets.interfaces.IWidget;
 

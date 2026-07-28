@@ -4,7 +4,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.image.Image;
-import utils.FileSystemUtils;
+import utils.filesystem.FileSystemUtils;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

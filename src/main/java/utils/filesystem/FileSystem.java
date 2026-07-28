@@ -1,13 +1,12 @@
-package utils;
+package utils.filesystem;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 import java.util.regex.Pattern;
 import javafx.beans.property.SimpleStringProperty;
-import types.OSType;
 import javafx.beans.property.StringProperty;
-
+import types.OSType;
 
 // TODO может быть статические методы всё-таки вынести в отдельную утилиту для удобства
 /**
@@ -27,6 +26,7 @@ public final class FileSystem
     {
         currentPath.setValue(FileSystemUtils.getDefaultPath());
     }
+
     /**
      * Конструктор с передачей пути, на который объект будет указывать после создания.
      * Если директории по такому пути не существует, будет указывать на корень (C:\ для Windows и / для Linux)
@@ -98,7 +98,7 @@ public final class FileSystem
      * */
     public void goForward(String filename)
     {
-       setCurrentPath(buildPath(filename));
+        setCurrentPath(buildPath(filename));
     }
 
     /**
