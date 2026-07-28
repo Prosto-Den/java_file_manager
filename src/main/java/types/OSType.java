@@ -4,8 +4,7 @@ package types;
 public enum OSType
 {
     WINDOWS,
-    LINUX,
-    UNKNOWN;
+    LINUX;
 
     private static OSType CURRENT_OS;
 
@@ -17,8 +16,6 @@ public enum OSType
             CURRENT_OS = WINDOWS;
         else if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix"))
             CURRENT_OS = LINUX;
-        else
-            CURRENT_OS = UNKNOWN;
     }
 
     /**

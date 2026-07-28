@@ -55,7 +55,7 @@ public class OSIntegrationService
      * @param filePath путь к файлу(директории)
      * @return true если перемещенеи в корзину прошло успешно, иначе false
      */
-    public static boolean moveToTrash(String filePath)
+    public boolean moveToTrash(String filePath)
     {
         boolean res = false;
 
@@ -77,7 +77,7 @@ public class OSIntegrationService
      * @param filePath - путь к файлу
      * @return true, если удалось переместить файл в корзину, иначе false
      */
-    public static boolean moveToTrashViaGio(String filePath)
+    public boolean moveToTrashViaGio(String filePath)
     {
         boolean result = false;
 
@@ -112,7 +112,6 @@ public class OSIntegrationService
         {
             case OSType.WINDOWS -> res = runCommand(WINDOWS_OPEN_COMMAND, path);
             case OSType.LINUX -> res = runCommand(settings.get(SettingKeys.LINUX_OPEN_COMMAND), path);
-            
         }
 
         return res;
@@ -125,7 +124,7 @@ public class OSIntegrationService
      * @param arg аргумент команды
      * @return код ошибки открытия файла
      * */
-    private static FileSystemErrors runCommand(String command, String arg)
+    private FileSystemErrors runCommand(String command, String arg)
     {
         FileSystemErrors result = FileSystemErrors.UNKNOWN_ERROR;
 
@@ -189,7 +188,7 @@ public class OSIntegrationService
      * @param arg аргумент команды
      * @return команду, разделённую по словам
      * */
-    private static String[] prepareCommand(String command, String arg)
+    private String[] prepareCommand(String command, String arg)
     {
         String readyCommand = String.format(command, arg);
         return readyCommand.split(" ");
@@ -200,7 +199,7 @@ public class OSIntegrationService
      * @param file объект открываемого файла
      * @return код ошибки открытия файла
      * */
-    private static FileSystemErrors openDesktop(File file)
+    private FileSystemErrors openDesktop(File file)
     {
         if (!Desktop.isDesktopSupported())
         {

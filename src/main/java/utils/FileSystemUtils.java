@@ -1,10 +1,6 @@
 package utils;
 
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import types.FileSystemErrors;
 import types.OSType;
-import java.awt.*;
 import java.io.File;
 import java.nio.file.*;
 import java.io.IOException;
