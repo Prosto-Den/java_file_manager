@@ -15,6 +15,7 @@ public class SettingsManager
     private final String settingsPath; // путь к настройкам пользователя
     private final Properties properties; // настройки
     private Properties bufferProperties = null; // временные настройки (для того, чтобы сразу не применять изменения с UI)
+    private static final String SETTINGS_PATH = "/settings/default_settings.properties";
 
     public SettingsManager(String settingsPath)
     {
@@ -131,7 +132,7 @@ public class SettingsManager
      */
     private void loadDefaultSettings()
     {
-        try (InputStream stream = ResourceHandler.getDefaultSettingsAsStream())
+        try (InputStream stream = getClass().getResourceAsStream(SETTINGS_PATH))
         {
             properties.load(stream);
         }

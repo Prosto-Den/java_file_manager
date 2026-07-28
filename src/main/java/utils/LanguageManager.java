@@ -6,12 +6,17 @@ import models.SettingKeys;
 import utils.settingsUtils.SettingsManager;
 
 import org.yaml.snakeyaml.Yaml;
+
+import events.EventBus;
+import events.LocaleChangedEvent;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import resourceHandler.ResourceHandler;
 
 
 public class LanguageManager
@@ -19,6 +24,7 @@ public class LanguageManager
     private List<Language> languages;
     private Language currentLanguage;
     private final SettingsManager settingsManager;
+    private final String LANGUAGES_FILE = "/languages.yaml";
 
     public LanguageManager(SettingsManager settingsManager)
     {   
@@ -31,9 +37,9 @@ public class LanguageManager
     {
         String langCode = settingsManager.get(SettingKeys.LOCALE);
         if (langCode != null)
-            this.currentLanguage = getLanguageByCode(langCode);
+            setCurrentLanguage(langCode);
         else
-            this.currentLanguage = languages.isEmpty() ? null : languages.getFirst();
+            setCurrentLanguage(languages.isEmpty() ? null : languages.getFirst());
     }
 
     public Language getLanguageByCode(String code)
@@ -47,6 +53,8 @@ public class LanguageManager
     public void setCurrentLanguage(Language language)
     {
         this.currentLanguage = language;
+        ResourceHandler.setLocale(language.toLocale());
+        EventBus.publish(new LocaleChangedEvent());
     }
 
     public void setCurrentLanguage(String code)
@@ -63,7 +71,7 @@ public class LanguageManager
 
     private void loadLanguages()
     {
-        try (InputStream stream = getClass().getResourceAsStream("/languages.yaml"))
+        try (InputStream stream = getClass().getResourceAsStream(LANGUAGES_FILE))
         {
             this.languages = new ArrayList<>();
             Yaml yaml = new Yaml();
