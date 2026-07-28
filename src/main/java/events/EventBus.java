@@ -35,9 +35,13 @@ public class EventBus
     {
         List<Consumer<?>> eventListeners = listeners.get(event.getClass());
         if (eventListeners != null) {
-            eventListeners.forEach(listener ->
-                    ((Consumer<T>) listener).accept(event)
-            );
+            eventListeners.forEach(listener -> callListener(listener, event));
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> void callListener(Consumer<?> listener, T event)
+    {
+        ((Consumer<T>) listener).accept(event);
     }
 }

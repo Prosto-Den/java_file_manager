@@ -12,18 +12,19 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import java.util.List;
-import java.util.Properties;
 
+import app.AppContext;
 import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
-import utils.*;
+import utils.settings.FileSystemSettingsHelper;
+import utils.ui.ContextMenuManager;
 import models.FileData;
-import utils.settingsUtils.FileSystemSettingsHelper;
 import widgets.interfaces.IWidget;
 import widgets.interfaces.ITranslatable;
 
+import utils.filesystem.*;
 
 /**
  * Класс панели. Отображает содержимое директории
@@ -40,6 +41,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
     private TableColumn<FileData, String> fileEditDateColumn; // дата последнего изменения файла
 
     private final String fileSystemID;
+    private final FileSystemSettingsHelper settingsHelper;
 
     /**
      * Конструктор
@@ -47,9 +49,10 @@ public class Panel extends VBox implements IWidget, ITranslatable
      *                     через FileSystemController. ВАЖНО!!! внутри конструктора нет проверки, что объект ФС
      *                     по этому ID существует, так что передавать нужно точно валидный ID
      * */
-    public Panel(String fileSystemId)
+    public Panel(String fileSystemId, FileSystemSettingsHelper helper)
     {
         fileSystemID = fileSystemId;
+        settingsHelper = helper;
 
         load(ResourceHandler.getLayout("Panel.fxml"));
         initUI();
@@ -90,7 +93,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
                     String fileName = file.getNameValue();
                     Image icon;
 
-                    if (fileName.equals(ResourceHandler.getString(StringKeys.FILEVIEWER_ROW_BACK)))
+                    if (fileName.equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
                         icon = ResourceHandler.getIcon(IconSize.BIG, IconName.BACK);
                     else
                     {
@@ -127,7 +130,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
                 {
                     super.updateItem(item, empty);
 
-                    if (empty || item == null || item.getNameValue().equals(ResourceHandler
+                    if (empty || item == null || item.getNameValue().equals(AppContext.getLanguageManager()
                             .getString(StringKeys.FILEVIEWER_ROW_BACK)))
                     {
                         // TODO после реализации контекстного меню для пустого места поменять
@@ -180,7 +183,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
                 refreshTable();
             }
             else
-                getFileSystem().openFile(fileName);
+                AppContext.getIntegrationService().openFile(fileName);
         }
     }
 
@@ -228,9 +231,9 @@ public class Panel extends VBox implements IWidget, ITranslatable
     @Override
     public void updateText()
     {
-        fileNameColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILENAME));
-        fileSizeColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_FILE_SIZE));
-        fileEditDateColumn.setText(ResourceHandler.getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
+        fileNameColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_FILENAME));
+        fileSizeColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_FILE_SIZE));
+        fileEditDateColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
     }
 
     // Приватные методы
@@ -250,7 +253,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
         if (getFileSystem() != null)
         {
             String currentPath = getFileSystem().getCurrentPath();
-            FileSystemSettingsHelper.setPath(fileSystemID, currentPath);
+            settingsHelper.setPath(fileSystemID, currentPath);
         }
     }
 }

@@ -1,4 +1,4 @@
-package utils.settingsUtils;
+package utils.settings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,15 @@ import java.util.Map;
 public class FileSystemSettingsHelper
 {
     // тут будем хранить связь UUID с путём
-    private static final Map<String, String> fileSystemsKeys = new HashMap<>();
+    private Map<String, String> fileSystemsKeys;
+    private final SettingsManager settingsManager;
+
+    public FileSystemSettingsHelper(SettingsManager settingsManager)
+    {
+        fileSystemsKeys = new HashMap<>();
+        this.settingsManager = settingsManager;
+    }
+
 
     /**
      * Установить связь между UUID файловой системой и ключом настроек, по которому хранится последняя открытая в этой
@@ -17,7 +25,7 @@ public class FileSystemSettingsHelper
      * @param uuid UUID файловой системы, для которой ключ из настроек
      * @param value ключ из настроек, по которому хранится последняя открытая директория
      * */
-    public static void setFileSystemSettingsKey(String uuid, String value)
+    public void setFileSystemSettingsKey(String uuid, String value)
     {
         fileSystemsKeys.put(uuid, value);
     }
@@ -27,8 +35,8 @@ public class FileSystemSettingsHelper
      * @param uuid UUID файловой системы, для которой нужно сохранить путь в настройках
      * @param path путь для сохранения
      * */
-    public static void setPath(String uuid, String path)
+    public void setPath(String uuid, String path)
     {
-        SettingsUtils.set(fileSystemsKeys.get(uuid), path);
+        settingsManager.set(fileSystemsKeys.get(uuid), path);
     }
 }

@@ -1,11 +1,6 @@
-package utils;
+package utils.filesystem;
 
-import app.AppContext;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import types.FileSystemErrors;
 import types.OSType;
-import java.awt.*;
 import java.io.File;
 import java.nio.file.*;
 import java.io.IOException;
@@ -13,7 +8,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Stream;
-
 
 //TODO некоторые утилиты не нужны для линукса. Возможно, стоит завезти отдельный класс WindowsFileSystemUtils?
 
@@ -47,33 +41,13 @@ public class FileSystemUtils
         {
             for (char letter = 'A'; letter <= 'Z'; letter++)
             {
-                String path = String.format("%s:\\", letter);
+                String path = String.format("%s:", letter);
                 if (isExist(path))
                     logicalDrives.add(path);
             }
         }
 
         return logicalDrives;
-    }
-
-    /**
-     * Проверить тип операционной системы
-     * @param type тип ОС
-     * @return True, если переданный тип совпадает с типом ОС компьютера, иначе False
-     * */
-    public static boolean checkOS(OSType type) { return osType.equals(type); }
-
-    // TODO после вызова метода могут возникать ошибки, нужно реализовать возврат кода ошибки,
-    //  чтобы потом можно было показывать диалоговые окна с предупреждением
-    /**
-     * Открыть файл соответствующей программой на ПК
-     * @param filePath путь к файлу
-     * @return код ошибки
-     * */
-    public static FileSystemErrors openFile(String filePath)
-    {
-        // логику работы с открытием файла вынес в отдельную утилиту, так как там много нюансов
-        return FileOpener.openFile(osType, filePath);
     }
 
     /**
@@ -140,89 +114,17 @@ public class FileSystemUtils
         return String.join(System.getProperty("file.separator"), path, filename);
     }
 
-
+    /**
+     * Удалить файл (директорию)
+     * @param path путь к файлу (директории)
+     * @return true если удаление прошло успешно, иначе false
+     */
     public static boolean delete(String path)
     {
         if (!isDir(path))
             return new File(path).delete();
         else
             return deleteRecursively(path);
-    }
-
-    //TODO на Linux корзины нет (не на всех рабочих столах). Нужно проверить, как эта функция себя поведёт
-    public static boolean moveToTrash(String filePath)
-    {
-        boolean res = false;
-
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.MOVE_TO_TRASH))
-        {
-                
-            File file = new File(filePath);
-            res = Desktop.getDesktop().moveToTrash(file);
-        }
-        else
-            res = moveToTrashViaGio(filePath);
-
-        return res;
-    }
-
-    public static boolean moveToTrashViaGio(String filePath)
-    {
-        boolean result = false;
-
-        try
-        {
-            Process process = new ProcessBuilder("gio", "trash", filePath).start();
-            int exitCode = process.waitFor();
-            result = exitCode == 0;
-        }
-        catch (IOException | InterruptedException ex)
-        {
-            // TODO сюда логгирование
-        }
-
-        return result;
-    }
-
-    public static void copyToClipboard(String path)
-    {
-        File file = new File(path);
-        Clipboard clipboard = Clipboard.getSystemClipboard();
-        ClipboardContent content = new ClipboardContent();
-
-        content.putFiles(Collections.singletonList(file));
-        clipboard.setContent(content);
-    }
-
-    public static boolean isClipBoardEmpty()
-    {
-        Clipboard clipboard = Clipboard.getSystemClipboard();
-
-        return !clipboard.hasFiles();
-    }
-
-    public static void insert(String path)
-    {
-        Clipboard clipboard = Clipboard.getSystemClipboard();
-
-        if (clipboard.hasFiles())
-        {
-            List<File> files = clipboard.getFiles();
-
-            for (File file : files)
-            {
-                File destFile = new File(FileSystemUtils.adjustPath(path, file.getName()));
-
-                try
-                {
-                    Files.copy(file.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }
-                catch (IOException ex)
-                {
-                    System.err.println("gneg :)");
-                }
-            }
-        }
     }
 
     public static boolean createDir(String path)
@@ -264,6 +166,7 @@ public class FileSystemUtils
      * Определить операционную систему. Пока все ОС делятся на Windows и Linux (всё что не Windows, то Linux)
      * @return Тип ОС
      * */
+    // TODO как будто тоже должно быть не тут
     private static OSType calcOSType()
     {
         String osName = System.getProperty("os.name");
@@ -283,8 +186,8 @@ public class FileSystemUtils
         return "/";
     }
 
-    //TODO подозреваю, что директории с большим количеством файлов будут удаляться долго, поэтому думаю, что
-    // удаление всего надо вынести в отдельный поток + создать окно с индикацией удаления
+    //TODO директории с большим количеством файлов будут удаляться долго, поэтому
+    // удаление надо вынести в отдельный поток + создать окно с индикацией удаления
     private static boolean deleteRecursively(String rawPath)
     {
         boolean res = false;

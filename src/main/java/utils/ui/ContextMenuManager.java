@@ -1,4 +1,4 @@
-package utils;
+package utils.ui;
 
 
 import javafx.event.ActionEvent;
@@ -15,6 +15,9 @@ import resourceHandler.ResourceHandler;
 import java.io.IOException;
 import java.util.Optional;
 
+import app.AppContext;
+
+import utils.filesystem.*;
 
 /**
  * Идентификаторы элементов контекстного меню
@@ -97,6 +100,7 @@ public class ContextMenuManager
         }
     }
 
+    // TODO точно не нужно передавать сюда объект файловой системы. Лучше поместить абсолютный путь в fileInfo
     /**
      * Поведение при нажатии на кнопку "Открыть"
      * @param event событие нажатия на кнопку
@@ -115,7 +119,7 @@ public class ContextMenuManager
             onRefresh.run();
         }
         else
-            FileSystemUtils.openFile(fileSystem.buildPath(fileInfo.getNameValue()));
+            AppContext.getIntegrationService().openFile(fileSystem.buildPath(fileInfo.getNameValue()));
     }
 
     /**
@@ -128,7 +132,7 @@ public class ContextMenuManager
         MenuItem item = (MenuItem) event.getSource();
         FileData fileInfo = (FileData) item.getUserData();
         String path = fileSystem.buildPath(fileInfo.getNameValue());
-        FileSystemUtils.copyToClipboard(path);
+        ClipboardUtil.copyToClipboard(path);
     }
 
     /**
@@ -158,7 +162,7 @@ public class ContextMenuManager
         MenuItem item = (MenuItem) event.getSource();
         FileData fileInfo = (FileData) item.getUserData();
         String path = fileSystem.buildPath(fileInfo.getNameValue());
-        FileSystemUtils.moveToTrash(path);
+        AppContext.getIntegrationService().moveToTrash(path);
         //TODO точно ли хорошая идея передавать сюда Runnable? Возможно стоит подключить шину событий
         onRefresh.run();
     }
@@ -196,7 +200,7 @@ public class ContextMenuManager
         if (panelMenuTemplate == null)
         {
             FXMLLoader loader = new FXMLLoader(ResourceHandler.getLayout("ContextMenu.fxml"),
-                    ResourceHandler.getStringBundle());
+                    AppContext.getLanguageManager().getBundle());
             try
             {
                 panelMenuTemplate = loader.load();

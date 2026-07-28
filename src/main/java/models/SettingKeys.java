@@ -6,17 +6,12 @@ package models;
 public class SettingKeys
 {
     public static final String LOCALE = "locale";
+    public static final String DEFAULT_DIRECTORY = "directory.default";
 
     public static class LastDirectory
     {
-        public static final String LEFT = "last.directory.left";
-        public static final String RIGHT = "last.directory.right";
-    }
-
-    public static class DefaultDirectories
-    {
-        public static final String WINDOWS = "default.directory.windows";
-        public static final String LINUX = "default.directory.linux";
+        public static final String LEFT = "directory.last.left";
+        public static final String RIGHT = "directory.last.right";
     }
 
     public static final String LINUX_CONSOLE = "linux.console";

@@ -1,6 +1,7 @@
 package widgets;
 
 
+import app.AppContext;
 import events.ClipboardEvent;
 import events.EventBus;
 import events.InsertButtonClickedEvent;
@@ -19,8 +20,9 @@ import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import types.OSType;
-import utils.FileSystemController;
-import utils.FileSystemUtils;
+import utils.filesystem.FileSystemController;
+import utils.filesystem.FileSystemUtils;
+import utils.ui.ClipboardUtil;
 import widgets.interfaces.ITranslatable;
 import widgets.interfaces.IWidget;
 
@@ -74,7 +76,7 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
      * */
     public void onInsertItemClick()
     {
-        FileSystemUtils.insert(currentPathField.getText());
+        ClipboardUtil.insert(currentPathField.getText());
         EventBus.publish(new InsertButtonClickedEvent());
     }
 
@@ -90,7 +92,7 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
             createButton.setGraphic(addImage);
         }
 
-        showDiskControlsVisibility(FileSystemUtils.checkOS(OSType.WINDOWS));
+        showDiskControlsVisibility(OSType.is(OSType.WINDOWS));
 
         insertButton.setDisable(true);
         EventBus.subscribe(ClipboardEvent.class, event -> {
@@ -106,11 +108,11 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
     @Override
     public void updateText()
     {
-        createButton.setText(ResourceHandler.getString(StringKeys.BUTTON_ADD_TEXT));
-        createButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_ADD_TOOLTIP)));
-        backButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_BACK_TOOLTIP)));
-        forwardButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_FORWARD_TOOLTIP)));
-        insertButton.setTooltip(new Tooltip(ResourceHandler.getString(StringKeys.BUTTON_INSERT_TOOLTIP)));
+        createButton.setText(AppContext.getLanguageManager().getString(StringKeys.BUTTON_ADD_TEXT));
+        createButton.setTooltip(new Tooltip(AppContext.getLanguageManager().getString(StringKeys.BUTTON_ADD_TOOLTIP)));
+        backButton.setTooltip(new Tooltip(AppContext.getLanguageManager().getString(StringKeys.BUTTON_BACK_TOOLTIP)));
+        forwardButton.setTooltip(new Tooltip(AppContext.getLanguageManager().getString(StringKeys.BUTTON_FORWARD_TOOLTIP)));
+        insertButton.setTooltip(new Tooltip(AppContext.getLanguageManager().getString(StringKeys.BUTTON_INSERT_TOOLTIP)));
     }
 
     // Приватные методы
@@ -119,7 +121,7 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
      * */
     private void updateDiskCombo()
     {
-        if (FileSystemUtils.checkOS(OSType.WINDOWS))
+        if (OSType.is(OSType.WINDOWS))
         {
             diskComboBox.setItems(FXCollections.observableArrayList(FileSystemUtils.getLogicalDrives()));
             diskComboBox.setValue(diskComboBox.getItems().getFirst());

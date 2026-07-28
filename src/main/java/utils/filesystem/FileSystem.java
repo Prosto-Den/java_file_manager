@@ -1,14 +1,12 @@
-package utils;
+package utils.filesystem;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 import java.util.regex.Pattern;
 import javafx.beans.property.SimpleStringProperty;
-import types.FileSystemErrors;
-import types.OSType;
 import javafx.beans.property.StringProperty;
-
+import types.OSType;
 
 // TODO может быть статические методы всё-таки вынести в отдельную утилиту для удобства
 /**
@@ -28,6 +26,7 @@ public final class FileSystem
     {
         currentPath.setValue(FileSystemUtils.getDefaultPath());
     }
+
     /**
      * Конструктор с передачей пути, на который объект будет указывать после создания.
      * Если директории по такому пути не существует, будет указывать на корень (C:\ для Windows и / для Linux)
@@ -71,7 +70,7 @@ public final class FileSystem
      * */
     public void setCurrentPath(String currentPath)
     {
-        if (FileSystemUtils.checkOS(OSType.WINDOWS))
+        if (OSType.is(OSType.WINDOWS))
             currentPath = currentPath.replace("\\\\", "\\");
         this.currentPath.setValue(currentPath);
     }
@@ -99,7 +98,7 @@ public final class FileSystem
      * */
     public void goForward(String filename)
     {
-       setCurrentPath(buildPath(filename));
+        setCurrentPath(buildPath(filename));
     }
 
     /**
@@ -125,11 +124,4 @@ public final class FileSystem
      * @return Property текущего пути
      * */
     public StringProperty getCurrentPathProperty() {return currentPath;}
-
-
-    public FileSystemErrors openFile(String fileName)
-    {
-        String path = FileSystemUtils.adjustPath(getCurrentPath(), fileName);
-        return FileSystemUtils.openFile(path);
-    }
 }
