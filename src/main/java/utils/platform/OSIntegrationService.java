@@ -16,6 +16,7 @@ public class OSIntegrationService
     private final SettingsManager settings;
     private final OSType osType;
     private final String WINDOWS_OPEN_COMMAND = "explorer %s";
+    private final String WINDOWS_OPEN_IN_TERMINAL_COMMAND = "cd /d %s";
 
     public OSIntegrationService(OSType osType, SettingsManager settingsManager)
     {
@@ -49,10 +50,10 @@ public class OSIntegrationService
 
     public void openInTerminal(String path)
     {
-        String linuxConsole = settings.get(SettingKeys.LINUX_CONSOLE);
+        String command = OSType.is(OSType.LINUX) ? settings.get(SettingKeys.LINUX_CONSOLE) : WINDOWS_OPEN_IN_TERMINAL_COMMAND;
         try
         {   
-            new ProcessBuilder(prepareCommand(linuxConsole, path)).start();
+            new ProcessBuilder(prepareCommand(command, path)).start();
         }
         catch (Exception ex)
         {
