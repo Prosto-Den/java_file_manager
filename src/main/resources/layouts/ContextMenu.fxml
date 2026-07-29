@@ -19,6 +19,15 @@
             </graphic>
         </MenuItem>
 
+        <!--Кнопка "Открыть в терминале"-->
+        <MenuItem fx:id="openInTerminalMenuItem" text="%contextmenu.item.openInTerminal">
+            <graphic>
+                <ImageView>
+                    <Image url="@/icons/16x16/terminal.png"/>
+                </ImageView>
+            </graphic>
+        </MenuItem>
+
         <!--Кнопка "Скопировать"-->
         <MenuItem fx:id="copyMenuItem" text="%contextmenu.item.copy">
             <graphic>
@@ -47,6 +56,5 @@
                 </ImageView>
             </graphic>
         </MenuItem>
-
     </items>
 </ContextMenu>

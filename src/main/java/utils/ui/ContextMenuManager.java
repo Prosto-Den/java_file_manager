@@ -24,6 +24,7 @@ class ContextMenuItemId
     public static final String COPY_ITEM = "copyMenuItem";
     public static final String DELETE_ITEM = "deleteMenuItem";
     public static final String MOVE_TO_TRASH_ITEM = "moveToTrashMenuItem";
+    public static final String OPEN_IN_TERMINAL_ITEM = "openInTerminalMenuItem";
 }
 
 /**
@@ -40,6 +41,7 @@ public class ContextMenuManager
         void copy(FileData fileInfo);
         void delete(FileData fileInfo);
         void moveToTrash(FileData fileInfo);
+        void openInTerminal(FileData fileInfo);
     }
 
     public ContextMenuManager()
@@ -64,6 +66,7 @@ public class ContextMenuManager
         Optional<MenuItem> copyItem = getMenuItem(menu, ContextMenuItemId.COPY_ITEM);
         Optional<MenuItem> deleteItem = getMenuItem(menu, ContextMenuItemId.DELETE_ITEM);
         Optional<MenuItem> moveToTrashItem = getMenuItem(menu, ContextMenuItemId.MOVE_TO_TRASH_ITEM);
+        Optional<MenuItem> openInTerminalItem = getMenuItem(menu, ContextMenuItemId.OPEN_IN_TERMINAL_ITEM);
 
         menu.setOnShowing(event -> {
             if (fileInfo == null)
@@ -71,6 +74,7 @@ public class ContextMenuManager
             else
             {
                 openItem.ifPresent(menuItem -> configureOpenItem(menuItem, fileInfo));
+                openInTerminalItem.ifPresent(menuItem -> menuItem.setDisable(!fileInfo.isDirectory()));
                 setUserData(menu, fileInfo);
             }
         });
@@ -97,6 +101,12 @@ public class ContextMenuManager
             FileData selectedFile = getSelectedFile(event);
             if (selectedFile != null && actions != null)
                 actions.moveToTrash(selectedFile);
+        }));
+
+        openInTerminalItem.ifPresent(item -> item.setOnAction(event -> {
+            FileData selectedFile = getSelectedFile(event);
+            if (selectedFile != null && actions != null)
+                actions.openInTerminal(selectedFile);
         }));
 
         return menu;

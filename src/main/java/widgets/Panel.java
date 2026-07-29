@@ -189,6 +189,12 @@ public class Panel extends VBox implements IWidget, ITranslatable
                 AppContext.getIntegrationService().moveToTrash(selectedFile.getAbsolutePath());
                 refreshTable();
             }
+
+            @Override
+            public void openInTerminal(FileData selectedFile)
+            {
+                AppContext.getIntegrationService().openInTerminal(selectedFile.getAbsolutePath());
+            }
         });
     }
 

@@ -47,6 +47,19 @@ public class OSIntegrationService
         return res;
     }
 
+    public void openInTerminal(String path)
+    {
+        String linuxConsole = settings.get(SettingKeys.LINUX_CONSOLE);
+        try
+        {   
+            new ProcessBuilder(prepareCommand(linuxConsole, path)).start();
+        }
+        catch (Exception ex)
+        {
+            // TODO сюда логгирование
+        }
+    }
+
     /**
      * Переместить файл (директорию) в корзину
      * @param filePath путь к файлу(директории)
