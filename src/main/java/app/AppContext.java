@@ -7,9 +7,8 @@ import types.OSType;
 import utils.filesystem.FileSystemUtils;
 import utils.i18n.LanguageManager;
 import utils.platform.OSIntegrationService;
-import utils.settings.FileSystemSettingsHelper;
-import utils.settings.SettingsManager;
-import utils.ui.WindowManager;
+import utils.settings.*;
+import utils.ui.*;
 
 
 /**
@@ -24,6 +23,7 @@ public final class AppContext
     private static LanguageManager languageManager;
     private static OSIntegrationService integrationService;
     private static WindowManager windowManager;
+    private static ContextMenuManager contextMenuManager;
 
     /**
      * Выполнить первичную инициализацию для приложения. Будет определено главное окно приложения, загружены настройки,
@@ -41,6 +41,7 @@ public final class AppContext
         appName = languageManager.getString(StringKeys.TITLE);
         integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager);
         windowManager = new WindowManager(stage, settingsManager, languageManager);
+        contextMenuManager = new ContextMenuManager();
     }
 
     /**
@@ -66,6 +67,18 @@ public final class AppContext
      * @return сервис интеграции
      */
     public static OSIntegrationService getIntegrationService() { return integrationService; }
+
+    /**
+     * Выдать менеджер контекстного меню
+     * @return менеджер контекстного меню
+     */
+    public static WindowManager getWindowManager() { return windowManager; }
+
+    /**
+     * Выдать менеджер контекстного меню
+     * @return менеджер контекстного меню
+     */
+    public static ContextMenuManager getContextMenuManager() { return contextMenuManager; }
 
     /**
      * Создать окно для работы с настройками приложения.

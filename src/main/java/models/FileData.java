@@ -2,6 +2,7 @@ package models;
 
 
 import javafx.beans.property.StringProperty;
+import utils.filesystem.FileSystemUtils;
 import javafx.beans.property.SimpleStringProperty;
 
 
@@ -9,16 +10,28 @@ import javafx.beans.property.SimpleStringProperty;
  * Класс для хранения информации по файлу. Необходимо для отображения данных в менеджере
  *
  */
-public record FileData(StringProperty name, StringProperty size, StringProperty date, boolean isDirectory)
+public record FileData(StringProperty absolutePath, StringProperty size, StringProperty date, boolean isDirectory)
 {
-    public FileData(String name, String size, String date, boolean isDirectory)
+    public FileData(String absolutePath, String size, String date, boolean isDirectory)
     {
-        this(new SimpleStringProperty(name), new SimpleStringProperty(size), new SimpleStringProperty(date),
+        this(new SimpleStringProperty(absolutePath), new SimpleStringProperty(size), new SimpleStringProperty(date),
                 isDirectory);
     }
 
-    public String getNameValue() {
-        return name.getValue();
+    public StringProperty getName()
+    {
+        return new SimpleStringProperty(getNameValue());
+    }
+
+    public String getNameValue() 
+    {
+        String absolutePathStr = absolutePath.getValue();
+        return FileSystemUtils.getFilenameFromPath(absolutePathStr);
+    }
+
+    public String getAbsolutePath()
+    {
+        return absolutePath.getValue();
     }
 
     public String getSizeValue() {

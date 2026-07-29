@@ -19,6 +19,7 @@ import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import utils.settings.FileSystemSettingsHelper;
+import utils.ui.ClipboardUtil;
 import utils.ui.ContextMenuManager;
 import models.FileData;
 import widgets.interfaces.IWidget;
@@ -69,7 +70,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
     private void setupTableColumns()
     {
         // настраиваем колонку с именем файла
-        fileNameColumn.setCellValueFactory(cellData -> cellData.getValue().name());
+        fileNameColumn.setCellValueFactory(cellData -> cellData.getValue().getName());
         fileNameColumn.setCellFactory(column -> new TableCell<FileData, String>()
         {
             private final ImageView imageView = new ImageView();
@@ -138,8 +139,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
                     }
                     else
                     {
-                        setContextMenu(ContextMenuManager.createPanelContextMenu(getFileSystem(), this,
-                                Panel.this::refreshTable));
+                        setContextMenu(createPanelContextMenu(item));
                     }
                 }
             };
@@ -157,6 +157,38 @@ public class Panel extends VBox implements IWidget, ITranslatable
             });
 
             return row;
+        });
+    }
+
+    private ContextMenu createPanelContextMenu(FileData fileInfo)
+    {
+        return AppContext.getContextMenuManager().createPanelContextMenu(fileInfo, new ContextMenuManager.PanelContextMenuActions()
+        {
+            @Override
+            public void open(FileData selectedFile)
+            {
+                handleDoubleClick(selectedFile);
+            }
+
+            @Override
+            public void copy(FileData selectedFile)
+            {
+                ClipboardUtil.copyToClipboard(selectedFile.getAbsolutePath());
+            }
+
+            @Override
+            public void delete(FileData selectedFile)
+            {
+                FileSystemUtils.delete(selectedFile.getAbsolutePath());
+                refreshTable();
+            }
+
+            @Override
+            public void moveToTrash(FileData selectedFile)
+            {
+                AppContext.getIntegrationService().moveToTrash(selectedFile.getAbsolutePath());
+                refreshTable();
+            }
         });
     }
 
@@ -183,7 +215,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
                 refreshTable();
             }
             else
-                AppContext.getIntegrationService().openFile(fileName);
+                AppContext.getIntegrationService().openFile(fileInfo.getAbsolutePath());
         }
     }
 
@@ -205,8 +237,8 @@ public class Panel extends VBox implements IWidget, ITranslatable
                 String fileSize = FileSystemUtils.getFileSize(file);
                 String fileEditDate = FileSystemUtils.lastModifiedDate(file);
 
-                FileData fileInfo = new FileData(FileSystemUtils.getFilenameFromPath(file), fileSize, fileEditDate,
-                        FileSystemUtils.isDir(file));
+                FileData fileInfo = new FileData(file, fileSize, fileEditDate,
+                    FileSystemUtils.isDir(file));
                 fileData.add(fileInfo);
             }
 
