@@ -19,6 +19,7 @@
     <entry key="contextmenu.item.delete">Delete</entry>
     <entry key="contextmenu.item.moveToTrash">Move to trash</entry>
     <entry key="contextmenu.item.openInTerminal">Open in terminal</entry>
+    <entry key="contextmenu.item.refresh">Refresh</entry>
     <entry key="fileviewer.row.back">..</entry>
     <entry key="textfield.currentPath.tooltip">Path to current directory</entry>
     <entry key="settings.title">Settings</entry>

@@ -48,6 +48,10 @@ public class OSIntegrationService
         return res;
     }
 
+    /**
+     * Открыть директорию в терминале. Терминал запуститься в отдельнои процессе и не заблокирует работу файлового менеджера
+     * @param path путь к директории
+     */
     public void openInTerminal(String path)
     {
         String command = OSType.is(OSType.LINUX) ? settings.get(SettingKeys.LINUX_CONSOLE) : WINDOWS_OPEN_IN_TERMINAL_COMMAND;

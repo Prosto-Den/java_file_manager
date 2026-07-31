@@ -39,6 +39,17 @@
 
         <SeparatorMenuItem/>
 
+        <!--Кнопка "Обновить"-->
+        <MenuItem fx:id="refreshMenuItem" text="%contextmenu.item.refresh">
+            <graphic>
+                <ImageView>
+                    <Image url="@/icons/16x16/refresh.png"/>
+                </ImageView>
+            </graphic>
+        </MenuItem>
+
+        <SeparatorMenuItem/>
+
         <!--Кнопка "Удалить"-->
         <MenuItem fx:id="deleteMenuItem" text="%contextmenu.item.delete">
             <graphic>

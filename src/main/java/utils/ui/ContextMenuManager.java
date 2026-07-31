@@ -25,6 +25,7 @@ class ContextMenuItemId
     public static final String DELETE_ITEM = "deleteMenuItem";
     public static final String MOVE_TO_TRASH_ITEM = "moveToTrashMenuItem";
     public static final String OPEN_IN_TERMINAL_ITEM = "openInTerminalMenuItem";
+    public static final String REFRESH_ITEM = "refreshMenuItem";
 }
 
 /**
@@ -42,6 +43,7 @@ public class ContextMenuManager
         void delete(FileData fileInfo);
         void moveToTrash(FileData fileInfo);
         void openInTerminal(FileData fileInfo);
+        void refresh();
     }
 
     public ContextMenuManager()
@@ -67,6 +69,7 @@ public class ContextMenuManager
         Optional<MenuItem> deleteItem = getMenuItem(menu, ContextMenuItemId.DELETE_ITEM);
         Optional<MenuItem> moveToTrashItem = getMenuItem(menu, ContextMenuItemId.MOVE_TO_TRASH_ITEM);
         Optional<MenuItem> openInTerminalItem = getMenuItem(menu, ContextMenuItemId.OPEN_IN_TERMINAL_ITEM);
+        Optional<MenuItem> refreshMenuItem = getMenuItem(menu, ContextMenuItemId.REFRESH_ITEM);
 
         menu.setOnShowing(event -> {
             if (fileInfo == null)
@@ -107,6 +110,10 @@ public class ContextMenuManager
             FileData selectedFile = getSelectedFile(event);
             if (selectedFile != null && actions != null)
                 actions.openInTerminal(selectedFile);
+        }));
+        
+        refreshMenuItem.ifPresent(item -> item.setOnAction(event -> {
+            actions.refresh();
         }));
 
         return menu;
