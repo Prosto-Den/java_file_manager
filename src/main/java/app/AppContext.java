@@ -3,6 +3,7 @@ package app;
 
 import javafx.stage.Stage;
 import models.StringKeys;
+import monitors.ClipboardMonitor;
 import types.OSType;
 import utils.filesystem.FileSystemUtils;
 import utils.i18n.LanguageManager;
@@ -42,6 +43,8 @@ public final class AppContext
         integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager);
         windowManager = new WindowManager(stage, settingsManager, languageManager);
         contextMenuManager = new ContextMenuManager();
+
+        ClipboardMonitor.start();
     }
 
     /**

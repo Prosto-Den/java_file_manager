@@ -38,11 +38,34 @@ public class ContextMenuManager
 
     public interface PanelContextMenuActions
     {
+        /**
+         * Открыть файл
+         * @param fileInfo информация о файле
+         */
         void open(FileData fileInfo);
+        /**
+         * Скопировать файл
+         * @param fileInfo информация о файле
+         */
         void copy(FileData fileInfo);
+        /**
+         * Удалить файл
+         * @param fileInfo информация о файле
+         */
         void delete(FileData fileInfo);
+        /**
+         * Переместить файл в корзину
+         * @param fileInfo информация о файле
+         */
         void moveToTrash(FileData fileInfo);
+        /**
+         * Открыть в терминале
+         * @param fileInfo информация о файле
+         */
         void openInTerminal(FileData fileInfo);
+        /**
+         * Обновить 
+         */
         void refresh();
     }
 
@@ -139,7 +162,7 @@ public class ContextMenuManager
     {
         MenuItem item = (MenuItem) event.getSource();
         Object userData = item.getUserData();
-        return (userData != null &&  userData instanceof FileData) ? (FileData) userData : null;
+        return (userData != null && userData instanceof FileData) ? (FileData) userData : null;
     }
 
     /**
