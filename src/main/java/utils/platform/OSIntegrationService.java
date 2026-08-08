@@ -185,7 +185,7 @@ public class OSIntegrationService
                 desktop.open(file);
                 return FileSystemErrors.OK;
             }
-            return FileSystemErrors.OPEN_FILE_ERROR;
+            return FileSystemErrors.DESKTOP_NOT_SUPPORTED;
         }
         catch (IOException ex)
         {
