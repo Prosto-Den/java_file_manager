@@ -17,8 +17,10 @@
     <entry key="contextmenu.item.open">Открыть</entry>
     <entry key="contextmenu.item.copy">Скопировать</entry>
     <entry key="contextmenu.item.delete">Удалить</entry>
-    <entry key="fileviewer.row.back">..</entry>
     <entry key="contextmenu.item.moveToTrash">Переместить в корзину</entry>
+    <entry key="contextmenu.item.openInTerminal">Открыть в терминале</entry>
+    <entry key="contextmenu.item.refresh">Обновить</entry>
+    <entry key="fileviewer.row.back">..</entry>
     <entry key="textfield.currentPath.tooltip">Путь к текущей директории</entry>
     <entry key="settings.title">Настройки</entry>
     <entry key="settings.label.language">Язык:</entry>

@@ -1,9 +1,9 @@
 package utils.platform;
 
-import java.io.BufferedReader;
+//import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+//import java.io.InputStreamReader;
 import java.awt.Desktop;
 
 import models.SettingKeys;
@@ -16,6 +16,7 @@ public class OSIntegrationService
     private final SettingsManager settings;
     private final OSType osType;
     private final String WINDOWS_OPEN_COMMAND = "explorer %s";
+    private final String WINDOWS_OPEN_IN_TERMINAL_COMMAND = "cd /d %s";
 
     public OSIntegrationService(OSType osType, SettingsManager settingsManager)
     {
@@ -29,22 +30,48 @@ public class OSIntegrationService
      * @param path путь к файлу
      * @return код ошибки открытия файла
      * */
-    public FileSystemErrors openFile(String path)
+    public /*FileSystemErrors*/ void openFile(String path)
     {
         File file = new File(path);
 
-        if (!file.exists())
-            return FileSystemErrors.FILE_NOT_FOUND;
-
-        if (!file.isFile())
-            return FileSystemErrors.NOT_A_FILE;
-
-        FileSystemErrors res = openSystemCommands(osType, path);
-
+        if (!file.exists() || !file.isFile())
+            return;
+        
+        FileSystemErrors res = openDesktop(file);
         if (res != FileSystemErrors.OK)
-            res = openDesktop(file);
+            openSystemCommands(osType, path);
 
-        return res;
+        // File file = new File(path);
+
+        // if (!file.exists())
+        //     return FileSystemErrors.FILE_NOT_FOUND;
+
+        // if (!file.isFile())
+        //     return FileSystemErrors.NOT_A_FILE;
+
+        // FileSystemErrors res = openSystemCommands(osType, path);
+
+        // if (res != FileSystemErrors.OK)
+        //     res = openDesktop(file);
+
+        // return res;
+    }
+
+    /**
+     * Открыть директорию в терминале. Терминал запуститься в отдельнои процессе и не заблокирует работу файлового менеджера
+     * @param path путь к директории
+     */
+    public void openInTerminal(String path)
+    {
+        String command = OSType.is(OSType.LINUX) ? settings.get(SettingKeys.LINUX_CONSOLE) : WINDOWS_OPEN_IN_TERMINAL_COMMAND;
+        try
+        {   
+            new ProcessBuilder(prepareCommand(command, path)).start();
+        }
+        catch (Exception ex)
+        {
+            // TODO сюда логгирование
+        }
     }
 
     /**
@@ -89,48 +116,50 @@ public class OSIntegrationService
         return result;
     }
 
-    private FileSystemErrors openSystemCommands(OSType osType, String path)
+    private /*FileSystemErrors*/ void openSystemCommands(OSType osType, String path)
     {
-        FileSystemErrors res = FileSystemErrors.UNKNOWN_ERROR;
+        //FileSystemErrors res = FileSystemErrors.UNKNOWN_ERROR;
 
         switch (osType)
         {
-            case OSType.WINDOWS -> res = runCommand(WINDOWS_OPEN_COMMAND, path);
-            case OSType.LINUX -> res = runCommand(settings.get(SettingKeys.LINUX_OPEN_COMMAND), path);
+            case OSType.WINDOWS -> /*res =*/ runCommand(WINDOWS_OPEN_COMMAND, path);
+            case OSType.LINUX -> /*res =*/ runCommand(settings.get(SettingKeys.LINUX_OPEN_COMMAND), path);
         }
 
-        return res;
+        //return res;
     }
 
-    private FileSystemErrors runCommand(String command, String arg)
+    private /*FileSystemErrors*/ void runCommand(String command, String arg)
     {
-        FileSystemErrors result = FileSystemErrors.UNKNOWN_ERROR;
+        //FileSystemErrors result = FileSystemErrors.UNKNOWN_ERROR;
 
         try
         {
             ProcessBuilder processBuilder = new ProcessBuilder(prepareCommand(command, arg));
             processBuilder.redirectErrorStream(true);
 
-            Process proc = processBuilder.start();
-
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream())))
-            {
-                String line;
-                while ((line = reader.readLine()) != null)
-                    System.out.println(line);
-            }
-
-            int exitCode = proc.waitFor();
-            if (exitCode == 0)
-                result = FileSystemErrors.OK;
-            System.out.println("Код ошибки: " + exitCode);
+            /*Process proc =*/ processBuilder.start();
+            
+            // TODO вывод информации в поток тоже блокирует файловый менеджер
+            // try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream())))
+            // {
+            //     String line;
+            //     while ((line = reader.readLine()) != null)
+            //         System.out.println(line);
+            // }
+            
+            // TODO так заблокируется файловый менеджер (будут ждать ответа от процесса)
+            // int exitCode = proc.;
+            // if (exitCode == 0)
+            //     result = FileSystemErrors.OK;
+            // System.out.println("Код ошибки: " + exitCode);
         }
         catch (Exception ex)
         {
             ex.printStackTrace();
         }
 
-        return result;
+        //return result;
     }
 
     private String[] prepareCommand(String command, String arg)
@@ -151,8 +180,12 @@ public class OSIntegrationService
 
         try
         {
-            desktop.open(file);
-            return FileSystemErrors.OK;
+            if (desktop.isSupported(Desktop.Action.APP_OPEN_FILE))
+            {
+                desktop.open(file);
+                return FileSystemErrors.OK;
+            }
+            return FileSystemErrors.DESKTOP_NOT_SUPPORTED;
         }
         catch (IOException ex)
         {

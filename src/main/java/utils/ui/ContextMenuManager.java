@@ -24,6 +24,8 @@ class ContextMenuItemId
     public static final String COPY_ITEM = "copyMenuItem";
     public static final String DELETE_ITEM = "deleteMenuItem";
     public static final String MOVE_TO_TRASH_ITEM = "moveToTrashMenuItem";
+    public static final String OPEN_IN_TERMINAL_ITEM = "openInTerminalMenuItem";
+    public static final String REFRESH_ITEM = "refreshMenuItem";
 }
 
 /**
@@ -36,10 +38,35 @@ public class ContextMenuManager
 
     public interface PanelContextMenuActions
     {
+        /**
+         * Открыть файл
+         * @param fileInfo информация о файле
+         */
         void open(FileData fileInfo);
+        /**
+         * Скопировать файл
+         * @param fileInfo информация о файле
+         */
         void copy(FileData fileInfo);
+        /**
+         * Удалить файл
+         * @param fileInfo информация о файле
+         */
         void delete(FileData fileInfo);
+        /**
+         * Переместить файл в корзину
+         * @param fileInfo информация о файле
+         */
         void moveToTrash(FileData fileInfo);
+        /**
+         * Открыть в терминале
+         * @param fileInfo информация о файле
+         */
+        void openInTerminal(FileData fileInfo);
+        /**
+         * Обновить 
+         */
+        void refresh();
     }
 
     public ContextMenuManager()
@@ -64,6 +91,8 @@ public class ContextMenuManager
         Optional<MenuItem> copyItem = getMenuItem(menu, ContextMenuItemId.COPY_ITEM);
         Optional<MenuItem> deleteItem = getMenuItem(menu, ContextMenuItemId.DELETE_ITEM);
         Optional<MenuItem> moveToTrashItem = getMenuItem(menu, ContextMenuItemId.MOVE_TO_TRASH_ITEM);
+        Optional<MenuItem> openInTerminalItem = getMenuItem(menu, ContextMenuItemId.OPEN_IN_TERMINAL_ITEM);
+        Optional<MenuItem> refreshMenuItem = getMenuItem(menu, ContextMenuItemId.REFRESH_ITEM);
 
         menu.setOnShowing(event -> {
             if (fileInfo == null)
@@ -71,6 +100,7 @@ public class ContextMenuManager
             else
             {
                 openItem.ifPresent(menuItem -> configureOpenItem(menuItem, fileInfo));
+                openInTerminalItem.ifPresent(menuItem -> menuItem.setDisable(!fileInfo.isDirectory()));
                 setUserData(menu, fileInfo);
             }
         });
@@ -99,6 +129,16 @@ public class ContextMenuManager
                 actions.moveToTrash(selectedFile);
         }));
 
+        openInTerminalItem.ifPresent(item -> item.setOnAction(event -> {
+            FileData selectedFile = getSelectedFile(event);
+            if (selectedFile != null && actions != null)
+                actions.openInTerminal(selectedFile);
+        }));
+        
+        refreshMenuItem.ifPresent(item -> item.setOnAction(event -> {
+            actions.refresh();
+        }));
+
         return menu;
     }
 
@@ -122,7 +162,7 @@ public class ContextMenuManager
     {
         MenuItem item = (MenuItem) event.getSource();
         Object userData = item.getUserData();
-        return (userData != null &&  userData instanceof FileData) ? (FileData) userData : null;
+        return (userData != null && userData instanceof FileData) ? (FileData) userData : null;
     }
 
     /**

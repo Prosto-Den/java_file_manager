@@ -19,11 +19,31 @@
             </graphic>
         </MenuItem>
 
+        <!--Кнопка "Открыть в терминале"-->
+        <MenuItem fx:id="openInTerminalMenuItem" text="%contextmenu.item.openInTerminal">
+            <graphic>
+                <ImageView>
+                    <Image url="@/icons/16x16/terminal.png"/>
+                </ImageView>
+            </graphic>
+        </MenuItem>
+
         <!--Кнопка "Скопировать"-->
         <MenuItem fx:id="copyMenuItem" text="%contextmenu.item.copy">
             <graphic>
                 <ImageView>
                     <Image url="@/icons/16x16/copy.png"/>
+                </ImageView>
+            </graphic>
+        </MenuItem>
+
+        <SeparatorMenuItem/>
+
+        <!--Кнопка "Обновить"-->
+        <MenuItem fx:id="refreshMenuItem" text="%contextmenu.item.refresh">
+            <graphic>
+                <ImageView>
+                    <Image url="@/icons/16x16/refresh.png"/>
                 </ImageView>
             </graphic>
         </MenuItem>
@@ -47,6 +67,5 @@
                 </ImageView>
             </graphic>
         </MenuItem>
-
     </items>
 </ContextMenu>

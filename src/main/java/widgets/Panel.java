@@ -160,6 +160,11 @@ public class Panel extends VBox implements IWidget, ITranslatable
         });
     }
 
+    /**
+     * Создать контекстное меню для панели
+     * @param fileInfo информация о файле
+     * @return контекстное меню
+     */
     private ContextMenu createPanelContextMenu(FileData fileInfo)
     {
         return AppContext.getContextMenuManager().createPanelContextMenu(fileInfo, new ContextMenuManager.PanelContextMenuActions()
@@ -187,6 +192,18 @@ public class Panel extends VBox implements IWidget, ITranslatable
             public void moveToTrash(FileData selectedFile)
             {
                 AppContext.getIntegrationService().moveToTrash(selectedFile.getAbsolutePath());
+                refreshTable();
+            }
+
+            @Override
+            public void openInTerminal(FileData selectedFile)
+            {
+                AppContext.getIntegrationService().openInTerminal(selectedFile.getAbsolutePath());
+            }
+
+            @Override
+            public void refresh()
+            {
                 refreshTable();
             }
         });
