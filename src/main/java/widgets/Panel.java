@@ -37,12 +37,10 @@ public class Panel extends VBox implements IWidget, ITranslatable
     public class PanelMenuContext implements IMenuContext
     {
         private final FileData data;
-        private final String fileSystemID;
 
-        public PanelMenuContext(FileData data, String fileSystemID)
+        public PanelMenuContext(FileData data)
         {
             this.data = data;
-            this.fileSystemID = fileSystemID;
         }
 
         @Override
@@ -53,22 +51,21 @@ public class Panel extends VBox implements IWidget, ITranslatable
         {
             switch (actionID)
             {
-                case (PanelContextMenuItemId.OPEN_ITEM) -> handleDoubleClick(data, fileSystemID);
+                case (PanelContextMenuItemId.OPEN_ITEM) -> handleDoubleClick(data);
                 case (PanelContextMenuItemId.COPY_ITEM) -> ClipboardUtil.copyToClipboard(data.getAbsolutePath());
                 case (PanelContextMenuItemId.DELETE_ITEM) -> 
                 {
                     FileSystemUtils.delete(data.getAbsolutePath());
-                    refreshTable(fileSystemID);
+                    refreshTable();
                 }
                 case (PanelContextMenuItemId.MOVE_TO_TRASH_ITEM) -> 
                 {
                     AppContext.getIntegrationService().moveToTrash(data.getAbsolutePath());
-                    refreshTable(fileSystemID);
+                    refreshTable();
                 }
                 case (PanelContextMenuItemId.OPEN_IN_TERMINAL_ITEM) -> AppContext.getIntegrationService().openInTerminal(data.getAbsolutePath());
-                case (PanelContextMenuItemId.REFRESH_ITEM) -> refreshTable(fileSystemID);
-                default -> {// ничего не делаем}
-                    }
+                case (PanelContextMenuItemId.REFRESH_ITEM) -> refreshTable();
+                default -> {/*ничего не делаем*/}
             }
         }
 
@@ -125,10 +122,10 @@ public class Panel extends VBox implements IWidget, ITranslatable
         load(ResourceHandler.getLayout("Panel.fxml"));
         initUI();
 
-        EventBus.subscribe(InsertButtonClickedEvent.class, event -> refreshTable(fileSystemId));
+        EventBus.subscribe(InsertButtonClickedEvent.class, event -> refreshTable());
         EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
 
-        refreshTable(fileSystemId);
+        refreshTable();
     }
 
     /**
@@ -165,7 +162,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
                         icon = ResourceHandler.getIcon(IconSize.BIG, IconName.BACK);
                     else
                     {
-                        String fullPath = getFileSystem(fileSystemID).buildPath(file.getNameValue());
+                        String fullPath = getFileSystem().buildPath(file.getNameValue());
                         if (FileSystemUtils.isDir(fullPath))
                             icon = ResourceHandler.getIcon(IconSize.BIG, IconName.FOLDER);
                         else
@@ -203,8 +200,8 @@ public class Panel extends VBox implements IWidget, ITranslatable
                     return;
                 }
                 ContextMenu contextMenu = AppContext.getContextMenuManager().createOrGetpanelContextMenu();
-                AppContext.getContextMenuManager().configureContextMenu(contextMenu, new PanelMenuContext(data, fileSystemID));
-                
+                AppContext.getContextMenuManager().configureContextMenu(contextMenu, new PanelMenuContext(data));
+
                 contextMenu.show(row, event.getScreenX(), event.getScreenY());
                 event.consume();
             });
@@ -216,7 +213,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
                     if (event.getClickCount() == 2 && !row.isEmpty())
                     {
                         FileData fileInfo = row.getItem();
-                        handleDoubleClick(fileInfo, fileSystemID);
+                        handleDoubleClick(fileInfo);
                     }
                 }
             });
@@ -229,23 +226,23 @@ public class Panel extends VBox implements IWidget, ITranslatable
      * Обработка двойного нажатия на ряд таблицы
      * @param fileInfo данные файла
      * */
-    private void handleDoubleClick(FileData fileInfo, String fileSystemID)
+    private void handleDoubleClick(FileData fileInfo)
     {
-        if (getFileSystem(fileSystemID) != null)
+        if (getFileSystem() != null)
         {
             String fileName = fileInfo.getNameValue();
 
             if (fileName.equals(".."))
             {
-                getFileSystem(fileSystemID).goBack();
+                getFileSystem().goBack();
                 updateSettings();
-                refreshTable(fileSystemID);
+                refreshTable();
             }
             else if (fileInfo.isDirectory())
             {
-                getFileSystem(fileSystemID).goForward(fileName);
+                getFileSystem().goForward(fileName);
                 updateSettings();
-                refreshTable(fileSystemID);
+                refreshTable();
             }
             else
                 AppContext.getIntegrationService().openFile(fileInfo.getAbsolutePath());
@@ -255,16 +252,16 @@ public class Panel extends VBox implements IWidget, ITranslatable
     /**
      * Обновить содержимое таблицы
      * */
-    private void refreshTable(String fileSystemID)
+    private void refreshTable()
     {
-        if (getFileSystem(fileSystemID) != null)
+        if (getFileSystem() != null)
         {
             ObservableList<FileData> fileData = FXCollections.observableArrayList();
 
-            if (!getFileSystem(fileSystemID).isCurrentPathRoot())
+            if (!getFileSystem().isCurrentPathRoot())
                 fileData.add(new FileData("..", "", "", true));
 
-            List<String> files = getFileSystem(fileSystemID).listCurrentPath(false);
+            List<String> files = getFileSystem().listCurrentPath(false);
             for (String file : files)
             {
                 String fileSize = FileSystemUtils.getFileSize(file);
@@ -289,7 +286,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
         // Тут же ставим, чтобы последняя колонка подстраивалась под новый размер окна
         fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         setupTableColumns();
-        refreshTable(fileSystemID);
+        refreshTable();
     }
 
     // ITranslatable
@@ -308,16 +305,16 @@ public class Panel extends VBox implements IWidget, ITranslatable
      * к экземпляру
      * @return объект файловой системы для данной панели
      * */
-    private FileSystem getFileSystem(String fileSystemID) { return FileSystemController.get(fileSystemID); }
+    private FileSystem getFileSystem() { return FileSystemController.get(fileSystemID); }
 
     /**
      * Записать директорию в настройки
      * */
     private void updateSettings()
     {
-        if (getFileSystem(fileSystemID) != null)
+        if (getFileSystem() != null)
         {
-            String currentPath = getFileSystem(fileSystemID).getCurrentPath();
+            String currentPath = getFileSystem().getCurrentPath();
             settingsHelper.setPath(fileSystemID, currentPath);
         }
     }
