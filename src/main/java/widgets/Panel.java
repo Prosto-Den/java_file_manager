@@ -34,6 +34,9 @@ import utils.filesystem.*;
  * */
 public class Panel extends VBox implements IWidget, ITranslatable
 {
+    /**
+     * Класс контекста для панели. Служит для передачи данных от панели к контекстному меню
+     */
     public class PanelMenuContext implements IMenuContext
     {
         private final FileData data;
