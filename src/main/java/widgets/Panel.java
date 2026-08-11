@@ -14,16 +14,18 @@ import javafx.fxml.FXML;
 import java.util.List;
 
 import app.AppContext;
+import context.IMenuContext;
 import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import utils.settings.FileSystemSettingsHelper;
 import utils.ui.ClipboardUtil;
-import utils.ui.ContextMenuManager;
+import models.PanelContextMenuItemId;
 import models.FileData;
 import widgets.interfaces.IWidget;
 import widgets.interfaces.ITranslatable;
+import javafx.scene.Node;
 
 import utils.filesystem.*;
 
@@ -32,6 +34,71 @@ import utils.filesystem.*;
  * */
 public class Panel extends VBox implements IWidget, ITranslatable
 {
+    /**
+     * Класс контекста для панели. Служит для передачи данных от панели к контекстному меню
+     */
+    public class PanelMenuContext implements IMenuContext
+    {
+        private final FileData data;
+
+        public PanelMenuContext(FileData data)
+        {
+            this.data = data;
+        }
+
+        @Override
+        public FileData getFileData() { return data; };
+
+        @Override
+        public void executeAction(String actionID)
+        {
+            switch (actionID)
+            {
+                case (PanelContextMenuItemId.OPEN_ITEM) -> handleDoubleClick(data);
+                case (PanelContextMenuItemId.COPY_ITEM) -> ClipboardUtil.copyToClipboard(data.getAbsolutePath());
+                case (PanelContextMenuItemId.DELETE_ITEM) -> 
+                {
+                    FileSystemUtils.delete(data.getAbsolutePath());
+                    refreshTable();
+                }
+                case (PanelContextMenuItemId.MOVE_TO_TRASH_ITEM) -> 
+                {
+                    AppContext.getIntegrationService().moveToTrash(data.getAbsolutePath());
+                    refreshTable();
+                }
+                case (PanelContextMenuItemId.OPEN_IN_TERMINAL_ITEM) -> AppContext.getIntegrationService().openInTerminal(data.getAbsolutePath());
+                case (PanelContextMenuItemId.REFRESH_ITEM) -> refreshTable();
+                default -> {/*ничего не делаем*/}
+            }
+        }
+
+        @Override
+        public boolean isActionEnabled(String actionID)
+        {
+            switch (actionID)
+            {
+                case (PanelContextMenuItemId.REFRESH_ITEM) : return true;
+                default : return data != null;
+            }
+        }
+
+        @Override
+        public Node getActionGraphic(String actionID)
+        {
+            if (actionID.equals(PanelContextMenuItemId.OPEN_ITEM))
+            {
+                FileData fileData = getFileData();
+                if (fileData != null)
+                {
+                    Image image = fileData.isDirectory() ? ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FOLDER) : ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FILE);
+                    return image != null ? new ImageView(image) : null;
+                }
+            }
+
+            return null;
+        }
+    }
+
     @FXML
     private TableView<FileData> fileViewer; // виджет отображения файлов
     @FXML
@@ -124,25 +191,23 @@ public class Panel extends VBox implements IWidget, ITranslatable
         // задаём настройки для ряда
         fileViewer.setRowFactory( tv ->
         {
-            TableRow<FileData> row = new TableRow<>() {
-                // переопределяем метод обновления ряда, чтобы убрать вызов контекстного меню для кнопки "назад"
-                @Override
-                protected void updateItem(FileData item, boolean empty)
-                {
-                    super.updateItem(item, empty);
+            TableRow<FileData> row = new TableRow<>(); 
 
-                    if (empty || item == null || item.getNameValue().equals(AppContext.getLanguageManager()
-                            .getString(StringKeys.FILEVIEWER_ROW_BACK)))
-                    {
-                        // TODO после реализации контекстного меню для пустого места поменять
-                        setContextMenu(null);
-                    }
-                    else
-                    {
-                        setContextMenu(createPanelContextMenu(item));
-                    }
+            // Настраиваем поведение при вызове контекстного меню панели
+            row.setOnContextMenuRequested(event -> {
+                FileData data = row.getItem();
+                
+                if (data != null && data.getNameValue().equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
+                {
+                    event.consume();
+                    return;
                 }
-            };
+                ContextMenu contextMenu = AppContext.getContextMenuManager().createOrGetpanelContextMenu();
+                AppContext.getContextMenuManager().configureContextMenu(contextMenu, new PanelMenuContext(data));
+
+                contextMenu.show(row, event.getScreenX(), event.getScreenY());
+                event.consume();
+            });
 
             // Настраиваем поведение при двойном щелчке ЛКМ
             row.setOnMouseClicked(event -> {
@@ -157,55 +222,6 @@ public class Panel extends VBox implements IWidget, ITranslatable
             });
 
             return row;
-        });
-    }
-
-    /**
-     * Создать контекстное меню для панели
-     * @param fileInfo информация о файле
-     * @return контекстное меню
-     */
-    private ContextMenu createPanelContextMenu(FileData fileInfo)
-    {
-        return AppContext.getContextMenuManager().createPanelContextMenu(fileInfo, new ContextMenuManager.PanelContextMenuActions()
-        {
-            @Override
-            public void open(FileData selectedFile)
-            {
-                handleDoubleClick(selectedFile);
-            }
-
-            @Override
-            public void copy(FileData selectedFile)
-            {
-                ClipboardUtil.copyToClipboard(selectedFile.getAbsolutePath());
-            }
-
-            @Override
-            public void delete(FileData selectedFile)
-            {
-                FileSystemUtils.delete(selectedFile.getAbsolutePath());
-                refreshTable();
-            }
-
-            @Override
-            public void moveToTrash(FileData selectedFile)
-            {
-                AppContext.getIntegrationService().moveToTrash(selectedFile.getAbsolutePath());
-                refreshTable();
-            }
-
-            @Override
-            public void openInTerminal(FileData selectedFile)
-            {
-                AppContext.getIntegrationService().openInTerminal(selectedFile.getAbsolutePath());
-            }
-
-            @Override
-            public void refresh()
-            {
-                refreshTable();
-            }
         });
     }
 
@@ -289,7 +305,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
 
     /**
      * Получить экземпляр файловой системы дял данной панели. Метод нужен для более простого доступа
-     * к экземпляру, так как имя метода короче, чем полный вызов
+     * к экземпляру
      * @return объект файловой системы для данной панели
      * */
     private FileSystem getFileSystem() { return FileSystemController.get(fileSystemID); }
