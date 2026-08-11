@@ -3,6 +3,9 @@ package context;
 import models.FileData;
 import javafx.scene.Node;
 
+/**
+ * Интерфейс для лбмена инфомрацией между виджетом и контекстным меню
+ */
 public interface IMenuContext 
 {
     /**

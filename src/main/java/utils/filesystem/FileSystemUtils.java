@@ -16,8 +16,6 @@ import java.util.stream.Stream;
  * */
 public class FileSystemUtils
 {
-    private static final OSType osType = calcOSType(); // тип ОС
-
     /**
      * Существует ли файл (директория) по этому пути
      * @param path Путь к файлу/директории
@@ -37,7 +35,7 @@ public class FileSystemUtils
     {
         List<String> logicalDrives = new ArrayList<>();
 
-        if (osType == OSType.WINDOWS)
+        if (OSType.is(OSType.WINDOWS))
         {
             for (char letter = 'A'; letter <= 'Z'; letter++)
             {
@@ -163,25 +161,12 @@ public class FileSystemUtils
     // Приватные методы
 
     /**
-     * Определить операционную систему. Пока все ОС делятся на Windows и Linux (всё что не Windows, то Linux)
-     * @return Тип ОС
-     * */
-    // TODO как будто тоже должно быть не тут
-    private static OSType calcOSType()
-    {
-        String osName = System.getProperty("os.name");
-        if (osName.contains("Windows"))
-            return OSType.WINDOWS;
-        return OSType.LINUX;
-    }
-
-    /**
      * Выдать корень файловой системы (C:\ для Windows и / для Linux)
      * @return Корень системы
      * */
     public static String getDefaultPath()
     {
-        if (osType == OSType.WINDOWS)
+        if (OSType.is(OSType.WINDOWS))
             return "C:\\";
         return "/";
     }
