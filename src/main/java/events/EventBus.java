@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 /**
  * Реализация шины событий
  * */
-public class EventBus
+public final class EventBus
 {
     // события и слушатели
     private static final Map<Class<?>, List<Consumer<?>>> listeners = new HashMap<>();

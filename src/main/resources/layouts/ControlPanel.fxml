@@ -38,7 +38,7 @@
     </Button>
 
     <!--Кнопка "Назад"-->
-    <Button fx:id="backButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30">
+    <Button fx:id="backButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30" disable="true">
         <graphic>
             <ImageView>
                 <Image url="/icons/24x24/back_arrow.png" preserveRatio="true"/>
@@ -50,7 +50,7 @@
     </Button>
 
     <!--Кнопка "Вперёд"-->
-    <Button fx:id="forwardButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30">
+    <Button fx:id="forwardButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30" disable="true">
         <graphic>
             <ImageView>
                 <Image url="/icons/24x24/forward_arrow.png" preserveRatio="true"/>
@@ -62,7 +62,7 @@
     </Button>
 
     <!--Кнопка вставки-->
-    <Button fx:id="insertButton" HBox.hgrow="ALWAYS">
+    <Button fx:id="insertButton" HBox.hgrow="ALWAYS" disable="true">
         <graphic>
             <ImageView>
                 <Image url="/icons/24x24/insert.png" preserveRatio="true"/>

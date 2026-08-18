@@ -3,6 +3,7 @@ package widgets;
 import events.EventBus;
 import events.InsertButtonClickedEvent;
 import events.LocaleChangedEvent;
+import events.PathChangedEvent;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -32,7 +33,7 @@ import utils.filesystem.*;
 /**
  * Класс панели. Отображает содержимое директории
  * */
-public class Panel extends VBox implements IWidget, ITranslatable
+public final class Panel extends VBox implements IWidget, ITranslatable
 {
     /**
      * Класс контекста для панели. Служит для передачи данных от панели к контекстному меню
@@ -127,6 +128,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
 
         EventBus.subscribe(InsertButtonClickedEvent.class, event -> refreshTable());
         EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
+        EventBus.subscribe(PathChangedEvent.class, event -> refreshTable());
 
         refreshTable();
     }
@@ -202,7 +204,7 @@ public class Panel extends VBox implements IWidget, ITranslatable
                     event.consume();
                     return;
                 }
-                ContextMenu contextMenu = AppContext.getContextMenuManager().createOrGetpanelContextMenu();
+                ContextMenu contextMenu = AppContext.getContextMenuManager().createOrGetPanelContextMenu();
                 AppContext.getContextMenuManager().configureContextMenu(contextMenu, new PanelMenuContext(data));
 
                 contextMenu.show(row, event.getScreenX(), event.getScreenY());
@@ -237,13 +239,13 @@ public class Panel extends VBox implements IWidget, ITranslatable
 
             if (fileName.equals(".."))
             {
-                getFileSystem().goBack();
+                getFileSystem().goUpTree();
                 updateSettings();
                 refreshTable();
             }
             else if (fileInfo.isDirectory())
             {
-                getFileSystem().goForward(fileName);
+                getFileSystem().goDownTree(fileName);
                 updateSettings();
                 refreshTable();
             }

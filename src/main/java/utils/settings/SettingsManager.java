@@ -8,7 +8,7 @@ import java.util.Properties;
 
 
 
-public class SettingsManager
+public final class SettingsManager
 {
     private final String settingsPath; // путь к настройкам пользователя
     private final Properties properties; // настройки

@@ -1,4 +1,4 @@
 package events;
 
-public class LocaleChangedEvent {
+public final class LocaleChangedEvent {
 }

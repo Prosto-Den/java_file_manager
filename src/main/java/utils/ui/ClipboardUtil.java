@@ -14,7 +14,7 @@ import utils.filesystem.FileSystemUtils;
 /**
  * Утилитный класс для работы с буфером обмена
  */
-public class ClipboardUtil
+public final class ClipboardUtil
 {
     private static final Clipboard clipboard = Clipboard.getSystemClipboard();
 

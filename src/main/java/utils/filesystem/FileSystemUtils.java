@@ -9,6 +9,8 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.Nullable;
+
 //TODO некоторые утилиты не нужны для линукса. Возможно, стоит завезти отдельный класс WindowsFileSystemUtils?
 
 /**
@@ -31,21 +33,22 @@ public class FileSystemUtils
      * Вызов функции актуален только для Windows.
      * @return Список со всеми логическими дисками системы для Windows, пустой список для Linux.
      * */
-    public static List<String> getLogicalDrives()
+    public static @Nullable List<String> getLogicalDrives()
     {
-        List<String> logicalDrives = new ArrayList<>();
-
         if (OSType.is(OSType.WINDOWS))
         {
-            for (char letter = 'A'; letter <= 'Z'; letter++)
+            List<String> logicalDrives = new ArrayList<>();
+            for (char letter = 'A'; letter <= 'Z'; ++letter)
             {
                 String path = String.format("%s:", letter);
                 if (isExist(path))
                     logicalDrives.add(path);
             }
+
+            return logicalDrives;
         }
 
-        return logicalDrives;
+        return null;
     }
 
     /**

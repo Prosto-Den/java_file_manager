@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 import java.util.regex.Pattern;
+
+import events.EventBus;
+import events.PathChangedEvent;
+
+import java.util.Deque;
+import java.util.ArrayDeque;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import types.OSType;
@@ -18,6 +25,10 @@ public final class FileSystem
     // отследить изменения текущей директории (для передачи данных между виджетами)
     private final StringProperty currentPath = new SimpleStringProperty("");
 
+    // история перемещений пользователя
+    private Deque<String> backStack;
+    private Deque<String> forwardStack;
+
     /**
      * Конструктор по умолчанию. После создания будет указывать на корень системы
      * (C:\ у Windows и / у Linux)
@@ -25,6 +36,8 @@ public final class FileSystem
     public FileSystem()
     {
         currentPath.setValue(FileSystemUtils.getDefaultPath());
+        backStack = new ArrayDeque<>();
+        forwardStack = new ArrayDeque<>();
     }
 
     /**
@@ -34,6 +47,8 @@ public final class FileSystem
     public FileSystem(String path)
     {
         currentPath.setValue(FileSystemUtils.isDir(path) ? path : FileSystemUtils.getDefaultPath());
+        backStack = new ArrayDeque<>();
+        forwardStack = new ArrayDeque<>();
     }
 
     /**
@@ -72,7 +87,16 @@ public final class FileSystem
     {
         if (OSType.is(OSType.WINDOWS))
             currentPath = currentPath.replace("\\\\", "\\");
-        this.currentPath.setValue(currentPath);
+        backStack.push(this.currentPath.getValue());
+
+        if (!forwardStack.isEmpty())
+        {
+            String valueFromForwardStack = forwardStack.peek();
+            if (!valueFromForwardStack.equals(currentPath))
+                forwardStack.clear();
+        }
+
+        changeCurrentPath(currentPath);
     }
 
     /**
@@ -96,7 +120,7 @@ public final class FileSystem
      * Пойти вперёд по файловому дереву. Строится путь текущая директория + переданное имя файла, затем
      * текущая директория заменяется на полученную. Не проверяет, существует ли полученный путь на самом деле
      * */
-    public void goForward(String filename)
+    public void goDownTree(String filename)
     {
         setCurrentPath(buildPath(filename));
     }
@@ -105,7 +129,7 @@ public final class FileSystem
      * Пойти назад по файловому дереву. Получает родительскую директорию для текущей,
      * и заменяет текущую директорию на неё
      * */
-    public void goBack()
+    public void goUpTree()
     {
         setCurrentPath(getParentDir());
     }
@@ -124,4 +148,38 @@ public final class FileSystem
      * @return Property текущего пути
      * */
     public StringProperty getCurrentPathProperty() {return currentPath;}
+
+    public boolean isBackStackEmpty()
+    {
+        return backStack.isEmpty();
+    }
+
+    public boolean isForwardStackEmpty()
+    {
+        return forwardStack.isEmpty();
+    }
+
+    public void goBack()
+    {
+        if (!backStack.isEmpty())
+        {
+            forwardStack.push(getCurrentPath());
+            changeCurrentPath(backStack.pop());
+        }
+    }
+
+    public void goForward()
+    {
+        if (!forwardStack.isEmpty())
+        {
+            backStack.push(getCurrentPath());
+            changeCurrentPath(forwardStack.pop());
+        }
+    }
+
+    private void changeCurrentPath(String newPath)
+    {
+        this.currentPath.setValue(newPath);
+        EventBus.publish(new PathChangedEvent());
+    }
 }
