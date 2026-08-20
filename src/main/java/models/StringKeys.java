@@ -31,6 +31,14 @@ public class StringKeys
     public static final String SETTINGS_LINUX_USED_TERMINAL = "settings.linux.used_terminal";
     public static final String SETTINGS_LINUX_OPEN_COMMAND = "settings.linux.open_command";
 
+    public static final String CREATE_FOLDER_ITEM = "addmenu.item.folder";
+    public static final String CREATE_TEXT_FILE_ITEM = "addmenu.item.textfile";
+
+    public static final String PATTERN_NEW_FILE = "pattern.newfile";
+
+    public static final String NEW_FOLDER_NAME = "new.folder.name";
+    public static final String NEW_TEXT_FILE_NAME = "new.textfile.name";
+
     public static final String ERROR_LOAD_USER_SETTINGS = "error.load_user_settings";
     public static final String ERROR_SAVE_USER_SETTINGS = "error.save_user_settings";
     public static final String ERROR_LOAD_DEFAULT_SETTINGS = "error.load_default_settings";

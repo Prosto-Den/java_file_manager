@@ -31,11 +31,41 @@
     <ComboBox fx:id="diskComboBox" HBox.hgrow="ALWAYS"/>
 
     <!--Кнопка создать-->
-    <Button textAlignment="RIGHT" fx:id="createButton" HBox.hgrow="ALWAYS" text="%button.add.text">
+    <MenuButton textAlignment="RIGHT" fx:id="createButton" HBox.hgrow="ALWAYS" text="%button.add.text">
+        <!-- Меню -->
+         <items>
+            <!-- Создать папку -->
+            <MenuItem fx:id="createFolderMenuItem" text="%addmenu.item.folder">
+                <graphic>
+                    <ImageView>
+                        <Image url="/icons/16x16/folder.png"/>
+                    </ImageView>
+                </graphic>
+            </MenuItem>
+
+            <!-- Создать текстовый файл -->
+             <MenuItem fx:id="createTextFileMenuItem" text="%addmenu.item.textfile">
+                <graphic>
+                    <ImageView>
+                        <Image url="/icons/16x16/file.png"/>
+                    </ImageView>
+                </graphic>
+             </MenuItem>
+
+         </items>
+        
+        <!-- Иконка -->
+         <graphic>
+            <ImageView>
+                <Image url="/icons/24x24/add.png" preserveRatio="true"/>
+            </ImageView>
+         </graphic>
+
+        <!-- Подсказка при наведении -->
         <tooltip>
             <Tooltip text="%button.add.tooltip"/>
         </tooltip>
-    </Button>
+    </MenuButton>
 
     <!--Кнопка "Назад"-->
     <Button fx:id="backButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30" disable="true">

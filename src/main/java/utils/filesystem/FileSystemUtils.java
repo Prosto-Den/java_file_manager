@@ -6,7 +6,6 @@ import java.nio.file.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
@@ -104,6 +103,17 @@ public class FileSystemUtils
         return new File(path).isDirectory();
     }
 
+    public static boolean isDirEmpty(String path)
+    {
+        boolean res = false;
+        File dir = new File(path);
+
+        if (dir.isDirectory())
+            res = dir.list().length == 0;
+
+        return res;
+    }
+
     /**
      * Провести конкатенацию пути и имени файла / директории
      * @param path путь к родительской директории
@@ -128,6 +138,11 @@ public class FileSystemUtils
             return deleteRecursively(path);
     }
 
+    /**
+     * Создать директорию по указанному пути
+     * @param path
+     * @return
+     */
     public static boolean createDir(String path)
     {
         File file = new File(path);
@@ -184,7 +199,7 @@ public class FileSystemUtils
 
         try
         {
-            if (Files.isDirectory(path))
+            if (Files.isDirectory(path) && !isDirEmpty(rawPath))
             {
                 try (Stream<Path> stream = Files.walk(path))
                 {
@@ -193,7 +208,7 @@ public class FileSystemUtils
                                 try
                                 {
                                     if (Files.isDirectory(p))
-                                        deleteRecursively(p.getParent().toString());
+                                        deleteRecursively(p.toString());
                                     else
                                         Files.delete(p);
                                 }

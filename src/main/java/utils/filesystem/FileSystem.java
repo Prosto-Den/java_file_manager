@@ -3,19 +3,25 @@ package utils.filesystem;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
+import java.io.FileFilter;
 import java.util.regex.Pattern;
-
-import events.EventBus;
-import events.PathChangedEvent;
-
+import java.util.regex.Matcher;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Deque;
 import java.util.ArrayDeque;
 
+import app.AppContext;
+import events.EventBus;
+import events.PathChangedEvent;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import models.StringKeys;
 import types.OSType;
+import utils.i18n.LanguageManager;
 
-// TODO может быть статические методы всё-таки вынести в отдельную утилиту для удобства
+
 /**
  * Класс для работы с файловой системой
  * */
@@ -53,8 +59,8 @@ public final class FileSystem
 
     /**
      * Выдать всё содержимое текущей директории
-     * @param asNames если True, выдаст имена файлов, содержащихся в текущей директории.
-     *                Если False - выдаст их абсолютные пути
+     * @param asNames если true, выдаст имена файлов, содержащихся в текущей директории.
+     *                Если false - выдаст их абсолютные пути
      * @return Список с файлами, содержащимися внутри текущей директории
      * */
     public List<String> listCurrentPath(boolean asNames)
@@ -80,6 +86,10 @@ public final class FileSystem
         return FileSystemUtils.adjustPath(getCurrentPath(), fileName);
     }
 
+    /*TODO возможны ситуации, когда изменения в файловой системе будут происходить в другом месте (например, пользователь удалит папку из 
+        другого файлового менеджера). И может сложиться ситуация, что будет происходить переход в папку, которая уже не существует.
+        Стоит предусмотреть такой сценарий и выводить alert, если вдруг папка перестала существовать.
+     */
     /**
      * Сменить текущую директорию
      * */
@@ -91,7 +101,7 @@ public final class FileSystem
 
         if (!forwardStack.isEmpty())
         {
-            String valueFromForwardStack = forwardStack.peek();
+            String valueFromForwardStack = forwardStack.pop();
             if (!valueFromForwardStack.equals(currentPath))
                 forwardStack.clear();
         }
@@ -149,16 +159,27 @@ public final class FileSystem
      * */
     public StringProperty getCurrentPathProperty() {return currentPath;}
 
+    /**
+     * Пуста ли история перемещений пользователя "назад"?
+     * @return true, если пуста, иначе false
+     */
     public boolean isBackStackEmpty()
     {
         return backStack.isEmpty();
     }
 
+    /**
+     * Пуста ли история перемещений пользователя "вперёд"?
+     * @return true, если пуста, иначе false
+     */
     public boolean isForwardStackEmpty()
     {
         return forwardStack.isEmpty();
     }
 
+    /**
+     * Переместиться "назад" по истории
+     */
     public void goBack()
     {
         if (!backStack.isEmpty())
@@ -168,6 +189,9 @@ public final class FileSystem
         }
     }
 
+    /**
+     * Переместиться "вперёд" по истории
+     */
     public void goForward()
     {
         if (!forwardStack.isEmpty())
@@ -177,9 +201,83 @@ public final class FileSystem
         }
     }
 
+    /**
+     * Создать папку в текущей директории
+     * @return true, если папку удалось создать, иначе false
+     */
+    public boolean createFolderInCurrentDirectory()
+    {
+        String folderName = AppContext.getLanguageManager().getString(StringKeys.NEW_FOLDER_NAME);
+        return FileSystemUtils.createDir(buildPath(buildFileName(folderName, "")));
+    }
+
+    /**
+     * Создать текстовый файл в текущей директории
+     * @return true, если файл удалось создать, иначе false
+     */
+    public boolean createTextFileInCurrentDirectory()
+    {
+        String fileName = AppContext.getLanguageManager().getString(StringKeys.NEW_TEXT_FILE_NAME);
+        return FileSystemUtils.createFile(buildPath(buildFileName(fileName, ".txt")));
+    }
+
+    // Приватные методы
+
+    /**
+     * Сменить текущую директории и отправить событие об этом
+     * @param newPath новый путь, на который будет указывать файловая система
+     */
     private void changeCurrentPath(String newPath)
     {
         this.currentPath.setValue(newPath);
         EventBus.publish(new PathChangedEvent());
+    }
+
+    /**
+     * Построить имя для создаваемого файла/папки
+     * @param fileName имя файла/папки
+     * @param fileFormat формат файла (для папки передать пустую строку)
+     * @return имя нового файла/папки
+     */
+    private String buildFileName(String fileName, String fileFormat)
+    {
+        LanguageManager langManager = AppContext.getLanguageManager();
+        File file = new File(getCurrentPath());
+        Set<Integer> usedIndices = new HashSet<>();
+
+        file.listFiles(new FileFilter() {
+            Pattern pattern = Pattern.compile(langManager.getString(StringKeys.PATTERN_NEW_FILE,
+                Pattern.quote(fileName),
+                Pattern.quote(fileFormat)));
+
+            @Override
+            public boolean accept(File file)
+            {
+                Matcher matcher = pattern.matcher(file.getName());
+                if (matcher.matches())
+                {
+                    String group = matcher.group(1);
+                    usedIndices.add(group == null ? 0 : Integer.parseInt(group));
+                    return true;
+                }
+
+                return false;
+            } 
+        });
+        
+        String result = fileName;
+
+        if (usedIndices.contains(0))
+        {
+            int nextIndex = 1;
+            while (usedIndices.contains(nextIndex))
+                nextIndex++;
+            result = fileName + " (" + nextIndex + ")";
+        }
+        
+        if (!fileFormat.isEmpty())
+            result += fileFormat;
+        
+        return result;
     }
 }

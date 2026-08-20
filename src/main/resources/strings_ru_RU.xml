@@ -31,7 +31,13 @@
     <entry key="settings.linux.title">Настройки для Linux</entry>
     <entry key="settings.linux.used_terminal">Используемый терминал:</entry>
     <entry key="settings.linux.open_command">Команда открытия:</entry>
+    <entry key="addmenu.item.folder">Папку</entry>
+    <entry key="addmenu.item.textfile">Текстовый файл</entry>
 
+    <!--TODO сделать имя для новых файлов/папок настраиваемым?  -->
+    <entry key="new.folder.name">Новая папка</entry>
+    <entry key="new.textfile.name">Текстовый файл</entry>
+    <entry key="pattern.newfile">^%s(?:\s\((\d+)\))?%s$</entry>
 
     <entry key="error.load_user_settings">Не удалось загрузить файл пользовательских настроек. Будут применены настройки по умолчанию</entry>
     <entry key="error.save_user_settings">Не удалось сохранить пользовательские настройки</entry>

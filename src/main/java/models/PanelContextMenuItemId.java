@@ -3,7 +3,7 @@ package models;
 /**
  * Идентификаторы элементов контекстного меню
  * */
-public class PanelContextMenuItemId
+public final class PanelContextMenuItemId
 {
     public static final String OPEN_ITEM = "openMenuItem";
     public static final String COPY_ITEM = "copyMenuItem";

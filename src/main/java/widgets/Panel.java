@@ -3,7 +3,9 @@ package widgets;
 import events.EventBus;
 import events.InsertButtonClickedEvent;
 import events.LocaleChangedEvent;
+import events.NewFileInDirEvent;
 import events.PathChangedEvent;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -129,6 +131,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         EventBus.subscribe(InsertButtonClickedEvent.class, event -> refreshTable());
         EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
         EventBus.subscribe(PathChangedEvent.class, event -> refreshTable());
+        EventBus.subscribe(NewFileInDirEvent.class, event -> refreshTable());
 
         refreshTable();
     }

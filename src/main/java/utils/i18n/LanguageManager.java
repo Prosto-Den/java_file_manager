@@ -151,6 +151,7 @@ public final class LanguageManager
         return String.format(pattern, args);
     }
 
+
     /**
      * Выдать коллекцию строковых ресурсов
      * @return коллекция строковых ресурсов
