@@ -57,8 +57,7 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     @FXML
     private TextField currentPathField; // текстовое поле текущей директории
 
-
-    private final String fileSystemId;
+    private final String fileSystemId; // ID файловой системы
 
 
     /**
@@ -83,12 +82,19 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
             backButton.setDisable(getFileSystem().isBackStackEmpty());
             forwardButton.setDisable(getFileSystem().isForwardStackEmpty());
         });
+        EventBus.subscribe(ClipboardEvent.class, event -> {
+            insertButton.setDisable(!event.isHasFiles());
+        });
 
         backButton.setOnAction(event ->getFileSystem().goBack());
         forwardButton.setOnAction(event -> getFileSystem().goForward());
+        if (OSType.is(OSType.WINDOWS))
+            diskComboBox.setOnAction(event -> onSelectLogicalDrive());
 
-        getCreateMenuItem(CreateButtonMenuId.CREATE_FOLDER_ITEM).ifPresent(item -> item.setOnAction(event -> onCreateFolderItemClick()));
-        getCreateMenuItem(CreateButtonMenuId.CREATE_TEXT_FILE_ITEM).ifPresent(item -> item.setOnAction(event -> onCreateTextFileItemClick()));
+        getCreateMenuItem(CreateButtonMenuId.CREATE_FOLDER_ITEM).ifPresent(item ->
+                item.setOnAction(event -> onCreateFolderItemClick()));
+        getCreateMenuItem(CreateButtonMenuId.CREATE_TEXT_FILE_ITEM).ifPresent(item ->
+                item.setOnAction(event -> onCreateTextFileItemClick()));
     }
 
     /**
@@ -100,16 +106,31 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
         EventBus.publish(new InsertButtonClickedEvent());
     }
 
+    /**
+     * Действия при нажатии на кнопку "Создать папку"
+     */
     private void onCreateFolderItemClick()
     {
         if (getFileSystem().createFolderInCurrentDirectory())
             EventBus.publish(new NewFileInDirEvent());
     }
 
+    /**
+     * Действия при нажатии на кнопку "Создать текстовый файл"
+     */
     private void onCreateTextFileItemClick()
     {
         if (getFileSystem().createTextFileInCurrentDirectory())
             EventBus.publish(new NewFileInDirEvent());
+    }
+
+    /**
+     * Действия при выборе логического драйвера из комбобокса. Актуально только для Windows
+     */
+    private void onSelectLogicalDrive()
+    {
+        String value = diskComboBox.getValue() + "\\";
+        getFileSystem().setCurrentPath(value);
     }
 
     // IWidget
@@ -117,12 +138,7 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     public void initUI()
     {
         showDiskControlsVisibility(OSType.is(OSType.WINDOWS));
-
         insertButton.setDisable(true);
-        EventBus.subscribe(ClipboardEvent.class, event -> {
-            insertButton.setDisable(!event.isHasFiles());
-        });
-
         updateDiskCombo();
         // вызывать updateText при инициализации не требуется, так как loader загружает текста виджетов
         // уже с нужной локалью
@@ -152,6 +168,10 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
         }
     }
 
+    /**
+     * Выставить видимость элементов управления, отвечающих за работу с логическими драйверами
+     * @param show флаг показа элементов управления
+     */
     private void showDiskControlsVisibility(boolean show)
     {
         diskComboBox.setVisible(show);
@@ -160,11 +180,20 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
         diskIcon.setManaged(show);
     }
 
+    /**
+     * Получить файловую систему для виджета
+     * @return файловая система дял виджета
+     */
     private FileSystem getFileSystem()
     {
         return FileSystemController.get(fileSystemId);
     }
 
+    /**
+     * Выдать кнопку из меню создания файлов
+     * @param itemId ID элемента
+     * @return кнопку, если кнопка с таким ID была найдена, иначе Null
+     */
     private Optional<MenuItem> getCreateMenuItem(String itemId)
     {
         return createButton.getItems().stream()
