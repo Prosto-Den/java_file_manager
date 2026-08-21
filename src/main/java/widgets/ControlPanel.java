@@ -72,14 +72,14 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
         insertButton.setOnAction(event -> onInsertItemClick());
 
         this.fileSystemId = fileSystemId;
-
-        //currentPathField.setText(getFileSystem().getCurrentPath());
-        currentPathField.textProperty().bind(getFileSystem().getCurrentPathProperty());
+        
+        currentPathField.setText(getFileSystem().getCurrentPath());
+        //currentPathField.textProperty().bind(getFileSystem().getCurrentPathProperty());
         initUI();
 
         EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
         EventBus.subscribe(PathChangedEvent.class, event -> {
-            //currentPathField.setText(getFileSystem().getCurrentPath());
+            currentPathField.setText(getFileSystem().getCurrentPath());
             backButton.setDisable(getFileSystem().isBackStackEmpty());
             forwardButton.setDisable(getFileSystem().isForwardStackEmpty());
         });

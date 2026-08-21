@@ -15,8 +15,6 @@ import app.AppContext;
 import events.EventBus;
 import events.PathChangedEvent;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import models.StringKeys;
 import types.OSType;
 import utils.i18n.LanguageManager;
@@ -26,10 +24,9 @@ import utils.i18n.LanguageManager;
  * Класс для работы с файловой системой
  * */
 public final class FileSystem
-{
-    // Абсолютный путь к текущей директории. Хранится в property из JavaFX, так как таким образом можно легко
-    // отследить изменения текущей директории (для передачи данных между виджетами)
-    private final StringProperty currentPath = new SimpleStringProperty("");
+{   
+    // Абсолютный путь к текущей директории
+    private String currentPath;
 
     // история перемещений пользователя
     private Deque<String> backStack;
@@ -41,7 +38,7 @@ public final class FileSystem
      * */
     public FileSystem()
     {
-        currentPath.setValue(FileSystemUtils.getDefaultPath());
+        currentPath = FileSystemUtils.getDefaultPath();
         backStack = new ArrayDeque<>();
         forwardStack = new ArrayDeque<>();
     }
@@ -52,7 +49,7 @@ public final class FileSystem
      * */
     public FileSystem(String path)
     {
-        currentPath.setValue(FileSystemUtils.isDir(path) ? path : FileSystemUtils.getDefaultPath());
+        currentPath = FileSystemUtils.isDir(path) ? path : FileSystemUtils.getDefaultPath();
         backStack = new ArrayDeque<>();
         forwardStack = new ArrayDeque<>();
     }
@@ -65,7 +62,7 @@ public final class FileSystem
      * */
     public List<String> listCurrentPath(boolean asNames)
     {
-        File dir = new File(currentPath.getValue());
+        File dir = new File(currentPath);
         File[] files = dir.listFiles();
         List<String> result = new ArrayList<>();
 
@@ -83,39 +80,40 @@ public final class FileSystem
      * */
     public String buildPath(String fileName)
     {
-        return FileSystemUtils.adjustPath(getCurrentPath(), fileName);
+        return FileSystemUtils.adjustPath(currentPath, fileName);
     }
 
     /*TODO возможны ситуации, когда изменения в файловой системе будут происходить в другом месте (например, пользователь удалит папку из 
         другого файлового менеджера). И может сложиться ситуация, что будет происходить переход в папку, которая уже не существует.
-        Стоит предусмотреть такой сценарий и выводить alert, если вдруг папка перестала существовать.
+        Стоит предусмотреть такой сценарий и выводить alert, если вдруг переданный путь не существует
      */
     /**
      * Сменить текущую директорию
      * */
-    public void setCurrentPath(String currentPath)
+    public void setCurrentPath(String path)
     {
         if (OSType.is(OSType.WINDOWS))
-            currentPath = currentPath.replace("\\\\", "\\");
-        backStack.push(this.currentPath.getValue());
+            path = path.replace("\\\\", "\\");
+        else if (OSType.is(OSType.LINUX))
+            path = path.replace("//", "/");
+
+        backStack.push(currentPath);
 
         if (!forwardStack.isEmpty())
         {
             String valueFromForwardStack = forwardStack.pop();
-            if (!valueFromForwardStack.equals(currentPath))
+            if (!valueFromForwardStack.equals(path))
                 forwardStack.clear();
         }
 
-        changeCurrentPath(currentPath);
+        changeCurrentPath(path);
     }
 
     /**
      * Выдать текущую директорию
      * @return текущая директория, на которую указывает объект
      * */
-    public String getCurrentPath() {
-        return currentPath.getValue();
-    }
+    public String getCurrentPath() { return currentPath; }
 
     /**
      * Является ли текущая директория корнем системы?
@@ -123,7 +121,7 @@ public final class FileSystem
     public boolean isCurrentPathRoot()
     {
         Pattern pattern = Pattern.compile("^([A-Z]:\\\\|/)$", Pattern.CASE_INSENSITIVE);
-        return pattern.matcher(currentPath.getValue()).matches();
+        return pattern.matcher(currentPath).matches();
     }
 
     /**
@@ -150,14 +148,8 @@ public final class FileSystem
      * */
     public String getParentDir()
     {
-        return new File(currentPath.getValue()).getParent();
+        return new File(currentPath).getParent();
     }
-
-    /**
-     * Выдать property текущего пути
-     * @return Property текущего пути
-     * */
-    public StringProperty getCurrentPathProperty() {return currentPath;}
 
     /**
      * Пуста ли история перемещений пользователя "назад"?
@@ -184,7 +176,7 @@ public final class FileSystem
     {
         if (!backStack.isEmpty())
         {
-            forwardStack.push(getCurrentPath());
+            forwardStack.push(currentPath);
             changeCurrentPath(backStack.pop());
         }
     }
@@ -196,7 +188,7 @@ public final class FileSystem
     {
         if (!forwardStack.isEmpty())
         {
-            backStack.push(getCurrentPath());
+            backStack.push(currentPath);
             changeCurrentPath(forwardStack.pop());
         }
     }
@@ -229,7 +221,7 @@ public final class FileSystem
      */
     private void changeCurrentPath(String newPath)
     {
-        this.currentPath.setValue(newPath);
+        currentPath = newPath;
         EventBus.publish(new PathChangedEvent());
     }
 
@@ -242,7 +234,7 @@ public final class FileSystem
     private String buildFileName(String fileName, String fileFormat)
     {
         LanguageManager langManager = AppContext.getLanguageManager();
-        File file = new File(getCurrentPath());
+        File file = new File(currentPath);
         Set<Integer> usedIndices = new HashSet<>();
 
         file.listFiles(new FileFilter() {
