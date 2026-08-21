@@ -6,37 +6,41 @@ import events.ClipboardEvent;
 import events.EventBus;
 import events.InsertButtonClickedEvent;
 import events.LocaleChangedEvent;
+import events.NewFileInDirEvent;
+import events.PathChangedEvent;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import models.CreateButtonMenuId;
 import models.StringKeys;
-import resourceHandler.IconName;
-import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import types.OSType;
+import utils.filesystem.FileSystem;
 import utils.filesystem.FileSystemController;
 import utils.filesystem.FileSystemUtils;
 import utils.ui.ClipboardUtil;
 import widgets.interfaces.ITranslatable;
 import widgets.interfaces.IWidget;
+import java.util.Optional;
 
 
 /**
  * Панель с элементами управления для текущей директории
  * */
-public class ControlPanel extends HBox implements IWidget, ITranslatable
+public final class ControlPanel extends HBox implements IWidget, ITranslatable
 {
     @FXML
-    private Button createButton; // кнопка добавления файла в директорию
+    private MenuButton createButton; // кнопка создания файла/папки в директории
 
     @FXML
-    private ImageView diskIcon;
+    private ImageView diskIcon; // иконка диска
 
     @FXML
     private ComboBox<String> diskComboBox; // выпадающий список с логическими дисками системы
@@ -54,6 +58,9 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
     private TextField currentPathField; // текстовое поле текущей директории
 
 
+    private final String fileSystemId;
+
+
     /**
      * Конструктор
      * @param fileSystemId идентификатор файловой системы. Так же, как и Panel не проверяет, что файловая
@@ -64,34 +71,51 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
         load(ResourceHandler.getLayout("ControlPanel.fxml"));
         insertButton.setOnAction(event -> onInsertItemClick());
 
-        if (FileSystemController.get(fileSystemId) != null)
-            currentPathField.textProperty().bind(FileSystemController.get(fileSystemId).getCurrentPathProperty());
+        this.fileSystemId = fileSystemId;
+        
+        currentPathField.setText(getFileSystem().getCurrentPath());
+        //currentPathField.textProperty().bind(getFileSystem().getCurrentPathProperty());
         initUI();
 
         EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
+        EventBus.subscribe(PathChangedEvent.class, event -> {
+            currentPathField.setText(getFileSystem().getCurrentPath());
+            backButton.setDisable(getFileSystem().isBackStackEmpty());
+            forwardButton.setDisable(getFileSystem().isForwardStackEmpty());
+        });
+
+        backButton.setOnAction(event ->getFileSystem().goBack());
+        forwardButton.setOnAction(event -> getFileSystem().goForward());
+
+        getCreateMenuItem(CreateButtonMenuId.CREATE_FOLDER_ITEM).ifPresent(item -> item.setOnAction(event -> onCreateFolderItemClick()));
+        getCreateMenuItem(CreateButtonMenuId.CREATE_TEXT_FILE_ITEM).ifPresent(item -> item.setOnAction(event -> onCreateTextFileItemClick()));
     }
 
     /**
      * Действия при нажатии кнопки "Вставить"
      * */
-    public void onInsertItemClick()
+    private void onInsertItemClick()
     {
         ClipboardUtil.insert(currentPathField.getText());
         EventBus.publish(new InsertButtonClickedEvent());
+    }
+
+    private void onCreateFolderItemClick()
+    {
+        if (getFileSystem().createFolderInCurrentDirectory())
+            EventBus.publish(new NewFileInDirEvent());
+    }
+
+    private void onCreateTextFileItemClick()
+    {
+        if (getFileSystem().createTextFileInCurrentDirectory())
+            EventBus.publish(new NewFileInDirEvent());
     }
 
     // IWidget
     @Override
     public void initUI()
     {
-        Image addIcon = ResourceHandler.getIcon(IconSize.BIG, IconName.ADD);
-        if (addIcon != null)
-        {
-            ImageView addImage = new ImageView();
-            addImage.setImage(addIcon);
-            createButton.setGraphic(addImage);
-        }
-
         showDiskControlsVisibility(OSType.is(OSType.WINDOWS));
 
         insertButton.setDisable(true);
@@ -134,5 +158,17 @@ public class ControlPanel extends HBox implements IWidget, ITranslatable
         diskComboBox.setManaged(show);
         diskIcon.setVisible(show);
         diskIcon.setManaged(show);
+    }
+
+    private FileSystem getFileSystem()
+    {
+        return FileSystemController.get(fileSystemId);
+    }
+
+    private Optional<MenuItem> getCreateMenuItem(String itemId)
+    {
+        return createButton.getItems().stream()
+            .filter(item -> item.getId() != null && item.getId().equals(itemId))
+            .findFirst();
     }
 }

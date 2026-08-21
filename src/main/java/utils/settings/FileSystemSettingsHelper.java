@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Вспомогательный класс для связи UUID экземпляра файловой системы с ID из настроек
  * */
-public class FileSystemSettingsHelper
+public final class FileSystemSettingsHelper
 {
     // тут будем хранить связь UUID с путём
     private Map<String, String> fileSystemsKeys;

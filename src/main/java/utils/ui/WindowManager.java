@@ -16,7 +16,7 @@ import java.io.IOException;
 /**
  * Вспомогательный класс для работы с окнами приложения.
  */
-public class WindowManager
+public final class WindowManager
 {
     private final Stage mainStage;
     private final SettingsManager settingsManager;

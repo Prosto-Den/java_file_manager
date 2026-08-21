@@ -6,8 +6,9 @@ import java.nio.file.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 import java.util.stream.Stream;
+
+import org.jetbrains.annotations.Nullable;
 
 //TODO некоторые утилиты не нужны для линукса. Возможно, стоит завезти отдельный класс WindowsFileSystemUtils?
 
@@ -16,8 +17,6 @@ import java.util.stream.Stream;
  * */
 public class FileSystemUtils
 {
-    private static final OSType osType = calcOSType(); // тип ОС
-
     /**
      * Существует ли файл (директория) по этому пути
      * @param path Путь к файлу/директории
@@ -33,21 +32,22 @@ public class FileSystemUtils
      * Вызов функции актуален только для Windows.
      * @return Список со всеми логическими дисками системы для Windows, пустой список для Linux.
      * */
-    public static List<String> getLogicalDrives()
+    public static @Nullable List<String> getLogicalDrives()
     {
-        List<String> logicalDrives = new ArrayList<>();
-
-        if (osType == OSType.WINDOWS)
+        if (OSType.is(OSType.WINDOWS))
         {
-            for (char letter = 'A'; letter <= 'Z'; letter++)
+            List<String> logicalDrives = new ArrayList<>();
+            for (char letter = 'A'; letter <= 'Z'; ++letter)
             {
                 String path = String.format("%s:", letter);
                 if (isExist(path))
                     logicalDrives.add(path);
             }
+
+            return logicalDrives;
         }
 
-        return logicalDrives;
+        return null;
     }
 
     /**
@@ -103,6 +103,17 @@ public class FileSystemUtils
         return new File(path).isDirectory();
     }
 
+    public static boolean isDirEmpty(String path)
+    {
+        boolean res = false;
+        File dir = new File(path);
+
+        if (dir.isDirectory())
+            res = dir.list().length == 0;
+
+        return res;
+    }
+
     /**
      * Провести конкатенацию пути и имени файла / директории
      * @param path путь к родительской директории
@@ -127,6 +138,11 @@ public class FileSystemUtils
             return deleteRecursively(path);
     }
 
+    /**
+     * Создать директорию по указанному пути
+     * @param path
+     * @return
+     */
     public static boolean createDir(String path)
     {
         File file = new File(path);
@@ -163,25 +179,12 @@ public class FileSystemUtils
     // Приватные методы
 
     /**
-     * Определить операционную систему. Пока все ОС делятся на Windows и Linux (всё что не Windows, то Linux)
-     * @return Тип ОС
-     * */
-    // TODO как будто тоже должно быть не тут
-    private static OSType calcOSType()
-    {
-        String osName = System.getProperty("os.name");
-        if (osName.contains("Windows"))
-            return OSType.WINDOWS;
-        return OSType.LINUX;
-    }
-
-    /**
      * Выдать корень файловой системы (C:\ для Windows и / для Linux)
      * @return Корень системы
      * */
     public static String getDefaultPath()
     {
-        if (osType == OSType.WINDOWS)
+        if (OSType.is(OSType.WINDOWS))
             return "C:\\";
         return "/";
     }
@@ -196,7 +199,7 @@ public class FileSystemUtils
 
         try
         {
-            if (Files.isDirectory(path))
+            if (Files.isDirectory(path) && !isDirEmpty(rawPath))
             {
                 try (Stream<Path> stream = Files.walk(path))
                 {
@@ -205,7 +208,7 @@ public class FileSystemUtils
                                 try
                                 {
                                     if (Files.isDirectory(p))
-                                        deleteRecursively(p.getParent().toString());
+                                        deleteRecursively(p.toString());
                                     else
                                         Files.delete(p);
                                 }

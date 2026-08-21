@@ -14,7 +14,7 @@ import javafx.scene.Node;
 /**
  * Класс для работы с контекстным меню
  * */
-public class ContextMenuManager
+public final class ContextMenuManager
 {   
     private ContextMenu panelContextMenu;
     private static final String PANEL_CONTEXT_MENU = "ContextMenu.fxml";
@@ -25,7 +25,11 @@ public class ContextMenuManager
 
     }
 
-    public ContextMenu createOrGetpanelContextMenu()
+    /**
+     * Создать контекстное меню для панели или получить его, если оно уже было создано
+     * @return контекстное меню для панели
+     */
+    public ContextMenu createOrGetPanelContextMenu()
     {
         if (panelContextMenu == null)
             panelContextMenu = loadContextMenuLayout(PANEL_CONTEXT_MENU);
@@ -57,6 +61,11 @@ public class ContextMenuManager
                 .findFirst();
     }
 
+    /**
+     * Настроить контекстное меню согласно конфигурации
+     * @param menu контекстное меню
+     * @param context конфигурация
+     */
     public void configureContextMenu(ContextMenu menu, IMenuContext context)
     {
         for (MenuItem item : menu.getItems())

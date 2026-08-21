@@ -1,4 +1,4 @@
 package events;
 
-public class InsertButtonClickedEvent {
+public final class InsertButtonClickedEvent {
 }

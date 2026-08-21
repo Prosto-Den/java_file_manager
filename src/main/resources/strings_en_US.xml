@@ -31,7 +31,12 @@
     <entry key="settings.linux.title">Linux settings</entry>
     <entry key="settings.linux.used_terminal">Used terminal:</entry>
     <entry key="settings.linux.open_command">Open command:</entry>
+    <entry key="addmenu.item.folder">Folder</entry>
+    <entry key="addmenu.item.textfile">Text file</entry>
 
+    <entry key="new.folder.name">New folder</entry>
+    <entry key="new.textfile.name">Text file</entry>
+    <entry key="pattern.newfile">^%s(?:\s\((\d+)\))?%s$</entry>
 
     <entry key="error.load_user_settings">Loading user settings failed. Applying default settings</entry>
     <entry key="error.save_user_settings">Failed to save settings</entry>
