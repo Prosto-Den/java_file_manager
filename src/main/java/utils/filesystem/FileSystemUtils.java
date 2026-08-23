@@ -189,6 +189,12 @@ public class FileSystemUtils
         return "/";
     }
 
+    public static boolean renameFile(String oldFilePath, String newFilePath)
+    {
+        File file = new File(oldFilePath);
+        return file.renameTo(new File(newFilePath));
+    }
+
     //TODO директории с большим количеством файлов будут удаляться долго, поэтому
     // удаление надо вынести в отдельный поток + создать окно с индикацией удаления
     private static boolean deleteRecursively(String rawPath)
