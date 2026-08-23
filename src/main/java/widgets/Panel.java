@@ -13,6 +13,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import java.util.List;
@@ -149,6 +150,18 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         {
             private final ImageView imageView = new ImageView();
             private TextField textField;
+            
+            // отключаем редактирование по двойному нажатию на мышку
+            {
+                addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+                    if (!isEditing())
+                    {
+                        if (event.getClickCount() > 1)
+                            event.consume();
+                        // обработка двойного щёлка на ЛКМ происходит ниже, тут можно ничего не писать
+                    }
+                });
+            }
 
             /**
              * Метод обновления содержимого ячейки таблицы
@@ -200,6 +213,9 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 }
             }
 
+            /**
+             * Действия при запуске радектирования ячейки
+             */
             @Override
             public void startEdit()
             {
@@ -219,7 +235,10 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 textField.selectAll();
                 textField.requestFocus();
             }
-
+            
+            /**
+             * Отмена редактирования
+             */
             @Override
             public void cancelEdit()
             {
@@ -227,7 +246,10 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 setText(getItem());
                 setGraphic(imageView);
             }
-
+            
+            /**
+             * Создать поле ввода в момент редактирования
+             */
             private void createTextField()
             {
                 textField = new TextField(getItem());
@@ -247,20 +269,19 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             }
         });
         fileNameColumn.setEditable(true);
+
+        // настраиваем поведение при завершении редактирования
         fileNameColumn.setOnEditCommit(event -> {
             String oldName = event.getOldValue();
             String newName = event.getNewValue();
+            FileData data = event.getRowValue();
 
             if (newName == null || newName.isBlank() || newName.equals(oldName))
-            {
-                refreshTable();
                 return;
-            }
 
             if (getFileSystem().renameFile(oldName, newName))
-            {
+                // TODO хотелось бы не перерисовывать всю таблицу, а изменить имя только у этой ячейки
                 refreshTable();
-            }
         });
 
 
@@ -303,6 +324,25 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             });
 
             return row;
+        });
+
+        // задаём поведение при нажатии на кнопки клавиатуры
+        fileViewer.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.F2)
+            {
+                int selectedIndex = fileViewer.getSelectionModel().getSelectedIndex();
+                if (selectedIndex >= 0)
+                {
+                    FileData selectedFile = fileViewer.getItems().get(selectedIndex);
+                    String fileName = selectedFile.getNameValue();
+                    if (fileName.equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
+                        return;
+
+                    fileViewer.edit(selectedIndex, fileNameColumn);
+                }
+
+                event.consume();
+            }
         });
     }
 
