@@ -11,7 +11,9 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import java.util.List;
@@ -59,18 +61,17 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             {
                 case (PanelContextMenuItemId.OPEN_ITEM) -> handleDoubleClick(data);
                 case (PanelContextMenuItemId.COPY_ITEM) -> ClipboardUtil.copyToClipboard(data.getAbsolutePath());
-                case (PanelContextMenuItemId.DELETE_ITEM) -> 
-                {
+                case (PanelContextMenuItemId.DELETE_ITEM) -> {
                     FileSystemUtils.delete(data.getAbsolutePath());
                     refreshTable();
                 }
-                case (PanelContextMenuItemId.MOVE_TO_TRASH_ITEM) -> 
-                {
+                case (PanelContextMenuItemId.MOVE_TO_TRASH_ITEM) -> {
                     AppContext.getIntegrationService().moveToTrash(data.getAbsolutePath());
                     refreshTable();
                 }
                 case (PanelContextMenuItemId.OPEN_IN_TERMINAL_ITEM) -> AppContext.getIntegrationService().openInTerminal(data.getAbsolutePath());
                 case (PanelContextMenuItemId.REFRESH_ITEM) -> refreshTable();
+                case (PanelContextMenuItemId.RENAME_ITEM) -> onRenameItem();
                 default -> {/*ничего не делаем*/}
             }
         }
@@ -146,6 +147,19 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         fileNameColumn.setCellFactory(column -> new TableCell<FileData, String>()
         {
             private final ImageView imageView = new ImageView();
+            private TextField textField;
+            
+            // отключаем редактирование по двойному нажатию на мышку
+            {
+                addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+                    if (!isEditing())
+                    {
+                        if (event.getClickCount() > 1)
+                            event.consume();
+                        // обработка двойного щёлка на ЛКМ происходит ниже, тут можно ничего не писать
+                    }
+                });
+            }
 
             /**
              * Метод обновления содержимого ячейки таблицы
@@ -162,31 +176,111 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 }
                 else
                 {
-                    FileData file = getTableView().getItems().get(getIndex());
-                    String fileName = file.getNameValue();
-                    Image icon;
-
-                    if (fileName.equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
-                        icon = ResourceHandler.getIcon(IconSize.BIG, IconName.BACK);
+                    if (isEditing())
+                    {
+                        if (textField != null)
+                            textField.setText(item);
+                        setText(null);
+                        setGraphic(textField);
+                    }
                     else
                     {
-                        String fullPath = getFileSystem().buildPath(file.getNameValue());
-                        if (FileSystemUtils.isDir(fullPath))
-                            icon = ResourceHandler.getIcon(IconSize.BIG, IconName.FOLDER);
+                        FileData file = getTableView().getItems().get(getIndex());
+                        String fileName = file.getNameValue();
+                        Image icon;
+
+                        if (fileName.equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
+                            icon = ResourceHandler.getIcon(IconSize.BIG, IconName.BACK);
                         else
-                            icon = ResourceHandler.getIcon(IconSize.BIG, IconName.FILE);
-                    }
+                        {
+                            String fullPath = getFileSystem().buildPath(file.getNameValue());
+                            if (FileSystemUtils.isDir(fullPath))
+                                icon = ResourceHandler.getIcon(IconSize.BIG, IconName.FOLDER);
+                            else
+                                icon = ResourceHandler.getIcon(IconSize.BIG, IconName.FILE);
+                        }
 
-                    if (icon != null)
-                    {
-                        imageView.setImage(icon);
-                        setGraphic(imageView);
-                    }
+                        if (icon != null)
+                        {
+                            imageView.setImage(icon);
+                            setGraphic(imageView);
+                        }
 
-                    setText(item);
+                        setText(item);
+                    }
                 }
             }
+
+            /**
+             * Действия при запуске радектирования ячейки
+             */
+            @Override
+            public void startEdit()
+            {
+                if (!isEditable() || !getTableView().isEditable() || !getTableColumn().isEditable())
+                    return;
+
+                FileData file = getTableView().getItems().get(getIndex());
+                String fileName = file.getNameValue();
+                if (fileName.equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
+                    return;
+
+                super.startEdit();
+                createTextField();
+
+                setText(null);
+                setGraphic(textField);
+                textField.selectAll();
+                textField.requestFocus();
+            }
+            
+            /**
+             * Отмена редактирования
+             */
+            @Override
+            public void cancelEdit()
+            {
+                super.cancelEdit();
+                setText(getItem());
+                setGraphic(imageView);
+            }
+            
+            /**
+             * Создать поле ввода в момент редактирования
+             */
+            private void createTextField()
+            {
+                textField = new TextField(getItem());
+                textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
+
+                textField.setOnKeyPressed(t -> {
+                    if (t.getCode() == KeyCode.ENTER)
+                        commitEdit(textField.getText());
+                    else if (t.getCode() == KeyCode.ESCAPE)
+                        cancelEdit();
+                });
+
+                textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                    if (!newValue)
+                        commitEdit(textField.getText());
+                });
+            }
         });
+        fileNameColumn.setEditable(true);
+
+        // настраиваем поведение при завершении редактирования
+        fileNameColumn.setOnEditCommit(event -> {
+            String oldName = event.getOldValue();
+            String newName = event.getNewValue();
+
+            if (newName == null || newName.isBlank() || newName.equals(oldName))
+                return;
+
+            if (getFileSystem().renameFile(oldName, newName))
+                // TODO хотелось бы не перерисовывать всю таблицу, а изменить имя только у этой ячейки
+                refreshTable();
+        });
+
 
         // настраиваем колонку с размером файла
         fileSizeColumn.setCellValueFactory(cellData -> cellData.getValue().size());
@@ -227,6 +321,15 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             });
 
             return row;
+        });
+
+        // задаём поведение при нажатии на кнопки клавиатуры
+        fileViewer.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.F2)
+            {
+                onRenameItem();
+                event.consume();
+            }
         });
     }
 
@@ -293,6 +396,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         // Меняем поведение fileViewer при увеличении размера окна. По умолчанию, будет создаваться четвёртая колонка.
         // Тут же ставим, чтобы последняя колонка подстраивалась под новый размер окна
         fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        fileViewer.setEditable(true);
         setupTableColumns();
         refreshTable();
     }
@@ -324,6 +428,20 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         {
             String currentPath = getFileSystem().getCurrentPath();
             settingsHelper.setPath(fileSystemID, currentPath);
+        }
+    }
+
+    private void onRenameItem()
+    {
+        int selectedIndex = fileViewer.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0)
+        {
+            FileData selectedFile = fileViewer.getItems().get(selectedIndex);
+            String fileName = selectedFile.getNameValue();
+            if (fileName.equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
+                return;
+            
+            fileViewer.edit(selectedIndex, fileNameColumn);
         }
     }
 }

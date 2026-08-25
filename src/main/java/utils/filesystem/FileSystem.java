@@ -98,6 +98,9 @@ public final class FileSystem
             path = path.replace("//", "/");
 
         backStack.push(currentPath);
+        // TODO размер истории вынести в настройки
+        if (backStack.size() >= 10)
+            backStack.removeLast();
 
         if (!forwardStack.isEmpty())
         {
@@ -177,6 +180,8 @@ public final class FileSystem
         if (!backStack.isEmpty())
         {
             forwardStack.push(currentPath);
+            if (forwardStack.size() >= 10)
+                forwardStack.removeLast();
             changeCurrentPath(backStack.pop());
         }
     }
@@ -189,6 +194,8 @@ public final class FileSystem
         if (!forwardStack.isEmpty())
         {
             backStack.push(currentPath);
+            if (backStack.size() >= 10)
+                backStack.removeLast();
             changeCurrentPath(forwardStack.pop());
         }
     }
@@ -211,6 +218,11 @@ public final class FileSystem
     {
         String fileName = AppContext.getLanguageManager().getString(StringKeys.NEW_TEXT_FILE_NAME);
         return FileSystemUtils.createFile(buildPath(buildFileName(fileName, ".txt")));
+    }
+
+    public boolean renameFile(String oldFileName, String newFileName)
+    {
+        return FileSystemUtils.renameFile(buildPath(oldFileName), buildPath(newFileName));
     }
 
     // Приватные методы

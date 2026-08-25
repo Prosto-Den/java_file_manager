@@ -37,6 +37,15 @@
             </graphic>
         </MenuItem>
 
+        <!-- Кнопка "Переименовать" -->
+         <MenuItem fx:id="renameMenuItem" text="%contextmenu.item.rename">
+            <graphic>
+                <ImageView>
+                    <Image url="@/icons/16x16/rename.png"/>
+                </ImageView>
+            </graphic>
+         </MenuItem>
+
         <SeparatorMenuItem/>
 
         <!--Кнопка "Обновить"-->

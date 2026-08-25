@@ -4,7 +4,7 @@ import models.FileData;
 import javafx.scene.Node;
 
 /**
- * Интерфейс для лбмена инфомрацией между виджетом и контекстным меню
+ * Интерфейс для обмена информацией между виджетом и контекстным меню
  */
 public interface IMenuContext 
 {
