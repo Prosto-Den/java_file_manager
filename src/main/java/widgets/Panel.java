@@ -71,9 +71,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 }
                 case (PanelContextMenuItemId.OPEN_IN_TERMINAL_ITEM) -> AppContext.getIntegrationService().openInTerminal(data.getAbsolutePath());
                 case (PanelContextMenuItemId.REFRESH_ITEM) -> refreshTable();
-                case (PanelContextMenuItemId.RENAME_ITEM) -> {
-
-                }
+                case (PanelContextMenuItemId.RENAME_ITEM) -> onRenameItem();
                 default -> {/*ничего не делаем*/}
             }
         }
@@ -274,7 +272,6 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         fileNameColumn.setOnEditCommit(event -> {
             String oldName = event.getOldValue();
             String newName = event.getNewValue();
-            FileData data = event.getRowValue();
 
             if (newName == null || newName.isBlank() || newName.equals(oldName))
                 return;
@@ -330,17 +327,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         fileViewer.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F2)
             {
-                int selectedIndex = fileViewer.getSelectionModel().getSelectedIndex();
-                if (selectedIndex >= 0)
-                {
-                    FileData selectedFile = fileViewer.getItems().get(selectedIndex);
-                    String fileName = selectedFile.getNameValue();
-                    if (fileName.equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
-                        return;
-
-                    fileViewer.edit(selectedIndex, fileNameColumn);
-                }
-
+                onRenameItem();
                 event.consume();
             }
         });
@@ -441,6 +428,20 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         {
             String currentPath = getFileSystem().getCurrentPath();
             settingsHelper.setPath(fileSystemID, currentPath);
+        }
+    }
+
+    private void onRenameItem()
+    {
+        int selectedIndex = fileViewer.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0)
+        {
+            FileData selectedFile = fileViewer.getItems().get(selectedIndex);
+            String fileName = selectedFile.getNameValue();
+            if (fileName.equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
+                return;
+            
+            fileViewer.edit(selectedIndex, fileNameColumn);
         }
     }
 }
