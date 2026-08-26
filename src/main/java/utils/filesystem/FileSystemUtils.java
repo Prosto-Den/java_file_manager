@@ -189,6 +189,12 @@ public class FileSystemUtils
         return "/";
     }
 
+    /**
+     * Переименовать файл
+     * @param oldFilePath старый путь к файлу
+     * @param newFilePath новый путь к файлу
+     * @return true, если файл удалось переименовать, иначе false
+     */
     public static boolean renameFile(String oldFilePath, String newFilePath)
     {
         File file = new File(oldFilePath);

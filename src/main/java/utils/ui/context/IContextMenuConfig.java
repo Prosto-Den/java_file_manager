@@ -1,4 +1,4 @@
-package context;
+package utils.ui.context;
 
 import models.FileData;
 import javafx.scene.Node;
@@ -6,7 +6,7 @@ import javafx.scene.Node;
 /**
  * Интерфейс для обмена информацией между виджетом и контекстным меню
  */
-public interface IMenuContext 
+public interface IContextMenuConfig 
 {
     /**
      * Получить информацию по файлу

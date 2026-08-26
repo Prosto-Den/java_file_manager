@@ -11,26 +11,32 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import java.util.List;
+import java.io.File;
+import java.util.ArrayList;
 
 import app.AppContext;
-import context.IMenuContext;
 import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import utils.settings.FileSystemSettingsHelper;
 import utils.ui.ClipboardUtil;
+import utils.ui.context.IContextMenuConfig;
 import models.PanelContextMenuItemId;
 import models.FileData;
 import widgets.interfaces.IWidget;
 import widgets.interfaces.ITranslatable;
 import javafx.scene.Node;
+import events.FileSystemChangedEvent;
 
 import utils.filesystem.*;
 
@@ -42,7 +48,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     /**
      * Класс контекста для панели. Служит для передачи данных от панели к контекстному меню
      */
-    public class PanelMenuContext implements IMenuContext
+    public class PanelMenuContext implements IContextMenuConfig
     {
         private final FileData data;
 
@@ -121,7 +127,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
      *                     через FileSystemController. ВАЖНО!!! внутри конструктора нет проверки, что объект ФС
      *                     по этому ID существует, так что передавать нужно точно валидный ID
      * */
-    public Panel(String fileSystemId, FileSystemSettingsHelper helper)
+    public Panel(String fileSystemId, FileSystemSettingsHelper helper, int panelId)
     {
         fileSystemID = fileSystemId;
         settingsHelper = helper;
@@ -133,14 +139,133 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
         EventBus.subscribe(PathChangedEvent.class, event -> refreshTable());
         EventBus.subscribe(NewFileInDirEvent.class, event -> refreshTable());
+        EventBus.subscribe(FileSystemChangedEvent.class, event -> {
+            if (fileSystemId.equals(event.getFileSystemId()))
+                refreshTable();
+        });
 
         refreshTable();
     }
 
     /**
+     * Обработка двойного нажатия на ряд таблицы
+     * @param fileInfo данные файла
+     * */
+    private void handleDoubleClick(FileData fileInfo)
+    {
+        if (getFileSystem() != null)
+        {
+            String fileName = fileInfo.getNameValue();
+
+            if (fileName.equals(".."))
+            {
+                getFileSystem().goUpTree();
+                updateSettings();
+                refreshTable();
+            }
+            else if (fileInfo.isDirectory())
+            {
+                getFileSystem().goDownTree(fileName);
+                updateSettings();
+                refreshTable();
+            }
+            else
+                AppContext.getIntegrationService().openFile(fileInfo.getAbsolutePath());
+        }
+    }
+
+    // IWidget
+    @Override
+    public void initUI()
+    {
+        // Меняем поведение fileViewer при увеличении размера окна. По умолчанию, будет создаваться четвёртая колонка.
+        // Тут же ставим, чтобы последняя колонка подстраивалась под новый размер окна
+        fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        fileViewer.setEditable(true);
+        setupFileViewer();
+        refreshTable();
+    }
+
+    // ITranslatable
+    @Override
+    public void updateText()
+    {
+        fileNameColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_FILENAME));
+        fileSizeColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_FILE_SIZE));
+        fileEditDateColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
+    }
+
+    // Приватные методы
+
+    /**
+     * Обновить содержимое таблицы
+     * */
+    private void refreshTable()
+    {
+        if (getFileSystem() != null)
+        {
+            ObservableList<FileData> fileData = FXCollections.observableArrayList();
+
+            if (!getFileSystem().isCurrentPathRoot())
+                fileData.add(new FileData("..", "", "", true));
+
+            List<String> files = getFileSystem().listCurrentPath(false);
+            for (String file : files)
+            {
+                String fileSize = FileSystemUtils.getFileSize(file);
+                String fileEditDate = FileSystemUtils.lastModifiedDate(file);
+
+                FileData fileInfo = new FileData(file, fileSize, fileEditDate,
+                    FileSystemUtils.isDir(file));
+                fileData.add(fileInfo);
+            }
+
+            fileViewer.getItems().clear();
+            fileViewer.setItems(fileData);
+            fileViewer.refresh();
+        }
+    }
+
+    /**
+     * Получить экземпляр файловой системы дял данной панели. Метод нужен для более простого доступа
+     * к экземпляру
+     * @return объект файловой системы для данной панели
+     * */
+    private FileSystem getFileSystem() { return FileSystemController.get(fileSystemID); }
+
+    /**
+     * Записать директорию в настройки
+     * */
+    private void updateSettings()
+    {
+        if (getFileSystem() != null)
+        {
+            String currentPath = getFileSystem().getCurrentPath();
+            settingsHelper.setPath(fileSystemID, currentPath);
+        }
+    }
+
+    /**
+     * Действия при переименовании файла
+     */
+    private void onRenameItem()
+    {
+        int selectedIndex = fileViewer.getSelectionModel().getSelectedIndex();
+        if (selectedIndex >= 0)
+        {
+            FileData selectedFile = fileViewer.getItems().get(selectedIndex);
+            String fileName = selectedFile.getNameValue();
+            if (fileName.equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
+                return;
+            
+            fileViewer.edit(selectedIndex, fileNameColumn);
+        }
+    }
+
+    /**
      * Настроить колонки таблицы
      * */
-    private void setupTableColumns()
+    private void setupFileViewerColumns()
     {
         // настраиваем колонку с именем файла
         fileNameColumn.setCellValueFactory(cellData -> cellData.getValue().getName());
@@ -286,6 +411,14 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         fileSizeColumn.setCellValueFactory(cellData -> cellData.getValue().size());
         // настраиваем колонку с датой последнего изменения
         fileEditDateColumn.setCellValueFactory(cellData -> cellData.getValue().date());
+    }
+
+    /**
+     * Настроить виджет таблицы
+     */
+    private void setupFileViewer()
+    {
+        setupFileViewerColumns();
 
         // задаём настройки для ряда
         fileViewer.setRowFactory( tv ->
@@ -331,117 +464,71 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 event.consume();
             }
         });
-    }
 
-    /**
-     * Обработка двойного нажатия на ряд таблицы
-     * @param fileInfo данные файла
-     * */
-    private void handleDoubleClick(FileData fileInfo)
-    {
-        if (getFileSystem() != null)
-        {
-            String fileName = fileInfo.getNameValue();
+        // задаём поведение при начале перетаскивания
+        fileViewer.setOnDragDetected(event -> {
+            ObservableList<FileData> files = fileViewer.getSelectionModel().getSelectedItems();
 
-            if (fileName.equals(".."))
-            {
-                getFileSystem().goUpTree();
-                updateSettings();
-                refreshTable();
-            }
-            else if (fileInfo.isDirectory())
-            {
-                getFileSystem().goDownTree(fileName);
-                updateSettings();
-                refreshTable();
-            }
-            else
-                AppContext.getIntegrationService().openFile(fileInfo.getAbsolutePath());
-        }
-    }
-
-    /**
-     * Обновить содержимое таблицы
-     * */
-    private void refreshTable()
-    {
-        if (getFileSystem() != null)
-        {
-            ObservableList<FileData> fileData = FXCollections.observableArrayList();
-
-            if (!getFileSystem().isCurrentPathRoot())
-                fileData.add(new FileData("..", "", "", true));
-
-            List<String> files = getFileSystem().listCurrentPath(false);
-            for (String file : files)
-            {
-                String fileSize = FileSystemUtils.getFileSize(file);
-                String fileEditDate = FileSystemUtils.lastModifiedDate(file);
-
-                FileData fileInfo = new FileData(file, fileSize, fileEditDate,
-                    FileSystemUtils.isDir(file));
-                fileData.add(fileInfo);
-            }
-
-            fileViewer.getItems().clear();
-            fileViewer.setItems(fileData);
-            fileViewer.refresh();
-        }
-    }
-
-    // IWidget
-    @Override
-    public void initUI()
-    {
-        // Меняем поведение fileViewer при увеличении размера окна. По умолчанию, будет создаваться четвёртая колонка.
-        // Тут же ставим, чтобы последняя колонка подстраивалась под новый размер окна
-        fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
-        fileViewer.setEditable(true);
-        setupTableColumns();
-        refreshTable();
-    }
-
-    // ITranslatable
-    @Override
-    public void updateText()
-    {
-        fileNameColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_FILENAME));
-        fileSizeColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_FILE_SIZE));
-        fileEditDateColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
-    }
-
-    // Приватные методы
-
-    /**
-     * Получить экземпляр файловой системы дял данной панели. Метод нужен для более простого доступа
-     * к экземпляру
-     * @return объект файловой системы для данной панели
-     * */
-    private FileSystem getFileSystem() { return FileSystemController.get(fileSystemID); }
-
-    /**
-     * Записать директорию в настройки
-     * */
-    private void updateSettings()
-    {
-        if (getFileSystem() != null)
-        {
-            String currentPath = getFileSystem().getCurrentPath();
-            settingsHelper.setPath(fileSystemID, currentPath);
-        }
-    }
-
-    private void onRenameItem()
-    {
-        int selectedIndex = fileViewer.getSelectionModel().getSelectedIndex();
-        if (selectedIndex >= 0)
-        {
-            FileData selectedFile = fileViewer.getItems().get(selectedIndex);
-            String fileName = selectedFile.getNameValue();
-            if (fileName.equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
+            if (files == null)
                 return;
             
-            fileViewer.edit(selectedIndex, fileNameColumn);
-        }
+            List<File> filesToDrag = new ArrayList<>();
+            for (FileData data : files)
+            {
+                if (data.getNameValue().equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
+                    continue;
+                String path = getFileSystem().buildPath(data.getNameValue());
+                filesToDrag.add(new File(path));
+            }
+
+            Dragboard dragBoard = fileViewer.startDragAndDrop(TransferMode.ANY);
+            ClipboardContent content = new ClipboardContent();
+            content.putFiles(filesToDrag);
+            content.put(AppContext.getPanelDataFormat(), fileSystemID);
+            dragBoard.setContent(content);
+
+            // TODO показать курсором, что перетаскивание работает?
+
+            event.consume();
+        });
+
+        // поведение при рабочем перетаскивании
+        fileViewer.setOnDragOver(event -> {
+            Dragboard dragBoard = event.getDragboard();
+
+            if (dragBoard.hasFiles() && dragBoard.hasContent(AppContext.getPanelDataFormat()))
+            {
+                String sourceFileSystemId = (String) dragBoard.getContent(AppContext.getPanelDataFormat());
+
+                if (sourceFileSystemId != null && !sourceFileSystemId.equals(fileSystemID))
+                    event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            }
+
+            event.consume();
+        });
+
+        // поведение при завершении перетаскивания
+        fileViewer.setOnDragDropped(event -> {
+            Dragboard dragBoard = event.getDragboard();
+            FileSystem targetFileSystem = getFileSystem();
+            List<File> filesToTransfer = dragBoard.getFiles();
+            
+            TransferMode acceptedMode = event.getAcceptedTransferMode();
+            
+            if (acceptedMode == TransferMode.MOVE)
+            {
+                targetFileSystem.moveInto(filesToTransfer);
+                String sourceFileSystemId = (String) dragBoard.getContent(AppContext.getPanelDataFormat());
+                if (sourceFileSystemId != null)
+                    EventBus.publish(new FileSystemChangedEvent(sourceFileSystemId));
+            }
+            else if (acceptedMode == TransferMode.COPY)
+                targetFileSystem.copyInto(filesToTransfer);
+            
+            event.setDropCompleted(true);
+            event.consume();
+
+            refreshTable();
+        });
     }
 }

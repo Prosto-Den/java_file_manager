@@ -10,7 +10,8 @@ import utils.i18n.LanguageManager;
 import utils.platform.OSIntegrationService;
 import utils.settings.*;
 import utils.ui.*;
-
+import utils.ui.context.ContextMenuManager;
+import javafx.scene.input.DataFormat;
 
 /**
  * Вспомогательный класс приложения. Хранит общую для приложения информацию, отвечает за работу с модальными окнами
@@ -25,6 +26,8 @@ public final class AppContext
     private static OSIntegrationService integrationService;
     private static WindowManager windowManager;
     private static ContextMenuManager contextMenuManager;
+    // TODO пока сойдёт, но если их станет много, надо будет сделать отдельынй менеджер
+    private static DataFormat panelDataFormat;
 
     /**
      * Выполнить первичную инициализацию для приложения. Будет определено главное окно приложения, загружены настройки,
@@ -44,6 +47,7 @@ public final class AppContext
         windowManager = new WindowManager(stage, settingsManager, languageManager);
         contextMenuManager = new ContextMenuManager();
 
+        panelDataFormat = new DataFormat("application/panel");
         ClipboardMonitor.start();
     }
 
@@ -104,6 +108,8 @@ public final class AppContext
      * @return название приложения
      * */
     public static String getAppName() {return appName;}
+
+    public static DataFormat getPanelDataFormat() {return panelDataFormat;}
 
     // Приватные методы
 
