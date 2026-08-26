@@ -458,18 +458,23 @@ public final class Panel extends VBox implements IWidget, ITranslatable
 
         // задаём поведение при нажатии на кнопки клавиатуры
         fileViewer.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.F2)
+            switch (event.getCode())
             {
-                onRenameItem();
-                event.consume();
+                // переименование файлов при нажатии F2
+                case KeyCode.F2 -> onRenameItem();
+                // снятие выделения 
+                case KeyCode.ESCAPE -> fileViewer.getSelectionModel().clearSelection();
+                default -> {/* ничего не делаем */}
             }
+            
+            event.consume();
         });
 
         // задаём поведение при начале перетаскивания
         fileViewer.setOnDragDetected(event -> {
             ObservableList<FileData> files = fileViewer.getSelectionModel().getSelectedItems();
 
-            if (files == null)
+            if (files == null || files.isEmpty())
                 return;
             
             List<File> filesToDrag = new ArrayList<>();
@@ -487,19 +492,17 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             content.put(AppContext.getPanelDataFormat(), fileSystemID);
             dragBoard.setContent(content);
 
-            // TODO показать курсором, что перетаскивание работает?
-
             event.consume();
         });
 
-        // поведение при рабочем перетаскивании
+        // поведение при активном перетаскивании
         fileViewer.setOnDragOver(event -> {
             Dragboard dragBoard = event.getDragboard();
 
             if (dragBoard.hasFiles() && dragBoard.hasContent(AppContext.getPanelDataFormat()))
             {
                 String sourceFileSystemId = (String) dragBoard.getContent(AppContext.getPanelDataFormat());
-
+                // проверяем, что сейчас курсор находится над другой панелью. Тогда разрешаем завершение перетаскивания
                 if (sourceFileSystemId != null && !sourceFileSystemId.equals(fileSystemID))
                     event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
             }
@@ -518,6 +521,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             if (acceptedMode == TransferMode.MOVE)
             {
                 targetFileSystem.moveInto(filesToTransfer);
+                // при перемещении надо обновить панель источник, чтобы актуализировать интерфейс
                 String sourceFileSystemId = (String) dragBoard.getContent(AppContext.getPanelDataFormat());
                 if (sourceFileSystemId != null)
                     EventBus.publish(new FileSystemChangedEvent(sourceFileSystemId));
