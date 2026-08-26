@@ -41,10 +41,10 @@ public class MainController implements Initializable
 
         // настраиваем левую часть окна
         leftContainer.setTop(new ControlPanel(leftFileSystemID));
-        leftContainer.setCenter(new Panel(leftFileSystemID, AppContext.getSettingsHelper()));
+        leftContainer.setCenter(new Panel(leftFileSystemID, AppContext.getSettingsHelper(), 1));
 
         // настраиваем правую часть окна
         rightContainer.setTop(new ControlPanel(rightFileSystemID));
-        rightContainer.setCenter(new Panel(rightFileSystemID, AppContext.getSettingsHelper()));
+        rightContainer.setCenter(new Panel(rightFileSystemID, AppContext.getSettingsHelper(), 2));
     }
 }

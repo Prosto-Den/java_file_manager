@@ -4,12 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Deque;
 import java.util.ArrayDeque;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
 
 import app.AppContext;
 import events.EventBus;
@@ -220,9 +225,53 @@ public final class FileSystem
         return FileSystemUtils.createFile(buildPath(buildFileName(fileName, ".txt")));
     }
 
+    /**
+     * Переименовать файл
+     * @param oldFileName старое имя файла
+     * @param newFileName новое имя файла
+     * @return true, если файл удалось переименовать, иначе false
+     */
     public boolean renameFile(String oldFileName, String newFileName)
     {
         return FileSystemUtils.renameFile(buildPath(oldFileName), buildPath(newFileName));
+    }
+
+    public void moveInto(List<File> files)
+    {
+        for (File file : files)
+        {
+            Path from = Path.of(file.getPath());
+            Path to = Path.of(buildPath(file.getName()));
+
+            try
+            {
+                Files.move(from, to, StandardCopyOption.REPLACE_EXISTING);
+            }
+            catch (IOException ex)
+            {
+                System.err.print(":(");
+            }
+        }
+    }
+
+    public void copyInto(List<File> files)
+    {
+        for (File file : files)
+        {
+            Path from = Path.of(file.getPath());
+            // TODO добавить проверку на существование файла в целевой директории
+            Path to = Path.of(buildPath(file.getName()));
+
+            try
+            {
+                // TODO вынести в настройки опцию копирования атрибутов файла
+                Files.copy(from, to);
+            }
+            catch (IOException ex)
+            {
+                System.err.print(":(");
+            }
+        }
     }
 
     // Приватные методы

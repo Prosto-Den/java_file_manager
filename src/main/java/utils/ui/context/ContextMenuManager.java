@@ -1,7 +1,6 @@
-package utils.ui;
+package utils.ui.context;
 
 import app.AppContext;
-import context.IMenuContext;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -18,12 +17,6 @@ public final class ContextMenuManager
 {   
     private ContextMenu panelContextMenu;
     private static final String PANEL_CONTEXT_MENU = "ContextMenu.fxml";
-
-
-    public ContextMenuManager()
-    {
-
-    }
 
     /**
      * Создать контекстное меню для панели или получить его, если оно уже было создано
@@ -66,7 +59,7 @@ public final class ContextMenuManager
      * @param menu контекстное меню
      * @param context конфигурация
      */
-    public void configureContextMenu(ContextMenu menu, IMenuContext context)
+    public void configureContextMenu(ContextMenu menu, IContextMenuConfig context)
     {
         for (MenuItem item : menu.getItems())
         {
@@ -85,25 +78,6 @@ public final class ContextMenuManager
 
         setUserData(menu, context.getFileData());
     }
-
-    /**
-     * Получить информацию о файле из userData
-     * @param event событие вызова контекстного меню
-     * @return информация о файле, если найдена, иначе null
-     */
-    // private FileData getSelectedFile(ActionEvent event)
-    // {
-    //     Object obj = event.getSource();
-    //     if (obj != null && obj instanceof MenuItem)
-    //     {
-    //         MenuItem item = (MenuItem) event.getSource();
-    //         Object userData = item.getUserData();
-    //         return (userData != null && userData instanceof FileData) ? (FileData) userData : null;
-    //     }
-
-    //     return null;
-    // }
-    
 
 
     /**
