@@ -45,6 +45,19 @@ import utils.filesystem.*;
  * */
 public final class Panel extends VBox implements IWidget, ITranslatable
 {
+
+    @FXML
+    private TableView<FileData> fileViewer; // виджет отображения файлов
+    @FXML
+    private TableColumn<FileData, String> fileNameColumn; // колонка с именем файла
+    @FXML
+    private TableColumn<FileData, String> fileSizeColumn; // размер файла
+    @FXML
+    private TableColumn<FileData, String> fileEditDateColumn; // дата последнего изменения файла
+
+    private final String fileSystemID;
+    private final FileSystemSettingsHelper settingsHelper;
+
     /**
      * Класс контекста для панели. Служит для передачи данных от панели к контекстному меню
      */
@@ -60,6 +73,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         @Override
         public FileData getFileData() { return data; };
 
+        // TODO переработать на работу с несколькими файлами
         @Override
         public void executeAction(String actionID)
         {
@@ -68,11 +82,15 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 case (PanelContextMenuItemId.OPEN_ITEM) -> handleDoubleClick(data);
                 case (PanelContextMenuItemId.COPY_ITEM) -> ClipboardUtil.copyToClipboard(data.getAbsolutePath());
                 case (PanelContextMenuItemId.DELETE_ITEM) -> {
-                    FileSystemUtils.delete(data.getAbsolutePath());
+                    ObservableList<FileData> filesData = fileViewer.getSelectionModel().getSelectedItems();
+                    for (FileData fileData : filesData)
+                        FileSystemUtils.delete(fileData.getAbsolutePath());
                     refreshTable();
                 }
                 case (PanelContextMenuItemId.MOVE_TO_TRASH_ITEM) -> {
-                    AppContext.getIntegrationService().moveToTrash(data.getAbsolutePath());
+                    ObservableList<FileData> filesData = fileViewer.getSelectionModel().getSelectedItems();
+                    for (FileData fileData : filesData)
+                        AppContext.getIntegrationService().moveToTrash(fileData.getAbsolutePath());
                     refreshTable();
                 }
                 case (PanelContextMenuItemId.OPEN_IN_TERMINAL_ITEM) -> AppContext.getIntegrationService().openInTerminal(data.getAbsolutePath());
@@ -108,18 +126,6 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             return null;
         }
     }
-
-    @FXML
-    private TableView<FileData> fileViewer; // виджет отображения файлов
-    @FXML
-    private TableColumn<FileData, String> fileNameColumn; // колонка с именем файла
-    @FXML
-    private TableColumn<FileData, String> fileSizeColumn; // размер файла
-    @FXML
-    private TableColumn<FileData, String> fileEditDateColumn; // дата последнего изменения файла
-
-    private final String fileSystemID;
-    private final FileSystemSettingsHelper settingsHelper;
 
     /**
      * Конструктор
@@ -180,8 +186,6 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     {
         // Меняем поведение fileViewer при увеличении размера окна. По умолчанию, будет создаваться четвёртая колонка.
         // Тут же ставим, чтобы последняя колонка подстраивалась под новый размер окна
-        fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
-        fileViewer.setEditable(true);
         setupFileViewer();
         refreshTable();
     }
@@ -258,7 +262,9 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             if (fileName.equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
                 return;
             
+            fileViewer.setEditable(true);
             fileViewer.edit(selectedIndex, fileNameColumn);
+            fileViewer.setEditable(false);
         }
     }
 
@@ -418,7 +424,12 @@ public final class Panel extends VBox implements IWidget, ITranslatable
      */
     private void setupFileViewer()
     {
+        fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        fileViewer.setEditable(false);
+        fileViewer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
         setupFileViewerColumns();
+
 
         // задаём настройки для ряда
         fileViewer.setRowFactory( tv ->
@@ -464,6 +475,12 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 case KeyCode.F2 -> onRenameItem();
                 // снятие выделения 
                 case KeyCode.ESCAPE -> fileViewer.getSelectionModel().clearSelection();
+                case KeyCode.DELETE -> {
+                    ObservableList<FileData> data = fileViewer.getSelectionModel().getSelectedItems();
+                    for (FileData file : data)
+                        FileSystemUtils.delete(file.getAbsolutePath());
+                    refreshTable();
+                }
                 default -> {/* ничего не делаем */}
             }
             

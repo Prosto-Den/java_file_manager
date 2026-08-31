@@ -201,6 +201,60 @@ public class FileSystemUtils
         return file.renameTo(new File(newFilePath));
     }
 
+    public static void moveFile(String sourcePath, String destPath)
+    {
+        transferFile(new File(sourcePath), new File(destPath), true);
+    }
+
+    public static void moveFile(File source, File dest)
+    {
+        transferFile(source, dest, true);
+    }
+
+    public static void copyFile(String sourcePath, String destPath)
+    {
+        transferFile(new File(sourcePath), new File(destPath), false);
+    }
+
+    public static void copyFile(File source, File dest)
+    {
+        transferFile(source, dest, false);
+    }
+
+    private static void transferFile(File source, File dest, boolean isMove)
+    {
+        try
+        {
+            Path sourcePath = source.toPath();
+            Path destPath = dest.toPath();
+
+            if (source.isDirectory())
+            {
+                if (!dest.exists())
+                    return;
+
+                File[] files = source.listFiles();
+                if (files != null)
+                    for (File file : files)
+                        transferFile(file, new File(dest, file.getName()), isMove);
+                
+                if (isMove)
+                    Files.delete(sourcePath);
+            }
+            else
+            {
+                if (isMove)
+                    Files.move(sourcePath, destPath, StandardCopyOption.REPLACE_EXISTING);
+                else
+                    Files.copy(sourcePath, destPath, StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
+        catch (IOException ex)
+        {
+            System.err.println(ex);
+        }
+    }
+
     //TODO директории с большим количеством файлов будут удаляться долго, поэтому
     // удаление надо вынести в отдельный поток + создать окно с индикацией удаления
     private static boolean deleteRecursively(String rawPath)
