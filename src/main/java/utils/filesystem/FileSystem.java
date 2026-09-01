@@ -240,17 +240,10 @@ public final class FileSystem
     {
         for (File file : files)
         {
-            Path from = Path.of(file.getPath());
-            Path to = Path.of(buildPath(file.getName()));
-
-            try
-            {
-                Files.move(from, to, StandardCopyOption.REPLACE_EXISTING);
-            }
-            catch (IOException ex)
-            {
-                System.err.print(":(");
-            }
+            File dest = new File(buildPath(file.getName()));
+            if (file.isDirectory() && !dest.exists())
+                dest.mkdir();
+            FileSystemUtils.moveFile(file, dest);
         }
     }
 
@@ -258,19 +251,10 @@ public final class FileSystem
     {
         for (File file : files)
         {
-            Path from = Path.of(file.getPath());
-            // TODO добавить проверку на существование файла в целевой директории
-            Path to = Path.of(buildPath(file.getName()));
-
-            try
-            {
-                // TODO вынести в настройки опцию копирования атрибутов файла
-                Files.copy(from, to);
-            }
-            catch (IOException ex)
-            {
-                System.err.print(":(");
-            }
+            File dest = new File(buildPath(file.getName()));
+            if (file.isDirectory() && !dest.exists())
+                dest.mkdir();
+            FileSystemUtils.copyFile(file, dest);
         }
     }
 
