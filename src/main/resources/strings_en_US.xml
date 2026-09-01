@@ -32,6 +32,7 @@
     <entry key="settings.linux.title">Linux settings</entry>
     <entry key="settings.linux.used_terminal">Used terminal:</entry>
     <entry key="settings.linux.open_command">Open command:</entry>
+    <entry key="settings.linux.move_to_trash_command">Move to trash command:</entry>
     <entry key="addmenu.item.folder">Folder</entry>
     <entry key="addmenu.item.textfile">Text file</entry>
 

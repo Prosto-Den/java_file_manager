@@ -52,6 +52,8 @@ public class FileSystemUtils
 
     /**
      * Получить дату последнего изменения файла
+     * @param filePath путь к файлу
+     * @return строку с датой последнего изменения файла
      * */
     public static String lastModifiedDate(String filePath)
     {
@@ -103,6 +105,11 @@ public class FileSystemUtils
         return new File(path).isDirectory();
     }
 
+    /**
+     * Пуста ли директория?
+     * @param path путь к директории
+     * @return true, если жиректоряи пуста, иначе false
+     */
     public static boolean isDirEmpty(String path)
     {
         boolean res = false;
@@ -140,8 +147,8 @@ public class FileSystemUtils
 
     /**
      * Создать директорию по указанному пути
-     * @param path
-     * @return
+     * @param path путь к директории
+     * @return true, если директорию удалось создать, иначе false
      */
     public static boolean createDir(String path)
     {
@@ -160,6 +167,11 @@ public class FileSystemUtils
         return res;
     }
 
+    /**
+     * Создать файл по указанному пути
+     * @param path путь к файлу
+     * @return true, если файл удалось создать, иначе false
+     */
     public static boolean createFile(String path)
     {
         File file = new File(path);
@@ -201,26 +213,54 @@ public class FileSystemUtils
         return file.renameTo(new File(newFilePath));
     }
 
+    /**
+     * Переместить файл
+     * @param sourcePath путь к файлу
+     * @param destPath новый путь к файлу
+     */
     public static void moveFile(String sourcePath, String destPath)
     {
         transferFile(new File(sourcePath), new File(destPath), true);
     }
 
+    /**
+     * Переместить файл
+     * @param source изначальный файл
+     * @param dest новый файл, который будет хранить данные изначального файла
+     */
     public static void moveFile(File source, File dest)
     {
         transferFile(source, dest, true);
     }
 
+    /**
+     * Скопирвоать файл
+     * @param sourcePath путь к файлу
+     * @param destPath новый путь к файлу
+     */
     public static void copyFile(String sourcePath, String destPath)
     {
         transferFile(new File(sourcePath), new File(destPath), false);
     }
 
+    /**
+     * Скопирвоать файл
+     * @param source изначальный файл
+     * @param dest новый файл, в который будут скопированы данные изначального файла
+     */
     public static void copyFile(File source, File dest)
     {
         transferFile(source, dest, false);
     }
 
+    // Приватный методы
+
+    /**
+     * Общий метод для перемещения файла
+     * @param source файл источник
+     * @param dest файл назначения
+     * @param isMove флаг перемещения. true, если файлы надо переместить и false, если их нужно скопировать.
+     */
     private static void transferFile(File source, File dest, boolean isMove)
     {
         try
