@@ -1,9 +1,7 @@
 package utils.platform;
 
-//import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-//import java.io.InputStreamReader;
 import java.awt.Desktop;
 
 import models.SettingKeys;
@@ -30,7 +28,7 @@ public class OSIntegrationService
      * @param path путь к файлу
      * @return код ошибки открытия файла
      * */
-    public /*FileSystemErrors*/ void openFile(String path)
+    public void openFile(String path)
     {
         File file = new File(path);
 
@@ -40,21 +38,6 @@ public class OSIntegrationService
         FileSystemErrors res = openDesktop(file);
         if (res != FileSystemErrors.OK)
             openSystemCommands(osType, path);
-
-        // File file = new File(path);
-
-        // if (!file.exists())
-        //     return FileSystemErrors.FILE_NOT_FOUND;
-
-        // if (!file.isFile())
-        //     return FileSystemErrors.NOT_A_FILE;
-
-        // FileSystemErrors res = openSystemCommands(osType, path);
-
-        // if (res != FileSystemErrors.OK)
-        //     res = openDesktop(file);
-
-        // return res;
     }
 
     /**
@@ -116,50 +99,28 @@ public class OSIntegrationService
         return result;
     }
 
-    private /*FileSystemErrors*/ void openSystemCommands(OSType osType, String path)
+    private void openSystemCommands(OSType osType, String path)
     {
-        //FileSystemErrors res = FileSystemErrors.UNKNOWN_ERROR;
-
         switch (osType)
         {
-            case OSType.WINDOWS -> /*res =*/ runCommand(WINDOWS_OPEN_COMMAND, path);
-            case OSType.LINUX -> /*res =*/ runCommand(settings.get(SettingKeys.LINUX_OPEN_COMMAND), path);
+            case OSType.WINDOWS -> runCommand(WINDOWS_OPEN_COMMAND, path);
+            case OSType.LINUX -> runCommand(settings.get(SettingKeys.LINUX_OPEN_COMMAND), path);
         }
-
-        //return res;
     }
 
-    private /*FileSystemErrors*/ void runCommand(String command, String arg)
+    private void runCommand(String command, String arg)
     {
-        //FileSystemErrors result = FileSystemErrors.UNKNOWN_ERROR;
-
         try
         {
-            ProcessBuilder processBuilder = new ProcessBuilder(prepareCommand(command, arg));
+            ProcessBuilder processBuilder = new ProcessBuilder(command, arg);
             processBuilder.redirectErrorStream(true);
 
-            /*Process proc =*/ processBuilder.start();
-            
-            // TODO вывод информации в поток тоже блокирует файловый менеджер
-            // try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream())))
-            // {
-            //     String line;
-            //     while ((line = reader.readLine()) != null)
-            //         System.out.println(line);
-            // }
-            
-            // TODO так заблокируется файловый менеджер (будут ждать ответа от процесса)
-            // int exitCode = proc.;
-            // if (exitCode == 0)
-            //     result = FileSystemErrors.OK;
-            // System.out.println("Код ошибки: " + exitCode);
+            processBuilder.start();
         }
         catch (Exception ex)
         {
             ex.printStackTrace();
         }
-
-        //return result;
     }
 
     private String[] prepareCommand(String command, String arg)

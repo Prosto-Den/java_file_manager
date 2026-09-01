@@ -81,18 +81,8 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             {
                 case (PanelContextMenuItemId.OPEN_ITEM) -> handleDoubleClick(data);
                 case (PanelContextMenuItemId.COPY_ITEM) -> ClipboardUtil.copyToClipboard(data.getAbsolutePath());
-                case (PanelContextMenuItemId.DELETE_ITEM) -> {
-                    ObservableList<FileData> filesData = fileViewer.getSelectionModel().getSelectedItems();
-                    for (FileData fileData : filesData)
-                        FileSystemUtils.delete(fileData.getAbsolutePath());
-                    refreshTable();
-                }
-                case (PanelContextMenuItemId.MOVE_TO_TRASH_ITEM) -> {
-                    ObservableList<FileData> filesData = fileViewer.getSelectionModel().getSelectedItems();
-                    for (FileData fileData : filesData)
-                        AppContext.getIntegrationService().moveToTrash(fileData.getAbsolutePath());
-                    refreshTable();
-                }
+                case (PanelContextMenuItemId.DELETE_ITEM) -> onDeleteItem();
+                case (PanelContextMenuItemId.MOVE_TO_TRASH_ITEM) -> onMoveToTrashItem();
                 case (PanelContextMenuItemId.OPEN_IN_TERMINAL_ITEM) -> AppContext.getIntegrationService().openInTerminal(data.getAbsolutePath());
                 case (PanelContextMenuItemId.REFRESH_ITEM) -> refreshTable();
                 case (PanelContextMenuItemId.RENAME_ITEM) -> onRenameItem();
@@ -266,6 +256,29 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             fileViewer.edit(selectedIndex, fileNameColumn);
             fileViewer.setEditable(false);
         }
+    }
+
+    // TODO добавить выбор, что делать при удалении (перемещать в корзину/реально удалять)
+    /**
+     * Действия при удалении файлов
+     */
+    private void onDeleteItem()
+    {
+        ObservableList<FileData> files = fileViewer.getSelectionModel().getSelectedItems();
+        for (FileData data : files)
+            FileSystemUtils.delete(data.getAbsolutePath());
+        refreshTable();
+    }
+
+    /**
+     * Действия при перемещении в корзину
+     */
+    private void onMoveToTrashItem()
+    {
+        ObservableList<FileData> files = fileViewer.getSelectionModel().getSelectedItems();
+        for (FileData data : files)
+            AppContext.getIntegrationService().moveToTrash(data.getAbsolutePath());
+        refreshTable();
     }
 
     /**
@@ -475,12 +488,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 case KeyCode.F2 -> onRenameItem();
                 // снятие выделения 
                 case KeyCode.ESCAPE -> fileViewer.getSelectionModel().clearSelection();
-                case KeyCode.DELETE -> {
-                    ObservableList<FileData> data = fileViewer.getSelectionModel().getSelectedItems();
-                    for (FileData file : data)
-                        FileSystemUtils.delete(file.getAbsolutePath());
-                    refreshTable();
-                }
+                case KeyCode.DELETE -> onDeleteItem();
                 default -> {/* ничего не делаем */}
             }
             

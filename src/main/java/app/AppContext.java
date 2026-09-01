@@ -2,7 +2,6 @@ package app;
 
 
 import javafx.stage.Stage;
-import models.StringKeys;
 import monitors.ClipboardMonitor;
 import types.OSType;
 import utils.filesystem.FileSystemUtils;
@@ -18,7 +17,7 @@ import javafx.scene.input.DataFormat;
  * */
 public final class AppContext
 {
-    private static String appName; // название приложения
+    private static final String appName = "Prosto File Manager"; // название приложения
     private static String appFolder;// папка приложения
     private static SettingsManager settingsManager;
     private static FileSystemSettingsHelper settingsHelper;
@@ -42,7 +41,6 @@ public final class AppContext
         settingsManager = new SettingsManager(settingsPath);
         settingsHelper = new FileSystemSettingsHelper(settingsManager);
         languageManager = new LanguageManager(settingsManager);
-        appName = languageManager.getString(StringKeys.TITLE);
         integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager);
         windowManager = new WindowManager(stage, settingsManager, languageManager);
         contextMenuManager = new ContextMenuManager();
