@@ -21,7 +21,6 @@ import utils.settings.SettingsManager;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import app.AppContext;
 import javafx.scene.image.ImageView;
 import widgets.interfaces.ITranslatable;
 
@@ -102,6 +101,12 @@ public class SettingsController implements Initializable, ITranslatable
      * */
     public void setStage(Stage stage) { dialogStage = stage; }
 
+    /**
+     * Инициализация контроллера и подготовка его к работе
+     * @param stage диалоговое окно
+     * @param settingsManager менеджер настроек
+     * @param languageManager менеджер языка
+     */
     public void init(Stage stage, SettingsManager settingsManager, LanguageManager languageManager)
     {
         dialogStage = stage;

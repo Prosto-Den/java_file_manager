@@ -39,6 +39,7 @@ import javafx.scene.Node;
 import events.FileSystemChangedEvent;
 
 import utils.filesystem.*;
+import utils.platform.OSIntegrationService;
 
 /**
  * Класс панели. Отображает содержимое директории
@@ -443,7 +444,6 @@ public final class Panel extends VBox implements IWidget, ITranslatable
 
         setupFileViewerColumns();
 
-
         // задаём настройки для ряда
         fileViewer.setRowFactory( tv ->
         {
@@ -467,13 +467,25 @@ public final class Panel extends VBox implements IWidget, ITranslatable
 
             // Настраиваем поведение при двойном щелчке ЛКМ
             row.setOnMouseClicked(event -> {
-                if (event.getButton() == MouseButton.PRIMARY)
+                switch (event.getButton())
                 {
-                    if (event.getClickCount() == 2 && !row.isEmpty())
-                    {
-                        FileData fileInfo = row.getItem();
-                        handleDoubleClick(fileInfo);
+                    // нажатие на ЛКМ
+                    case MouseButton.PRIMARY -> {
+                        // открытие файлов/папок при двойном клике
+                        if (event.getClickCount() == 2 && !row.isEmpty())
+                        {
+                            FileData data = row.getItem();
+                            handleDoubleClick(data);
+                        }
+                        // снятие выделения при клике на пустую строку
+                        else if (event.getClickCount() == 1 && row.isEmpty())
+                            fileViewer.getSelectionModel().clearSelection();
                     }
+                    // нажатие на кнопку "назад"
+                    case MouseButton.BACK -> getFileSystem().goBack();
+                    // нажатие на кнопку "вперёд"
+                    case MouseButton.FORWARD -> getFileSystem().goForward();
+                    default -> {/* ничего не делаем */}
                 }
             });
 
@@ -488,7 +500,12 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 case KeyCode.F2 -> onRenameItem();
                 // снятие выделения 
                 case KeyCode.ESCAPE -> fileViewer.getSelectionModel().clearSelection();
-                case KeyCode.DELETE -> onDeleteItem();
+                case KeyCode.DELETE -> {
+                    if (event.isShiftDown())
+                        onDeleteItem();
+                    else
+                        onMoveToTrashItem();
+                }
                 default -> {/* ничего не делаем */}
             }
             
