@@ -39,7 +39,6 @@ import javafx.scene.Node;
 import events.FileSystemChangedEvent;
 
 import utils.filesystem.*;
-import utils.platform.OSIntegrationService;
 
 /**
  * Класс панели. Отображает содержимое директории
