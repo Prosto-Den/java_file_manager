@@ -4,17 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Deque;
 import java.util.ArrayDeque;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.CopyOption;
-import java.nio.file.Files;
 
 import app.AppContext;
 import events.EventBus;
@@ -36,6 +31,11 @@ public final class FileSystem
     // история перемещений пользователя
     private Deque<String> backStack;
     private Deque<String> forwardStack;
+
+    private static interface Transfer
+    {
+        void execute(File source, File dest);
+    }
 
     /**
      * Конструктор по умолчанию. После создания будет указывать на корень системы
@@ -236,29 +236,48 @@ public final class FileSystem
         return FileSystemUtils.renameFile(buildPath(oldFileName), buildPath(newFileName));
     }
 
+    /**
+     * Переместить файлы в текущую директорию
+     * @param files файлы для перемещения
+     */
     public void moveInto(List<File> files)
     {
-        for (File file : files)
-        {
-            File dest = new File(buildPath(file.getName()));
-            if (file.isDirectory() && !dest.exists())
-                dest.mkdir();
-            FileSystemUtils.moveFile(file, dest);
-        }
+        transferFiles(files, new Transfer() {
+            @Override
+            public void execute(File source, File dest)
+            {
+                FileSystemUtils.moveFile(source, dest);
+            }
+        });
     }
 
+    /**
+     * Скопирвоать файлы в текущую директорию
+     * @param files файлы для копирования
+     */
     public void copyInto(List<File> files)
     {
-        for (File file : files)
-        {
-            File dest = new File(buildPath(file.getName()));
-            if (file.isDirectory() && !dest.exists())
-                dest.mkdir();
-            FileSystemUtils.copyFile(file, dest);
-        }
+        transferFiles(files, new Transfer(){
+            @Override
+            public void execute(File source, File dest)
+            {
+                FileSystemUtils.copyFile(source, dest);
+            }
+        });
     }
 
     // Приватные методы
+
+    private void transferFiles(List<File> files, Transfer command)
+    {
+        for (File file : files)
+        {
+            File dest = new File(buildPath(file.getName()));
+            if (file.isDirectory() && !dest.exists())
+                dest.mkdir();
+            command.execute(file, dest);
+        }
+    }
 
     /**
      * Сменить текущую директории и отправить событие об этом

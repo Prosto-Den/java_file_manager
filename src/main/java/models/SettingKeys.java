@@ -16,4 +16,5 @@ public class SettingKeys
 
     public static final String LINUX_CONSOLE = "linux.console";
     public static final String LINUX_OPEN_COMMAND = "linux.open_command";
+    public static final String LINUX_MOVE_TO_TRASH_COMMAND = "linux.move_to_trash_command";
 }

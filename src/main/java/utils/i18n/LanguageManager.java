@@ -178,7 +178,7 @@ public final class LanguageManager
         catch (IOException ex)
         {
             // TODO сюда логгирование
-            System.err.println("123");
+            System.err.println(ex);
         }
     }
 }

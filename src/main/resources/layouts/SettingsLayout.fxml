@@ -16,10 +16,12 @@
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
 
+    <!-- Настройки языка -->
     <GridPane>
         <padding>
             <Insets bottom="10"/>
         </padding>
+        <!-- Заголовок раздела -->
         <Label text="%settings.language.title" fx:id="languageSettingsTitle" GridPane.rowIndex="0" GridPane.columnIndex="0"
                GridPane.columnSpan="2" style="-fx-font-weight: bold">
             <GridPane.margin>
@@ -27,6 +29,7 @@
             </GridPane.margin>
         </Label>
 
+        <!-- Выбор языка -->
         <Label fx:id="languageLabel" text="%settings.label.language" GridPane.rowIndex="1" GridPane.columnIndex="0"
                GridPane.halignment="RIGHT">
             <GridPane.margin>
@@ -35,11 +38,14 @@
         </Label>
 
         <ComboBox fx:id="localeBox" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200"/>
+        <!-- -->
     </GridPane>
 
     <Separator fx:id="linuxSettingsSeparator"/>
 
+    <!-- Настройки для Linux -->
     <GridPane fx:id="linuxSettings">
+        <!-- заголовок раздела -->
         <Label text="%settings.linux.title" fx:id="linuxSettingsTitle" GridPane.rowIndex="0" GridPane.columnIndex="0"
                GridPane.columnSpan="2" style="-fx-font-weight: bold">
             <GridPane.margin>
@@ -47,24 +53,36 @@
             </GridPane.margin>
         </Label>
 
+        <!-- Настройки используемого терминала -->
         <Label text="%settings.linux.used_terminal" fx:id="linuxUsedTerminalLabel" GridPane.rowIndex="1"
                GridPane.columnIndex="0">
             <GridPane.margin>
                 <Insets right="10"/>
             </GridPane.margin>
         </Label>
-
         <TextField fx:id="terminalTextField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <!-- -->
 
+        <!-- Настройки команды открытия файлов -->
         <Label text="%settings.linux.open_command" fx:id="linuxOpenCommandLabel" GridPane.rowIndex="2" GridPane.columnIndex="0">
             <GridPane.margin>
                 <Insets right="10"/>
             </GridPane.margin>
         </Label>
-
         <TextField fx:id="openCommandTextField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <!-- -->
+
+        <!-- Настройки команды перемещеняи в корзину -->
+         <Label text="%settings.linux.move_to_trash_command" fx:id="linuxMoveToTrashCommandLabel" GridPane.rowIndex="3" GridPane.columnIndex="0">
+            <GridPane.margin>
+                <Insets right="10"/>
+            </GridPane.margin>
+         </Label>
+         <TextField fx:id="moveToTrashTextField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+         <!-- -->
     </GridPane>
 
+    <!-- Кнопки -->
     <HBox alignment="BOTTOM_RIGHT" VBox.vgrow="ALWAYS" spacing="5">
         <Button fx:id="saveButton" text="%settings.button.save" minWidth="80" textAlignment="CENTER"/>
         <Button fx:id="applyButton" text="%settings.button.apply" minWidth="80" textAlignment="CENTER"/>

@@ -32,6 +32,7 @@
     <entry key="settings.linux.title">Настройки для Linux</entry>
     <entry key="settings.linux.used_terminal">Используемый терминал:</entry>
     <entry key="settings.linux.open_command">Команда открытия:</entry>
+    <entry key="settings.linux.move_to_trash_command">Команда перемещения в корзину:</entry>
     <entry key="addmenu.item.folder">Папку</entry>
     <entry key="addmenu.item.textfile">Текстовый файл</entry>
 

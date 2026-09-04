@@ -2,6 +2,9 @@ package utils.platform;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.awt.Desktop;
 
 import models.SettingKeys;
@@ -47,14 +50,7 @@ public class OSIntegrationService
     public void openInTerminal(String path)
     {
         String command = OSType.is(OSType.LINUX) ? settings.get(SettingKeys.LINUX_CONSOLE) : WINDOWS_OPEN_IN_TERMINAL_COMMAND;
-        try
-        {   
-            new ProcessBuilder(prepareCommand(command, path)).start();
-        }
-        catch (Exception ex)
-        {
-            // TODO сюда логгирование
-        }
+        runCommand(command, path);
     }
 
     /**
@@ -84,21 +80,15 @@ public class OSIntegrationService
      */
     public boolean moveToTrashViaGio(String filePath)
     {
-        boolean result = false;
-
-        try
-        {
-            Process process = new ProcessBuilder("gio", "trash", filePath).start();
-            int exitCode = process.waitFor();
-            result = exitCode == 0;
-        }
-        catch (IOException | InterruptedException ex)
-        {
-        }
-
-        return result;
+        String command = settings.get(SettingKeys.LINUX_MOVE_TO_TRASH_COMMAND);
+        return runCommandWithWait(command, filePath);
     }
 
+    /**
+     * Открыть файл при помощи системных команд
+     * @param osType тип ОС
+     * @param path путь к файлу
+     */
     private void openSystemCommands(OSType osType, String path)
     {
         switch (osType)
@@ -108,11 +98,16 @@ public class OSIntegrationService
         }
     }
 
+    /**
+     * Запустить выполнение команды отдельным процессов без ожидания
+     * @param command команда
+     * @param arg аргумент команды
+     */
     private void runCommand(String command, String arg)
     {
         try
         {
-            ProcessBuilder processBuilder = new ProcessBuilder(command, arg);
+            ProcessBuilder processBuilder = new ProcessBuilder(prepareCommand(command, arg));
             processBuilder.redirectErrorStream(true);
 
             processBuilder.start();
@@ -123,12 +118,52 @@ public class OSIntegrationService
         }
     }
 
-    private String[] prepareCommand(String command, String arg)
+    /**
+     * Запустить выполнение команды отдельным процесом и дождаться его завершения
+     * @param command команда
+     * @param arg аргумент к команде
+     * @return true, если команда завершилась успешно, иначе false
+     */
+    private boolean runCommandWithWait(String command, String arg)
     {
-        String readyCommand = String.format(command, arg);
-        return readyCommand.split(" ");
+        boolean result = false;
+
+        try
+        {
+            ProcessBuilder processBuilder = new ProcessBuilder(prepareCommand(command, arg));
+            processBuilder.redirectErrorStream(true);
+            Process proc = processBuilder.start();
+            // TODO некоторые команды могут быть долгими. Выставить время ожидания? Показать диалоговое окно во время выполнения?
+            result = proc.waitFor() == 0;
+        }
+        catch (IOException | InterruptedException ex)
+        {
+            System.err.println(ex);   
+        }
+
+        return result;
     }
 
+    /**
+     * Подготовить команду к выполнению. Объекты Process и ProcessBuilder принимают команду в виде списка, где первй элемент - сама команда,
+     * а все остальные - ключи и аргументы к ней. Соотвественно, необходимо привезти команду к нужному виду
+     * @param command команда
+     * @param arg аргумент команды
+     * @return список из команды и её ключей/аргументов
+     */
+    private List<String> prepareCommand(String command, String arg)
+    {
+        String[] commandParts = command.trim().split("\\s+");
+        List<String> fullArgs = new ArrayList<>(Arrays.asList(commandParts));
+        fullArgs.add(arg);
+        return fullArgs;
+    }
+
+    /**
+     * Открыть файл при помощи Desktop API
+     * @param file файл для октрытия
+     * @return код ошибки
+     */
     private FileSystemErrors openDesktop(File file)
     {
         if (!Desktop.isDesktopSupported())
