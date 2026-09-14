@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+
+<ContextMenu xmlns="http://javafx.com/javafx"
+             xmlns:fx="http://javafx.com/fxml">
+    <items>
+        <!--Кнопка "Восстановить"-->
+        <MenuItem fx:id="restoreMenuItem" text="%contextmenu.item.restore">
+            <graphic>
+                <ImageView>
+                    <!-- В коде иконку будем менять в зависимости от файла, но по умолчанию тоже выставим -->
+                    <Image url="@/icons/16x16/open_file.png"/>
+                </ImageView>
+            </graphic>
+        </MenuItem>
+
+        <SeparatorMenuItem/>
+
+        <!-- Кнопка "Удалить навсегда" -->  
+         <MenuItem fx:id="deletePermanentlyMenuItem" text="%contextmenu.item.deletePermanently">
+            <graphic>
+                <ImageView>
+                    <Image url="@/icons/16x16/open_file.png"/>
+                </ImageView>
+            </graphic>
+         </MenuItem>
+    </items>
+</ContextMenu>

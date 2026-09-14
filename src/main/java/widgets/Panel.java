@@ -20,6 +20,8 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import java.util.List;
+import java.util.Optional;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -31,7 +33,7 @@ import resourceHandler.ResourceHandler;
 import utils.settings.FileSystemSettingsHelper;
 import utils.ui.ClipboardUtil;
 import utils.ui.context.IContextMenuConfig;
-import models.PanelContextMenuItemId;
+import models.ContextMenuItemId;
 import models.FileData;
 import widgets.interfaces.IWidget;
 import widgets.interfaces.ITranslatable;
@@ -61,17 +63,19 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     /**
      * Класс контекста для панели. Служит для передачи данных от панели к контекстному меню
      */
-    public class PanelMenuContext implements IContextMenuConfig
+    private class PanelMenuContext extends IContextMenuConfig
     {
-        private final FileData data;
-
         public PanelMenuContext(FileData data)
         {
             this.data = data;
         }
-
-        @Override
-        public FileData getFileData() { return data; };
+        
+        private Optional<FileData> getFileData()
+        {
+            if (data != null && data instanceof FileData)
+                return Optional.of((FileData) data);
+            return Optional.empty();
+        }
 
         // TODO переработать на работу с несколькими файлами
         @Override
@@ -79,13 +83,15 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         {
             switch (actionID)
             {
-                case (PanelContextMenuItemId.OPEN_ITEM) -> handleDoubleClick(data);
-                case (PanelContextMenuItemId.COPY_ITEM) -> ClipboardUtil.copyToClipboard(data.getAbsolutePath());
-                case (PanelContextMenuItemId.DELETE_ITEM) -> onDeleteItem();
-                case (PanelContextMenuItemId.MOVE_TO_TRASH_ITEM) -> onMoveToTrashItem();
-                case (PanelContextMenuItemId.OPEN_IN_TERMINAL_ITEM) -> AppContext.getIntegrationService().openInTerminal(data.getAbsolutePath());
-                case (PanelContextMenuItemId.REFRESH_ITEM) -> refreshTable();
-                case (PanelContextMenuItemId.RENAME_ITEM) -> onRenameItem();
+                case (ContextMenuItemId.OPEN_ITEM) -> handleDoubleClick((FileData) data);
+                case (ContextMenuItemId.COPY_ITEM) -> 
+                    getFileData().ifPresent(fileData -> ClipboardUtil.copyToClipboard(fileData.getAbsolutePath())); 
+                case (ContextMenuItemId.DELETE_ITEM) -> onDeleteItem();
+                case (ContextMenuItemId.MOVE_TO_TRASH_ITEM) -> onMoveToTrashItem();
+                case (ContextMenuItemId.OPEN_IN_TERMINAL_ITEM) -> 
+                    getFileData().ifPresent(fileData -> AppContext.getIntegrationService().openInTerminal(fileData.getAbsolutePath()));
+                case (ContextMenuItemId.REFRESH_ITEM) -> refreshTable();
+                case (ContextMenuItemId.RENAME_ITEM) -> onRenameItem();
                 default -> {/*ничего не делаем*/}
             }
         }
@@ -95,7 +101,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         {
             switch (actionID)
             {
-                case (PanelContextMenuItemId.REFRESH_ITEM) : return true;
+                case (ContextMenuItemId.REFRESH_ITEM) : return true;
                 default : return data != null;
             }
         }
@@ -103,13 +109,17 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         @Override
         public Node getActionGraphic(String actionID)
         {
-            if (actionID.equals(PanelContextMenuItemId.OPEN_ITEM))
+            if (actionID.equals(ContextMenuItemId.OPEN_ITEM))
             {
-                FileData fileData = getFileData();
-                if (fileData != null)
+                Object rawFileData = getUserData();
+                if (rawFileData != null &&  rawFileData instanceof FileData)
                 {
-                    Image image = fileData.isDirectory() ? ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FOLDER) : ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FILE);
-                    return image != null ? new ImageView(image) : null;
+                    FileData fileData = (FileData) rawFileData;
+                    if (fileData != null)
+                    {
+                        Image image = fileData.isDirectory() ? ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FOLDER) : ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FILE);
+                        return image != null ? new ImageView(image) : null;
+                    }
                 }
             }
 

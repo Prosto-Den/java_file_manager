@@ -8,6 +8,8 @@ import utils.filesystem.FileSystemUtils;
 import utils.i18n.LanguageManager;
 import utils.platform.OSIntegrationService;
 import utils.settings.*;
+import utils.trash.ITrashManager;
+import utils.trash.LinuxTrashManager;
 import utils.ui.*;
 import utils.ui.context.ContextMenuManager;
 import javafx.scene.input.DataFormat;
@@ -25,6 +27,8 @@ public final class AppContext
     private static OSIntegrationService integrationService;
     private static WindowManager windowManager;
     private static ContextMenuManager contextMenuManager;
+    private static ITrashManager trashManager;
+
     // TODO пока сойдёт, но если их станет много, надо будет сделать отдельынй менеджер
     private static DataFormat panelDataFormat;
 
@@ -44,6 +48,9 @@ public final class AppContext
         integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager);
         windowManager = new WindowManager(stage, settingsManager, languageManager);
         contextMenuManager = new ContextMenuManager();
+
+        if (OSType.is(OSType.LINUX))
+            trashManager = new LinuxTrashManager();
 
         panelDataFormat = new DataFormat("application/panel");
         ClipboardMonitor.start();
@@ -108,6 +115,8 @@ public final class AppContext
     public static String getAppName() {return appName;}
 
     public static DataFormat getPanelDataFormat() {return panelDataFormat;}
+
+    public static ITrashManager getTrashManager() { return trashManager; }
 
     // Приватные методы
 

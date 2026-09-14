@@ -4,16 +4,24 @@
 <properties>
     <comment>Prosto File Manager - English strings</comment>
 
+    <!-- App Title -->
     <entry key="title">Prosto File Manager</entry>
-    <entry key="button.add.text">Create</entry>
-    <entry key="button.add.tooltip">Create file in the directory</entry>
+
     <entry key="panel.column.filename">Filename</entry>
     <entry key="panel.column.fileSize">File size</entry>
     <entry key="panel.column.fileEditDate">Edit date</entry>
+
+    <!-- Tooltips for controls -->
     <entry key="combobox.disk.tooltip">Change disk</entry>
+    <entry key="button.add.tooltip">Create file in the directory</entry>
     <entry key="button.back.tooltip">Back</entry>
     <entry key="button.forward.tooltip">Forward</entry>
     <entry key="button.insert.tooltip">Insert</entry>
+
+    <!-- Control text -->
+    <entry key="button.add.text">Create</entry>
+
+    <!-- Control menu`s items -->
     <entry key="contextmenu.item.open">Open</entry>
     <entry key="contextmenu.item.copy">Copy</entry>
     <entry key="contextmenu.item.delete">Delete</entry>
@@ -21,8 +29,19 @@
     <entry key="contextmenu.item.openInTerminal">Open in terminal</entry>
     <entry key="contextmenu.item.refresh">Refresh</entry>
     <entry key="contextmenu.item.rename">Rename</entry>
+    <entry key="contextmenu.item.restore">Restore</entry>
+    <entry key="contextmenu.item.deletePermanently">Delete permanently</entry>
+
+    <!-- Go back -->
     <entry key="fileviewer.row.back">..</entry>
+
+    <!-- Column names for trash viewer -->
+    <entry key="trashviewer.column.filename">Filename</entry>
+    <entry key="trashviewer.column.path">Original path</entry>
+    <entry key="trashviewer.column.date">Deletion date</entry>
+
     <entry key="textfield.currentPath.tooltip">Path to current directory</entry>
+
     <entry key="settings.title">Settings</entry>
     <entry key="settings.label.language">Language:</entry>
     <entry key="settings.button.save">Save</entry>
@@ -33,12 +52,20 @@
     <entry key="settings.linux.used_terminal">Used terminal:</entry>
     <entry key="settings.linux.open_command">Open command:</entry>
     <entry key="settings.linux.move_to_trash_command">Move to trash command:</entry>
+
     <entry key="addmenu.item.folder">Folder</entry>
     <entry key="addmenu.item.textfile">Text file</entry>
 
+    <entry key="pattern.newfile">^%s(?:\s\((\d+)\))?%s$</entry>
+
     <entry key="new.folder.name">New folder</entry>
     <entry key="new.textfile.name">Text file</entry>
-    <entry key="pattern.newfile">^%s(?:\s\((\d+)\))?%s$</entry>
+
+    <entry key="alert.delete.title">File deletion</entry>
+    <entry key="alert.delete.header">Delete files permanently?</entry>
+    <entry key="alert.delete.text">You could not revert this action later.</entry>
+    <entry key="alert.restore.error.title">Restore error</entry>
+    <entry key="alert.restore.error.text">Some files haven`t been restored</entry>
 
     <entry key="error.load_user_settings">Loading user settings failed. Applying default settings</entry>
     <entry key="error.save_user_settings">Failed to save settings</entry>

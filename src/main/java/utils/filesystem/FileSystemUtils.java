@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
 //TODO некоторые утилиты не нужны для линукса. Возможно, стоит завезти отдельный класс WindowsFileSystemUtils?
+// TODO избавится от использования обычных строк и переписать всё на File
 
 /**
  * Статические методы для работы с файловой системой
@@ -130,6 +131,12 @@ public class FileSystemUtils
     public static String adjustPath(String path, String filename)
     {
         return String.join(System.getProperty("file.separator"), path, filename);
+    }
+
+    // TODO проверить работу с файлом
+    public static boolean delete(File file)
+    {
+        return delete(file.getPath());
     }
 
     /**

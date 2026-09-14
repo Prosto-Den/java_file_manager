@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com" xmlns:fx="http://javafx.com" fx:controller="controllers.TrashController">
+   <children>
+      <TableView fx:id="trashTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <columns>
+          <TableColumn fx:id="nameColumn" prefWidth="150.0" text="%trashviewer.column.filename" />
+          <TableColumn fx:id="pathColumn" prefWidth="300.0" text="%trashviewer.column.path" />
+            <TableColumn fx:id="dateColumn" prefWidth="130.0" text="%trashviewer.column.date" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>

@@ -103,6 +103,16 @@
         </tooltip>
     </Button>
 
+    <!-- Кнопка просмотра корзины -->
+     <Button fx:id="trashButton" HBox.hgrow="ALWAYS">
+        <graphic>
+            <ImageView>
+                <Image url="/icons/24x24/trash.png" preserveRatio="true"/>
+            </ImageView>
+        </graphic>
+
+     </Button>
+
     <!--Текстовое поле с текущей директорией-->
     <TextField fx:id="currentPathField" HBox.hgrow="ALWAYS" editable="false">
         <tooltip>

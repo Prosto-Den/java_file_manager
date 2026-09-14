@@ -5,15 +5,19 @@
     <comment>Prosto File Manager - Russian strings</comment>
 
     <entry key="title">Prosto File Manager</entry>
-    <entry key="button.add.text">Создать</entry>
-    <entry key="button.add.tooltip">Создать файл в директории</entry>
+
     <entry key="panel.column.filename">Имя файла</entry>
     <entry key="panel.column.fileSize">Размер файла</entry>
     <entry key="panel.column.fileEditDate">Дата изменения</entry>
+
     <entry key="combobox.disk.tooltip">Сменить диск</entry>
+
+    <entry key="button.add.text">Создать</entry>
+    <entry key="button.add.tooltip">Создать файл в директории</entry>
     <entry key="button.back.tooltip">Назад</entry>
     <entry key="button.forward.tooltip">Вперёд</entry>
     <entry key="button.insert.tooltip">Вставить</entry>
+
     <entry key="contextmenu.item.open">Открыть</entry>
     <entry key="contextmenu.item.copy">Скопировать</entry>
     <entry key="contextmenu.item.delete">Удалить</entry>
@@ -21,8 +25,17 @@
     <entry key="contextmenu.item.openInTerminal">Открыть в терминале</entry>
     <entry key="contextmenu.item.refresh">Обновить</entry>
     <entry key="contextmenu.item.rename">Переименовать</entry>
+    <entry key="contextmenu.item.restore">Восстановить</entry>
+    <entry key="contextmenu.item.deletePermanently">Удалить навсегда</entry>
+
     <entry key="fileviewer.row.back">..</entry>
+
+    <entry key="trashviewer.column.filename">Имя файла</entry>
+    <entry key="trashviewer.column.path">Оригинальное расположение</entry>
+    <entry key="trashviewer.column.date">Дата удаления</entry>
+
     <entry key="textfield.currentPath.tooltip">Путь к текущей директории</entry>
+
     <entry key="settings.title">Настройки</entry>
     <entry key="settings.label.language">Язык:</entry>
     <entry key="settings.button.save">Сохранить</entry>
@@ -33,13 +46,21 @@
     <entry key="settings.linux.used_terminal">Используемый терминал:</entry>
     <entry key="settings.linux.open_command">Команда открытия:</entry>
     <entry key="settings.linux.move_to_trash_command">Команда перемещения в корзину:</entry>
+
     <entry key="addmenu.item.folder">Папку</entry>
     <entry key="addmenu.item.textfile">Текстовый файл</entry>
 
     <!--TODO сделать имя для новых файлов/папок настраиваемым?  -->
     <entry key="new.folder.name">Новая папка</entry>
     <entry key="new.textfile.name">Текстовый файл</entry>
+
     <entry key="pattern.newfile">^%s(?:\s\((\d+)\))?%s$</entry>
+
+    <entry key="alert.delete.title">Удаление файлов</entry>
+    <entry key="alert.delete.header">Удалить выбранные файлы навсегда?</entry>
+    <entry key="alert.delete.text">Это действие нельзя будет отменить.</entry>
+    <entry key="alert.restore.error.title">Ошибка восстановления</entry>
+    <entry key="alert.restore.error.text">Некоторые файлы не удалось восстановить</entry>
 
     <entry key="error.load_user_settings">Не удалось загрузить файл пользовательских настроек. Будут применены настройки по умолчанию</entry>
     <entry key="error.save_user_settings">Не удалось сохранить пользовательские настройки</entry>
