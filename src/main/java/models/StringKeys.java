@@ -35,6 +35,8 @@ public class StringKeys
     // "Назад"
     public static final String FILEVIEWER_ROW_BACK = "fileviewer.row.back";
 
+    public static final String TRASH_TITLE = "trash.title";
+
     // названия колонок корзины
     public static final String TRASHVIEWER_COLUMN_FILENAME = "trashviewer.column.filename";
     public static final String TRASHVIEWER_COLUMN_PATH = "trashviewer.column.path";

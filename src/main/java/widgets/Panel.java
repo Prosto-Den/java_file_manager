@@ -146,7 +146,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         EventBus.subscribe(PathChangedEvent.class, event -> refreshTable());
         EventBus.subscribe(NewFileInDirEvent.class, event -> refreshTable());
         EventBus.subscribe(FileSystemChangedEvent.class, event -> {
-            if (fileSystemId.equals(event.getFileSystemId()))
+            if (fileSystemId.equals(event.getFileSystemId()) || event.getFileSystemId().equals("all"))
                 refreshTable();
         });
 

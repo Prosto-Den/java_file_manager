@@ -19,15 +19,23 @@ public class ToolBarController implements Initializable
     @FXML
     private Button settingsButton;
 
+    @FXML 
+    private Button trashButton;
+
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
         settingsButton.setOnAction(event -> onSettingsButtonClick());
+        trashButton.setOnAction(event -> onTrashButtonClick());
     }
 
     private void onSettingsButtonClick()
     {
-        AppContext.getLanguageManager().setCurrentLanguage(AppContext.getSettings().get(SettingKeys.LOCALE));
         AppContext.getSettingsStage().showAndWait();
+    }
+
+    private void onTrashButtonClick()
+    {
+        AppContext.getTrashStage().show();
     }
 }

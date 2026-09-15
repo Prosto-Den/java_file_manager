@@ -102,6 +102,11 @@ public final class AppContext
         return windowManager.createSettingsStage();
     }
 
+    public static Stage getTrashStage()
+    {
+        return windowManager.createOrGetTrashStage();
+    }
+
     /**
      * Получить путь к директории приложения
      * @return путь к директории

@@ -14,11 +14,8 @@ import javafx.scene.control.ContextMenu;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.Optional;
 
 import app.AppContext;
-import events.EventBus;
-import events.FileSystemChangedEvent;
 
 import java.util.List;
 
@@ -27,11 +24,13 @@ import models.StringKeys;
 import models.TrashItem;
 import utils.i18n.LanguageManager;
 import utils.ui.context.IContextMenuConfig;
+import events.EventBus;
+import events.FileSystemChangedEvent;
 
 public class TrashController implements Initializable
 {
     @FXML 
-    private TableView<TrashItem> trashTable;
+    private TableView<TrashItem> trashViewer;
     @FXML
     private TableColumn<TrashItem, String> nameColumn;
     @FXML
@@ -59,20 +58,13 @@ public class TrashController implements Initializable
         @Override
         public boolean isActionEnabled(String actionID)
         {
-            return data != null;
+            return true;
         }
 
         @Override
         public Node getActionGraphic(String actionID)
         {
             return null;
-        }
-
-        private Optional<TrashItem> getTrashItem()
-        {
-            if (data != null && data instanceof TrashItem)
-                return Optional.of((TrashItem) data);
-            return Optional.empty();
         }
     }
 
@@ -83,7 +75,7 @@ public class TrashController implements Initializable
         pathColumn.setCellValueFactory(cellData -> cellData.getValue().originalPathProperty());
         dateColumn.setCellValueFactory(cellData -> cellData.getValue().deletionDateProperty());
 
-        trashTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        trashViewer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         createContextMenu();
 
@@ -96,11 +88,12 @@ public class TrashController implements Initializable
     {
         ContextMenu contextMenu = AppContext.getContextMenuManager().createTrashContextMenu();
         AppContext.getContextMenuManager().configureContextMenu(contextMenu, new TrashMenuContext());
+        trashViewer.setContextMenu(contextMenu);
     }
 
     private void onRestoreItem()
     {
-        ObservableList<TrashItem> selectedItems = trashTable.getSelectionModel().getSelectedItems();
+        ObservableList<TrashItem> selectedItems = trashViewer.getSelectionModel().getSelectedItems();
         if (selectedItems.isEmpty())
             return;
 
@@ -117,13 +110,12 @@ public class TrashController implements Initializable
 
         refreshTable();
 
-        // TODO прилумать, как передать ID файловой системы
-        //EventBus.publish(new FileSystemChangedEvent());
+        EventBus.publish(new FileSystemChangedEvent("all"));
     }
 
     private void onDeletePermanentlyItem()
     {
-        ObservableList<TrashItem> selectedItems = trashTable.getSelectionModel().getSelectedItems();
+        ObservableList<TrashItem> selectedItems = trashViewer.getSelectionModel().getSelectedItems();
         if (selectedItems.isEmpty())
             return;
 
@@ -146,7 +138,7 @@ public class TrashController implements Initializable
     private void refreshTable()
     {
         List<TrashItem> items = AppContext.getTrashManager().getTrashItems();
-        trashTable.setItems(FXCollections.observableArrayList(items));
+        trashViewer.setItems(FXCollections.observableArrayList(items));
     }
 
     // TODO вынести в отдельный менеджер предупреждающих сообщений

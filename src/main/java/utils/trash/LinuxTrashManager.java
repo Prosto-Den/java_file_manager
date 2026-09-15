@@ -97,7 +97,7 @@ public class LinuxTrashManager implements ITrashManager
                 line = line.trim();
                 if (line.startsWith("Path="))
                 {
-                    path = path.substring(5);
+                    path = line.substring(5);
                     path = URLDecoder.decode(path, StandardCharsets.UTF_8);
                 }
                 else if (line.startsWith("DeletionDate="))

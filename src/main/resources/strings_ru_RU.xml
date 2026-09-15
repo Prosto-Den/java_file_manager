@@ -30,6 +30,8 @@
 
     <entry key="fileviewer.row.back">..</entry>
 
+    <entry key="trash.title">Корзина</entry>
+
     <entry key="trashviewer.column.filename">Имя файла</entry>
     <entry key="trashviewer.column.path">Оригинальное расположение</entry>
     <entry key="trashviewer.column.date">Дата удаления</entry>

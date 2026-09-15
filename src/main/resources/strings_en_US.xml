@@ -35,6 +35,8 @@
     <!-- Go back -->
     <entry key="fileviewer.row.back">..</entry>
 
+    <entry key="trash.title">Trash</entry>
+
     <!-- Column names for trash viewer -->
     <entry key="trashviewer.column.filename">Filename</entry>
     <entry key="trashviewer.column.path">Original path</entry>
