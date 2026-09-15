@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import utils.filesystem.FileSystemUtils;
 
-public class LinuxTrashManager implements ITrashManager
+public final class LinuxTrashManager implements ITrashManager
 {
     private final File trashHome = new File(System.getProperty("user.home"), ".local/share/Trash");
     private final File filesDir = new File(trashHome, "files");

@@ -10,6 +10,7 @@ import utils.platform.OSIntegrationService;
 import utils.settings.*;
 import utils.trash.ITrashManager;
 import utils.trash.LinuxTrashManager;
+import utils.trash.WindowsTrashManager;
 import utils.ui.*;
 import utils.ui.context.ContextMenuManager;
 import javafx.scene.input.DataFormat;
@@ -29,7 +30,7 @@ public final class AppContext
     private static ContextMenuManager contextMenuManager;
     private static ITrashManager trashManager;
 
-    // TODO пока сойдёт, но если их станет много, надо будет сделать отдельынй менеджер
+    // TODO пока сойдёт, но если их станет много, надо будет сделать отдельный менеджер
     private static DataFormat panelDataFormat;
 
     /**
@@ -51,6 +52,8 @@ public final class AppContext
 
         if (OSType.is(OSType.LINUX))
             trashManager = new LinuxTrashManager();
+        else if (OSType.is(OSType.WINDOWS))
+            trashManager = new WindowsTrashManager();
 
         panelDataFormat = new DataFormat("application/panel");
         ClipboardMonitor.start();
