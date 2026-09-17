@@ -84,8 +84,8 @@ public final class AppContext
     public static OSIntegrationService getIntegrationService() { return integrationService; }
 
     /**
-     * Выдать менеджер контекстного меню
-     * @return менеджер контекстного меню
+     * Выдать менеджер окон приложения
+     * @return менеджер окон приложения
      */
     public static WindowManager getWindowManager() { return windowManager; }
 
@@ -94,21 +94,6 @@ public final class AppContext
      * @return менеджер контекстного меню
      */
     public static ContextMenuManager getContextMenuManager() { return contextMenuManager; }
-
-    /**
-     * Создать окно для работы с настройками приложения.
-     *
-     * @return окно для работы с настройками
-     */
-    public static Stage getSettingsStage()
-    {
-        return windowManager.createSettingsStage();
-    }
-
-    public static Stage getTrashStage()
-    {
-        return windowManager.createOrGetTrashStage();
-    }
 
     /**
      * Получить путь к директории приложения

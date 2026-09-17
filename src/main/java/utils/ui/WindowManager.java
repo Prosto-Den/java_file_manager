@@ -66,6 +66,10 @@ public final class WindowManager
         return settingsStage;
     }
 
+    /**
+     * Создать/выдать окно с 
+     * @return
+     */
     public Stage createOrGetTrashStage()
     {
         if (trashStage != null && trashStage.isShowing())
