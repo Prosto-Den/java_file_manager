@@ -3,6 +3,7 @@ package utils.filesystem;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.nio.file.Path;
 
 /**
  * Класс для работы с объектами файловой системы.
@@ -17,7 +18,7 @@ public class FileSystemController
      * */
     public static String create()
     {
-        return create("");
+        return create(Path.of(""));
     }
 
     /**
@@ -25,7 +26,7 @@ public class FileSystemController
      * @param path путь, на который файловая системы должна указывать
      * @return UUID созданной файловой системы
      * */
-    public static String create(String path)
+    public static String create(Path path)
     {
         String id = UUID.randomUUID().toString();
         instances.put(id, new FileSystem(path));

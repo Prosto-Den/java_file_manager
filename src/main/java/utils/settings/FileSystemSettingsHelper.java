@@ -2,6 +2,7 @@ package utils.settings;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.nio.file.Path;
 
 /**
  * Вспомогательный класс для связи UUID экземпляра файловой системы с ID из настроек
@@ -35,8 +36,8 @@ public final class FileSystemSettingsHelper
      * @param uuid UUID файловой системы, для которой нужно сохранить путь в настройках
      * @param path путь для сохранения
      * */
-    public void setPath(String uuid, String path)
+    public void setPath(String uuid, Path path)
     {
-        settingsManager.set(fileSystemsKeys.get(uuid), path);
+        settingsManager.set(fileSystemsKeys.get(uuid), path.toString());
     }
 }

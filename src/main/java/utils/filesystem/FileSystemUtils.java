@@ -3,6 +3,7 @@ package utils.filesystem;
 import types.OSType;
 import java.io.File;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -22,9 +23,15 @@ public class FileSystemUtils
      * @param path Путь к файлу/директории
      * @return True если существует, иначе False
      * */
+    @Deprecated(since = "0.0.8", forRemoval = true)
     public static boolean isExist(String path)
     {
         return new File(path).exists();
+    }
+
+    public static boolean isExist(Path path)
+    {
+        return Files.exists(path);
     }
 
     /**
@@ -50,11 +57,30 @@ public class FileSystemUtils
         return null;
     }
 
+    public static @Nullable List<Path> getLogicalDrivesV2()
+    {
+        if (OSType.is(OSType.WINDOWS))
+        {
+            List<Path> logicalDrives = new ArrayList<>();
+            for (char letter = 'A'; letter <= 'Z'; ++letter)
+            {
+                Path path = Path.of(String.format("&s:", letter));
+                if (isExist(path))
+                    logicalDrives.add(path);
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Получить дату последнего изменения файла
      * @param filePath путь к файлу
      * @return строку с датой последнего изменения файла
+     * @deprecated Используйте {@link #getFileAttributes(Path)} для получения даты последней модификации файла и прочих атрибутов. А
+     * для перевода даты в "человеческий" вид используйте {@link utils.Converter#convertDateTime(java.nio.file.attribute.FileTime)}
      * */
+    @Deprecated(since="0.0.8", forRemoval = true)
     public static String lastModifiedDate(String filePath)
     {
         //TODO формат для даты вынести в строковые ресурсы
@@ -65,10 +91,30 @@ public class FileSystemUtils
     }
 
     /**
+     * Получить атрибуты файла по пути к нему
+     * @param path путь к файлу
+     * @return атрибуты файла, если их удалось получить, иначе null
+     */
+    public static @Nullable BasicFileAttributes getFileAttributes(Path path)
+    {
+        try
+        {
+            return Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        }
+        catch (IOException ex)
+        {
+            System.err.println("Ошибка чтения пути: " + ex.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Получить имя файла из абсолютного пути к нему
      * @param filePath Абсолютный путь к файлу
      * @return Имя файла
+     * @deprecated Передача строк в качестве путей более не актуальна. Используйте метод класса {@link Path} для получения имена файла
      * */
+    @Deprecated(since="0.0.8", forRemoval = true)
     public static String getFilenameFromPath(String filePath)
     {
         return new File(filePath).getName();
@@ -79,7 +125,9 @@ public class FileSystemUtils
      * Получить строку с информацией о размере файла
      * @param filePath Абсолютный путь к файлу
      * @return Строка с размером файла
+     * @deprecated Используйте {@link #getFileAttributes(Path)} для получения размера файла и прочих атрибутов
      * */
+    @Deprecated(since = "0.0.8", forRemoval = true)
     public static String getFileSize(String filePath)
     {
         String[] units = {"B", "KB", "MB", "GB", "TB"};
@@ -99,17 +147,36 @@ public class FileSystemUtils
      * Является ли переданный путь директорией
      * @param path Путь
      * @return True - если переданный путь существует и является директорией, иначе False
+     * @deprecated Передача строк в качестве пути болле не актуальна. Используйте метод {@link #isDir(Path)}
      * */
+    @Deprecated(since="0.0.8", forRemoval = true)
     public static boolean isDir(String path)
     {
         return new File(path).isDirectory();
     }
 
     /**
+     * Является ли переданный путь директорией
+     * @param path путь
+     * @return true, если путь указывает на директорию, иначе false
+     */
+    public static boolean isDir(Path path)
+    {
+        return Files.isDirectory(path);
+    }
+
+    public static boolean isFile(Path path)
+    {
+        return !isDir(path);
+    }
+
+    /**
      * Пуста ли директория?
      * @param path путь к директории
      * @return true, если жиректоряи пуста, иначе false
+     * @deprecated Передача строк в качестве пути более не пктуальна. Используйте метод {@link #isDirEmpty(Path)}
      */
+    @Deprecated(since = "0.0.8", forRemoval = true)
     public static boolean isDirEmpty(String path)
     {
         boolean res = false;
@@ -122,34 +189,67 @@ public class FileSystemUtils
     }
 
     /**
+     * Пуста ли директория?
+     * @param path путь к директории
+     * @return true, если удалось считать содержимое директории и в директории есть хотя бы один файл. false, если путь ведёт не к директории или не удалось считать содержимое
+     */
+    public static boolean isDirEmpty(Path path)
+    {
+        if (path == null || !Files.isDirectory(path))
+            return false;
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path))
+        {
+            return stream.iterator().hasNext();
+        }
+        catch (IOException ex)
+        {
+            System.err.println("Не удалось создать поток для чтения директории: " + ex.getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Провести конкатенацию пути и имени файла / директории
      * @param path путь к родительской директории
      * @param filename название файла / директории в родительской директории
      * @return путь до файла / директории
+     * @deprecated Более не актуален. Используйте {@link java.nio.file.Path#resolve(String)}
      * */
+    @Deprecated(since = "0.0.8", forRemoval = true)
     public static String adjustPath(String path, String filename)
     {
         return String.join(System.getProperty("file.separator"), path, filename);
     }
 
     /**
-     * Удалить файл (директорию)
-     * @param path путь к файлу (директории)
-     * @return true если удаление прошло успешно, иначе false
+     * Удалить файл/директорию
+     * @param path путь к файлу/директории
+     * @return true, если удалось удалить файл/директорию, иначе false
      */
-    public static boolean delete(String path)
+    public static boolean delete(Path path)
     {
-        if (!isDir(path))
-            return new File(path).delete();
-        else
-            return deleteRecursively(path);
+        try
+        {
+            if (Files.deleteIfExists(path))
+                return true;
+            else
+                return deleteRecursively(path);
+        }
+        catch (IOException ex)
+        {
+            System.err.println("Не удалось удалить: " + ex.getMessage());
+            return false;
+        }
     }
 
     /**
      * Создать директорию по указанному пути
      * @param path путь к директории
      * @return true, если директорию удалось создать, иначе false
+     * @deprecated Используйте {@link #createDir(Path)}
      */
+    @Deprecated(since = "0.0.8", forRemoval = true)
     public static boolean createDir(String path)
     {
         File file = new File(path);
@@ -168,10 +268,32 @@ public class FileSystemUtils
     }
 
     /**
+     * Создать директорию по указанному пути
+     * @param path путь к директории
+     * @return true, если директорию удалось создать, иначе false
+     */
+    public static boolean createDir(Path path)
+    {
+        try 
+        {
+            // TODO подумать над проверкой
+            Files.createDirectory(path);
+            return true;
+        }
+        catch (IOException ex)
+        {
+            System.err.println("Не удалось создать директорию: " + ex.getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Создать файл по указанному пути
      * @param path путь к файлу
      * @return true, если файл удалось создать, иначе false
+     * @deprecated Используйте {@link #createFile(Path)}
      */
+    @Deprecated(since = "0.0.8", forRemoval = true)
     public static boolean createFile(String path)
     {
         File file = new File(path);
@@ -188,17 +310,19 @@ public class FileSystemUtils
         return res;
     }
 
-    // Приватные методы
-
-    /**
-     * Выдать корень файловой системы (C:\ для Windows и / для Linux)
-     * @return Корень системы
-     * */
-    public static String getDefaultPath()
+    public static boolean createFile(Path path)
     {
-        if (OSType.is(OSType.WINDOWS))
-            return "C:\\";
-        return "/";
+        try
+        {
+            // TODO подумать над проверкой
+            Files.createFile(path);
+            return true;
+        }
+        catch (IOException ex)
+        {
+            System.err.println("Не удалось создать файл: " + ex.getMessage());
+            return false;
+        }
     }
 
     /**
@@ -206,7 +330,9 @@ public class FileSystemUtils
      * @param oldFilePath старый путь к файлу
      * @param newFilePath новый путь к файлу
      * @return true, если файл удалось переименовать, иначе false
+     * @deprecated Используйте {@link #renameFile(Path, String)}
      */
+    @Deprecated(since = "0.0.8", forRemoval = true)
     public static boolean renameFile(String oldFilePath, String newFilePath)
     {
         File file = new File(oldFilePath);
@@ -214,13 +340,49 @@ public class FileSystemUtils
     }
 
     /**
+     * Переименовать файл/директорию
+     * @param path путь к файлу
+     * @param newName новое имя для файла/директории
+     * @return true, если файл/директорию удалось переименовать, иначе false
+     */
+    public static boolean renameFile(Path path, String newName)
+    {
+        if (path == null || !Files.exists(path) || newName == null || newName.isBlank())
+            return false;
+
+        Path newPath = path.getParent().resolve(newName);
+
+        try
+        {
+            Files.move(path, newPath, StandardCopyOption.REPLACE_EXISTING);
+            return true;
+        }
+        catch (IOException ex)
+        {
+            System.err.println("Не удалось переименовать файл: " + ex.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Выдать корень файловой системы (C:\ для Windows и / для Linux)
+     * @return Корень системы
+     * */
+    public static Path getDefaultPath()
+    {
+        if (OSType.is(OSType.WINDOWS))
+            return Path.of("C:\\");
+        return Path.of("/");
+    }
+
+    /**
      * Переместить файл
      * @param sourcePath путь к файлу
      * @param destPath новый путь к файлу
      */
-    public static void moveFile(String sourcePath, String destPath)
+    public static void moveFile(Path sourcePath, Path destPath)
     {
-        transferFile(new File(sourcePath), new File(destPath), true);
+        transferFile(sourcePath, destPath, true);
     }
 
     /**
@@ -230,7 +392,7 @@ public class FileSystemUtils
      */
     public static void moveFile(File source, File dest)
     {
-        transferFile(source, dest, true);
+        transferFile(source.toPath(), dest.toPath(), true);
     }
 
     /**
@@ -238,9 +400,9 @@ public class FileSystemUtils
      * @param sourcePath путь к файлу
      * @param destPath новый путь к файлу
      */
-    public static void copyFile(String sourcePath, String destPath)
+    public static void copyFile(Path sourcePath, Path destPath)
     {
-        transferFile(new File(sourcePath), new File(destPath), false);
+        transferFile(sourcePath, destPath, false);
     }
 
     /**
@@ -250,43 +412,70 @@ public class FileSystemUtils
      */
     public static void copyFile(File source, File dest)
     {
-        transferFile(source, dest, false);
+        transferFile(source.toPath(), dest.toPath(), false);
+    }
+
+    public static List<Path> listDirectory(Path dirPath, boolean asNames)
+    {
+        List<Path> res = new ArrayList<>();
+
+        if (!isDir(dirPath))
+            return res;
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath))
+        {
+            for (Path path : stream)
+                if (asNames)
+                    res.add(path.getFileName());
+                else
+                    res.add(path);
+        }
+        catch (IOException ex)
+        {
+            System.err.println("Не удалось создать поток для чтения директории: " + ex.getMessage());
+        }
+
+        return res;
     }
 
     // Приватный методы
-
     /**
      * Общий метод для перемещения файла
      * @param source файл источник
      * @param dest файл назначения
      * @param isMove флаг перемещения. true, если файлы надо переместить и false, если их нужно скопировать.
      */
-    private static void transferFile(File source, File dest, boolean isMove)
+    private static void transferFile(Path source, Path dest, boolean isMove)
     {
         try
         {
-            Path sourcePath = source.toPath();
-            Path destPath = dest.toPath();
-
-            if (source.isDirectory())
+            if (isDir(source))
             {
-                if (!dest.exists())
+                if (!isExist(dest))
                     return;
-
-                File[] files = source.listFiles();
-                if (files != null)
-                    for (File file : files)
-                        transferFile(file, new File(dest, file.getName()), isMove);
                 
+                Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+                    {
+                        if (isMove)
+                            Files.move(source, dest, StandardCopyOption.REPLACE_EXISTING);
+                        else
+                            Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);  
+
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+
                 if (isMove)
-                    Files.delete(sourcePath);
+                    Files.delete(source);
             }
             else
             {
                 if (isMove)
-                    Files.move(sourcePath, destPath, StandardCopyOption.REPLACE_EXISTING);
+                    Files.move(source, dest, StandardCopyOption.REPLACE_EXISTING);
                 else
-                    Files.copy(sourcePath, destPath, StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
             }
         }
         catch (IOException ex)
@@ -297,33 +486,31 @@ public class FileSystemUtils
 
     //TODO директории с большим количеством файлов будут удаляться долго, поэтому
     // удаление надо вынести в отдельный поток + создать окно с индикацией удаления
-    private static boolean deleteRecursively(String rawPath)
+    private static boolean deleteRecursively(Path path)
     {
         boolean res = false;
-
-        Path path = Paths.get(rawPath);
-
         try
         {
-            if (Files.isDirectory(path) && !isDirEmpty(rawPath))
+            if (isDir(path) && !isDirEmpty(path))
             {
-                try (Stream<Path> stream = Files.walk(path))
-                {
-                    stream.sorted(Comparator.reverseOrder())
-                            .forEach(p -> {
-                                try
-                                {
-                                    if (Files.isDirectory(p))
-                                        deleteRecursively(p.toString());
-                                    else
-                                        Files.delete(p);
-                                }
-                                catch (IOException ex)
-                                {
-                                    System.err.println("не удалось удалить: " + p);
-                                }
-                            });
-                }
+                Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+                    {
+                        Files.delete(file);
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException ex) throws IOException
+                    {
+                        if (ex != null)
+                            throw ex;
+
+                        Files.delete(dir);
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
             }
             else
                 Files.delete(path);

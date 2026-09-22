@@ -6,7 +6,7 @@
 
     <groupId>prost0_den</groupId>
     <artifactId>PFM_JE</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.8</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

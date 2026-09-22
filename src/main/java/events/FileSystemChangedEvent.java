@@ -1,14 +1,16 @@
 package events;
 
+import java.nio.file.Path;
+
 
 public class FileSystemChangedEvent
 {
-    private final String fileSystemId;
+    private final Path path;
 
-    public FileSystemChangedEvent(String id)
+    public FileSystemChangedEvent(Path path)
     {
-        fileSystemId = id;
+        this.path = path;
     }
 
-    public String getFileSystemId() { return fileSystemId; }
+    public Path getPath() { return path; }
 }

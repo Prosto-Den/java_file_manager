@@ -1,7 +1,7 @@
 package utils.platform;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,7 @@ import java.awt.Desktop;
 import models.SettingKeys;
 import types.FileSystemErrors;
 import types.OSType;
+import utils.filesystem.FileSystemUtils;
 import utils.settings.SettingsManager;
 
 public class OSIntegrationService
@@ -31,14 +32,12 @@ public class OSIntegrationService
      * @param path путь к файлу
      * @return код ошибки открытия файла
      * */
-    public void openFile(String path)
+    public void openFile(Path path)
     {
-        File file = new File(path);
-
-        if (!file.exists() || !file.isFile())
+        if (!FileSystemUtils.isExist(path) || FileSystemUtils.isDir(path))
             return;
         
-        FileSystemErrors res = openDesktop(file);
+        FileSystemErrors res = openDesktop(path);
         if (res != FileSystemErrors.OK)
             openSystemCommands(osType, path);
     }
@@ -47,10 +46,10 @@ public class OSIntegrationService
      * Открыть директорию в терминале. Терминал запуститься в отдельнои процессе и не заблокирует работу файлового менеджера
      * @param path путь к директории
      */
-    public void openInTerminal(String path)
+    public void openInTerminal(Path path)
     {
         String command = OSType.is(OSType.LINUX) ? settings.get(SettingKeys.LINUX_CONSOLE) : WINDOWS_OPEN_IN_TERMINAL_COMMAND;
-        runCommand(command, path);
+        runCommand(command, path.toString());
     }
 
     /**
@@ -58,15 +57,12 @@ public class OSIntegrationService
      * @param filePath путь к файлу(директории)
      * @return true если перемещенеи в корзину прошло успешно, иначе false
      */
-    public boolean moveToTrash(String filePath)
+    public boolean moveToTrash(Path filePath)
     {
         boolean res = false;
 
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.MOVE_TO_TRASH))
-        {
-            File file = new File(filePath);
-            res = Desktop.getDesktop().moveToTrash(file);
-        }
+            res = Desktop.getDesktop().moveToTrash(filePath.toFile());
         else
             res = moveToTrashViaGio(filePath);
 
@@ -78,10 +74,10 @@ public class OSIntegrationService
      * @param filePath - путь к файлу
      * @return true, если удалось переместить файл в корзину, иначе false
      */
-    public boolean moveToTrashViaGio(String filePath)
+    public boolean moveToTrashViaGio(Path filePath)
     {
         String command = settings.get(SettingKeys.LINUX_MOVE_TO_TRASH_COMMAND);
-        return runCommandWithWait(command, filePath);
+        return runCommandWithWait(command, filePath.toString());
     }
 
     /**
@@ -89,12 +85,12 @@ public class OSIntegrationService
      * @param osType тип ОС
      * @param path путь к файлу
      */
-    private void openSystemCommands(OSType osType, String path)
+    private void openSystemCommands(OSType osType, Path path)
     {
         switch (osType)
         {
-            case OSType.WINDOWS -> runCommand(WINDOWS_OPEN_COMMAND, path);
-            case OSType.LINUX -> runCommand(settings.get(SettingKeys.LINUX_OPEN_COMMAND), path);
+            case OSType.WINDOWS -> runCommand(WINDOWS_OPEN_COMMAND, path.toString());
+            case OSType.LINUX -> runCommand(settings.get(SettingKeys.LINUX_OPEN_COMMAND), path.toString());
         }
     }
 
@@ -164,7 +160,7 @@ public class OSIntegrationService
      * @param file файл для октрытия
      * @return код ошибки
      */
-    private FileSystemErrors openDesktop(File file)
+    private FileSystemErrors openDesktop(Path path)
     {
         if (!Desktop.isDesktopSupported())
         {
@@ -178,7 +174,7 @@ public class OSIntegrationService
         {
             if (desktop.isSupported(Desktop.Action.APP_OPEN_FILE))
             {
-                desktop.open(file);
+                desktop.open(path.toFile());
                 return FileSystemErrors.OK;
             }
             return FileSystemErrors.DESKTOP_NOT_SUPPORTED;

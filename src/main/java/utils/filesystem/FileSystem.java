@@ -1,22 +1,23 @@
 package utils.filesystem;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
-import java.io.FileFilter;
+import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Deque;
 import java.util.ArrayDeque;
+import java.nio.file.Path;
+import java.nio.file.Files;
+import java.nio.file.DirectoryStream;
 
 import app.AppContext;
 import events.EventBus;
 import events.PathChangedEvent;
 
 import models.StringKeys;
-import types.OSType;
 import utils.i18n.LanguageManager;
 
 
@@ -26,15 +27,16 @@ import utils.i18n.LanguageManager;
 public final class FileSystem
 {   
     // Абсолютный путь к текущей директории
-    private String currentPath;
+    private Path currentPath;
 
     // история перемещений пользователя
-    private Deque<String> backStack;
-    private Deque<String> forwardStack;
+    // TODO добавить настройки с количеством файлов в истории
+    private Deque<Path> backStack;
+    private Deque<Path> forwardStack;
 
     private static interface Transfer
     {
-        void execute(File source, File dest);
+        void execute(Path source, Path dest);
     }
 
     /**
@@ -52,7 +54,7 @@ public final class FileSystem
      * Конструктор с передачей пути, на который объект будет указывать после создания.
      * Если директории по такому пути не существует, будет указывать на корень (C:\ для Windows и / для Linux)
      * */
-    public FileSystem(String path)
+    public FileSystem(Path path)
     {
         currentPath = FileSystemUtils.isDir(path) ? path : FileSystemUtils.getDefaultPath();
         backStack = new ArrayDeque<>();
@@ -65,17 +67,9 @@ public final class FileSystem
      *                Если false - выдаст их абсолютные пути
      * @return Список с файлами, содержащимися внутри текущей директории
      * */
-    public List<String> listCurrentPath(boolean asNames)
+    public List<Path> listCurrentPath(boolean asNames)
     {
-        File dir = new File(currentPath);
-        File[] files = dir.listFiles();
-        List<String> result = new ArrayList<>();
-
-        if (files != null)
-            for (File file : files)
-                result.add(asNames ? file.getName() : file.getPath());
-
-        return result;
+        return FileSystemUtils.listDirectory(currentPath, asNames);
     }
 
     /**
@@ -83,9 +77,14 @@ public final class FileSystem
      * (с добавлением разделителя между ними). Не проверяет, существует ли файл по этому пути на самом деле
      * @return Путь к файлу
      * */
-    public String buildPath(String fileName)
+    public Path buildPath(String fileName)
     {
-        return FileSystemUtils.adjustPath(currentPath, fileName);
+        return currentPath.resolve(fileName);
+    }
+
+    public Path buildPath(Path fileName)
+    {
+        return currentPath.resolve(fileName);
     }
 
     /*TODO возможны ситуации, когда изменения в файловой системе будут происходить в другом месте (например, пользователь удалит папку из 
@@ -95,13 +94,8 @@ public final class FileSystem
     /**
      * Сменить текущую директорию
      * */
-    public void setCurrentPath(String path)
+    public void setCurrentPath(Path path)
     {
-        if (OSType.is(OSType.WINDOWS))
-            path = path.replace("\\\\", "\\");
-        else if (OSType.is(OSType.LINUX))
-            path = path.replace("//", "/");
-
         backStack.push(currentPath);
         // TODO размер истории вынести в настройки
         if (backStack.size() >= 10)
@@ -109,7 +103,7 @@ public final class FileSystem
 
         if (!forwardStack.isEmpty())
         {
-            String valueFromForwardStack = forwardStack.pop();
+            Path valueFromForwardStack = forwardStack.pop();
             if (!valueFromForwardStack.equals(path))
                 forwardStack.clear();
         }
@@ -121,7 +115,7 @@ public final class FileSystem
      * Выдать текущую директорию
      * @return текущая директория, на которую указывает объект
      * */
-    public String getCurrentPath() { return currentPath; }
+    public Path getCurrentPath() { return currentPath; }
 
     /**
      * Является ли текущая директория корнем системы?
@@ -129,7 +123,7 @@ public final class FileSystem
     public boolean isCurrentPathRoot()
     {
         Pattern pattern = Pattern.compile("^([A-Z]:\\\\|/)$", Pattern.CASE_INSENSITIVE);
-        return pattern.matcher(currentPath).matches();
+        return pattern.matcher(currentPath.toString()).matches();
     }
 
     /**
@@ -147,16 +141,16 @@ public final class FileSystem
      * */
     public void goUpTree()
     {
-        setCurrentPath(getParentDir());
+        setCurrentPath(currentPath.getParent());
     }
 
     /**
      * Получить родительскую директорию для текущей директории
      * @return Абсолютный путь до родительской директории
      * */
-    public String getParentDir()
+    public Path getParentDir()
     {
-        return new File(currentPath).getParent();
+        return currentPath.getParent();
     }
 
     /**
@@ -233,7 +227,7 @@ public final class FileSystem
      */
     public boolean renameFile(String oldFileName, String newFileName)
     {
-        return FileSystemUtils.renameFile(buildPath(oldFileName), buildPath(newFileName));
+        return FileSystemUtils.renameFile(buildPath(oldFileName), newFileName);
     }
 
     /**
@@ -244,7 +238,7 @@ public final class FileSystem
     {
         transferFiles(files, new Transfer() {
             @Override
-            public void execute(File source, File dest)
+            public void execute(Path source, Path dest)
             {
                 FileSystemUtils.moveFile(source, dest);
             }
@@ -259,7 +253,7 @@ public final class FileSystem
     {
         transferFiles(files, new Transfer(){
             @Override
-            public void execute(File source, File dest)
+            public void execute(Path source, Path dest)
             {
                 FileSystemUtils.copyFile(source, dest);
             }
@@ -272,10 +266,18 @@ public final class FileSystem
     {
         for (File file : files)
         {
-            File dest = new File(buildPath(file.getName()));
-            if (file.isDirectory() && !dest.exists())
-                dest.mkdir();
-            command.execute(file, dest);
+            Path dest = buildPath(file.toPath());
+            if (file.isDirectory() && !FileSystemUtils.isExist(dest))
+                try
+                {
+                    Files.createDirectories(dest);
+                    command.execute(file.toPath(), dest);
+                }
+                catch (IOException ex)
+                {
+                    System.err.println("Не удалось создать папку назначения " + ex.getMessage());
+                    return;
+                }
         }
     }
 
@@ -283,7 +285,7 @@ public final class FileSystem
      * Сменить текущую директории и отправить событие об этом
      * @param newPath новый путь, на который будет указывать файловая система
      */
-    private void changeCurrentPath(String newPath)
+    private void changeCurrentPath(Path newPath)
     {
         currentPath = newPath;
         EventBus.publish(new PathChangedEvent());
@@ -298,28 +300,28 @@ public final class FileSystem
     private String buildFileName(String fileName, String fileFormat)
     {
         LanguageManager langManager = AppContext.getLanguageManager();
-        File file = new File(currentPath);
         Set<Integer> usedIndices = new HashSet<>();
 
-        file.listFiles(new FileFilter() {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(currentPath))
+        {
             Pattern pattern = Pattern.compile(langManager.getString(StringKeys.PATTERN_NEW_FILE,
                 Pattern.quote(fileName),
                 Pattern.quote(fileFormat)));
 
-            @Override
-            public boolean accept(File file)
-            {
-                Matcher matcher = pattern.matcher(file.getName());
+            stream.forEach(path -> {
+                Matcher matcher = pattern.matcher(path.getFileName().toString());
                 if (matcher.matches())
                 {
                     String group = matcher.group(1);
                     usedIndices.add(group == null ? 0 : Integer.parseInt(group));
-                    return true;
                 }
-
-                return false;
-            } 
-        });
+            });
+        }
+        catch (IOException ex)
+        {
+            System.err.println("Не удалось создать поток чтения директории: " + ex.getMessage());
+            return fileName;
+        }
         
         String result = fileName;
 
