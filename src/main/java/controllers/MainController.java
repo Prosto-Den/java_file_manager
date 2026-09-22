@@ -11,6 +11,7 @@ import models.SettingKeys;
 import utils.filesystem.FileSystemController;
 import widgets.ControlPanel;
 import widgets.Panel;
+import java.nio.file.Path;
 
 
 /**
@@ -30,10 +31,10 @@ public class MainController implements Initializable
     public void initialize(URL url, ResourceBundle bundle)
     {
         // Создаём экземпляры файловых систем
-        String leftPath = AppContext.getSettings().get(SettingKeys.LastDirectory.LEFT);
-        String rightPath = AppContext.getSettings().get(SettingKeys.LastDirectory.RIGHT);
-        String leftFileSystemID = FileSystemController.create(leftPath == null ? "" : leftPath);
-        String rightFileSystemID = FileSystemController.create(rightPath == null ? "" : rightPath);
+        Path leftPath = Path.of(AppContext.getSettings().get(SettingKeys.LastDirectory.LEFT));
+        Path rightPath = Path.of(AppContext.getSettings().get(SettingKeys.LastDirectory.RIGHT));
+        String leftFileSystemID = FileSystemController.create(leftPath);
+        String rightFileSystemID = FileSystemController.create(rightPath);
 
         // устанавливаем связь между UUID файловой системы и ключом в настройках
         AppContext.getSettingsHelper().setFileSystemSettingsKey(leftFileSystemID, SettingKeys.LastDirectory.LEFT);

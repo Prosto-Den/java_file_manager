@@ -1,11 +1,8 @@
 package utils.ui;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.Collections;
-import java.util.List;
+import java.nio.file.Path;
 
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
@@ -22,12 +19,11 @@ public final class ClipboardUtil
      * Скопировать содержимое в буфер обмена
      * @param path - путь к файлу
      */
-    public static void copyToClipboard(String path)
+    public static void copyToClipboard(Path path)
     {
-        File file = new File(path);
         ClipboardContent content = new ClipboardContent();
 
-        content.putFiles(Collections.singletonList(file));
+        content.putFiles(Collections.singletonList(path.toFile()));
         clipboard.setContent(content);
     }
 
@@ -40,30 +36,16 @@ public final class ClipboardUtil
         return !clipboard.hasFiles();
     }
 
-    /**
-     * Вставить содержимое из буфера обмена в директорию
-     * @param path - путь к диренктории
-     */
-    public static void insert(String path)
+    public static void insert(Path path)
     {
         Clipboard clipboard = Clipboard.getSystemClipboard();
 
         if (clipboard.hasFiles())
         {
-            List<File> files = clipboard.getFiles();
-
-            for (File file : files)
+            for (File file : clipboard.getFiles())
             {
-                File destFile = new File(FileSystemUtils.adjustPath(path, file.getName()));
-
-                try
-                {
-                    Files.copy(file.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }
-                catch (IOException ex)
-                {
-                    System.err.println("gneg :)");
-                }
+                Path destFile = path.resolve(file.getName());
+                FileSystemUtils.copyFile(file.toPath(), destFile);
             }
         }
     }

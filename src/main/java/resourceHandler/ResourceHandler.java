@@ -4,14 +4,13 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.image.Image;
-import utils.filesystem.FileSystemUtils;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
 /**
- * Общий класс для управления ресурсами программы (реализация паттерна фасад)
+ * Класс для управления ресурсами программы
  * */
 public final class ResourceHandler
 {
@@ -70,11 +69,10 @@ public final class ResourceHandler
     @Nullable
     public static URL getLayout(String layoutFileName)
     {
-        String path = FileSystemUtils.adjustPath(LAYOUTS_PATH, layoutFileName);
-        return ResourceHandler.class.getResource(path);
+        return ResourceHandler.class.getResource(buildResourcePath(LAYOUTS_PATH, layoutFileName));
     }
 
-    // Методы работы с ресурсами стилей
+    
     /**
      * Получить стиль для виджета по названию файла
      * @param styleFileName название файла со стилем
@@ -83,7 +81,17 @@ public final class ResourceHandler
     @Nullable
     public static URL getStyle(String styleFileName)
     {
-        String path = String.join("/", STYLES_PATH, styleFileName);
-        return ResourceHandler.class.getResource(path);
+        return ResourceHandler.class.getResource(buildResourcePath(STYLES_PATH, styleFileName));
+    }
+
+    /**
+     * Построить путь к файлу из ресурсов
+     * @param folderName папка, в которой находится файл
+     * @param fileName имя файла
+     * @return путь до файла
+     */
+    private static String buildResourcePath(String folderName, String fileName)
+    {
+        return String.join("/", folderName, fileName);
     }
 }

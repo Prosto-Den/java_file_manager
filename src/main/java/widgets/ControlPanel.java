@@ -1,13 +1,6 @@
 package widgets;
 
 
-import app.AppContext;
-import events.ClipboardEvent;
-import events.EventBus;
-import events.InsertButtonClickedEvent;
-import events.LocaleChangedEvent;
-import events.NewFileInDirEvent;
-import events.PathChangedEvent;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -18,17 +11,26 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import java.util.Optional;
+import java.nio.file.Path;
+
+import app.AppContext;
+import events.EventBus;
+import events.InsertButtonClickedEvent;
+import events.LocaleChangedEvent;
+import events.NewFileInDirEvent;
+import events.PathChangedEvent;
+import events.ClipboardEvent;
 import models.CreateButtonMenuId;
 import models.StringKeys;
 import resourceHandler.ResourceHandler;
-import types.OSType;
 import utils.filesystem.FileSystem;
 import utils.filesystem.FileSystemController;
-import utils.filesystem.FileSystemUtils;
 import utils.ui.ClipboardUtil;
-import widgets.interfaces.ITranslatable;
+import utils.filesystem.FileSystemUtils;
+import types.OSType;
 import widgets.interfaces.IWidget;
-import java.util.Optional;
+import widgets.interfaces.ITranslatable;
 
 
 /**
@@ -72,13 +74,13 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
 
         this.fileSystemId = fileSystemId;
         
-        currentPathField.setText(getFileSystem().getCurrentPath());
-        //currentPathField.textProperty().bind(getFileSystem().getCurrentPathProperty());
+        currentPathField.setText(getFileSystem().getCurrentPath().toString());
+        currentPathField.setUserData(getFileSystem().getCurrentPath());
         initUI();
 
         EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
         EventBus.subscribe(PathChangedEvent.class, event -> {
-            currentPathField.setText(getFileSystem().getCurrentPath());
+            currentPathField.setText(getFileSystem().getCurrentPath().toString());
             backButton.setDisable(getFileSystem().isBackStackEmpty());
             forwardButton.setDisable(getFileSystem().isForwardStackEmpty());
         });
@@ -101,9 +103,13 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
      * Действия при нажатии кнопки "Вставить"
      * */
     private void onInsertItemClick()
-    {
-        ClipboardUtil.insert(currentPathField.getText());
-        EventBus.publish(new InsertButtonClickedEvent());
+    {   
+        Object userData = currentPathField.getUserData();
+        if (userData != null && userData instanceof Path)
+        {
+            ClipboardUtil.insert((Path) userData);
+            EventBus.publish(new InsertButtonClickedEvent());
+        }
     }
 
     /**
@@ -130,7 +136,7 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     private void onSelectLogicalDrive()
     {
         String value = diskComboBox.getValue() + "\\";
-        getFileSystem().setCurrentPath(value);
+        getFileSystem().setCurrentPath(Path.of(value));
     }
 
     // IWidget
