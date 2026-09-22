@@ -229,7 +229,10 @@ public final class Panel extends VBox implements IWidget, ITranslatable
      * к экземпляру
      * @return объект файловой системы для данной панели
      * */
-    private FileSystem getFileSystem() { return FileSystemController.get(fileSystemID); }
+    private FileSystem getFileSystem() 
+    { 
+        return FileSystemController.get(fileSystemID); 
+    }
 
     /**
      * Записать директорию в настройки

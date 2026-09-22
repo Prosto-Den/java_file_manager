@@ -266,18 +266,18 @@ public final class FileSystem
     {
         for (File file : files)
         {
-            Path dest = buildPath(file.toPath());
+            Path dest = buildPath(file.getName());
             if (file.isDirectory() && !FileSystemUtils.isExist(dest))
                 try
                 {
                     Files.createDirectories(dest);
-                    command.execute(file.toPath(), dest);
                 }
                 catch (IOException ex)
                 {
                     System.err.println("Не удалось создать папку назначения " + ex.getMessage());
                     return;
                 }
+            command.execute(file.toPath(), dest);
         }
     }
 
