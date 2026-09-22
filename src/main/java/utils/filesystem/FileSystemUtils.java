@@ -28,10 +28,13 @@ public class FileSystemUtils
             List<String> logicalDrives = new ArrayList<>();
             for (char letter = 'A'; letter <= 'Z'; ++letter)
             {
-                Path path = Path.of(String.format("&s:", letter));
+                Path path = Path.of(String.format("%s:", letter));
                 if (isExist(path))
                     logicalDrives.add(path.toString());
+
             }
+
+            return logicalDrives;
         }
 
         return null;
