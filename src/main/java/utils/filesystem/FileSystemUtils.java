@@ -31,6 +31,7 @@ public class FileSystemUtils
                 Path path = Path.of(String.format("%s:", letter));
                 if (isExist(path))
                     logicalDrives.add(path.toString());
+
             }
 
             return logicalDrives;
