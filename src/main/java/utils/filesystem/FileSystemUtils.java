@@ -1,7 +1,6 @@
 package utils.filesystem;
 
 import types.OSType;
-import java.io.File;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.io.IOException;
@@ -38,6 +37,11 @@ public class FileSystemUtils
         return null;
     }
 
+    /**
+     * Существует ли путь?
+     * @param path путь к файле/директории
+     * @return true, если путь существует (ведёт к существующему файлу, существующей директории), иначе false
+     */
     public static boolean isExist(Path path)
     {
         return Files.exists(path);
@@ -71,6 +75,11 @@ public class FileSystemUtils
         return Files.isDirectory(path);
     }
 
+    /**
+     * Является ли переданный путь файлом?
+     * @param path путь
+     * @return true, если путь указывает на файл, иначе false
+     */
     public static boolean isFile(Path path)
     {
         return !isDir(path);
@@ -79,7 +88,8 @@ public class FileSystemUtils
     /**
      * Пуста ли директория?
      * @param path путь к директории
-     * @return true, если удалось считать содержимое директории и в директории есть хотя бы один файл. false, если путь ведёт не к директории или не удалось считать содержимое
+     * @return true, если удалось считать содержимое директории и в директории есть хотя бы один файл. false, 
+     * если путь ведёт не к директории или не удалось считать содержимое
      */
     public static boolean isDirEmpty(Path path)
     {
@@ -138,6 +148,11 @@ public class FileSystemUtils
         }
     }
 
+    /**
+     * Создать файл по переданному пути
+     * @param path путь к будущему файлу
+     * @return true, если файл удалось создать, иначе false
+     */
     public static boolean createFile(Path path)
     {
         try
@@ -200,16 +215,6 @@ public class FileSystemUtils
     }
 
     /**
-     * Переместить файл
-     * @param source изначальный файл
-     * @param dest новый файл, который будет хранить данные изначального файла
-     */
-    public static void moveFile(File source, File dest)
-    {
-        transferFile(source.toPath(), dest.toPath(), true);
-    }
-
-    /**
      * Скопирвоать файл
      * @param sourcePath путь к файлу
      * @param destPath новый путь к файлу
@@ -217,16 +222,6 @@ public class FileSystemUtils
     public static void copyFile(Path sourcePath, Path destPath)
     {
         transferFile(sourcePath, destPath, false);
-    }
-
-    /**
-     * Скопирвоать файл
-     * @param source изначальный файл
-     * @param dest новый файл, в который будут скопированы данные изначального файла
-     */
-    public static void copyFile(File source, File dest)
-    {
-        transferFile(source.toPath(), dest.toPath(), false);
     }
 
     public static List<Path> listDirectory(Path dirPath, boolean asNames)
