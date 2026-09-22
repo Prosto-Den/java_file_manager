@@ -5,7 +5,7 @@ import events.InsertButtonClickedEvent;
 import events.LocaleChangedEvent;
 import events.NewFileInDirEvent;
 import events.PathChangedEvent;
-
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -20,10 +20,11 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
 import java.util.List;
-import java.util.Optional;
-
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Optional;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 
 import app.AppContext;
 import models.StringKeys;
@@ -39,7 +40,7 @@ import widgets.interfaces.IWidget;
 import widgets.interfaces.ITranslatable;
 import javafx.scene.Node;
 import events.FileSystemChangedEvent;
-
+import utils.Converter;
 import utils.filesystem.*;
 
 /**
@@ -69,7 +70,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         {
             this.data = data;
         }
-        
+
         private Optional<FileData> getFileData()
         {
             if (data != null && data instanceof FileData)
@@ -84,11 +85,11 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             switch (actionID)
             {
                 case (ContextMenuItemId.OPEN_ITEM) -> handleDoubleClick((FileData) data);
-                case (ContextMenuItemId.COPY_ITEM) -> 
-                    getFileData().ifPresent(fileData -> ClipboardUtil.copyToClipboard(fileData.getAbsolutePath())); 
+                case (ContextMenuItemId.COPY_ITEM) ->
+                    getFileData().ifPresent(fileData -> ClipboardUtil.copyToClipboard(fileData.getAbsolutePath()));
                 case (ContextMenuItemId.DELETE_ITEM) -> onDeleteItem();
                 case (ContextMenuItemId.MOVE_TO_TRASH_ITEM) -> onMoveToTrashItem();
-                case (ContextMenuItemId.OPEN_IN_TERMINAL_ITEM) -> 
+                case (ContextMenuItemId.OPEN_IN_TERMINAL_ITEM) ->
                     getFileData().ifPresent(fileData -> AppContext.getIntegrationService().openInTerminal(fileData.getAbsolutePath()));
                 case (ContextMenuItemId.REFRESH_ITEM) -> refreshTable();
                 case (ContextMenuItemId.RENAME_ITEM) -> onRenameItem();
@@ -117,7 +118,8 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                     FileData fileData = (FileData) rawFileData;
                     if (fileData != null)
                     {
-                        Image image = fileData.isDirectory() ? ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FOLDER) : ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FILE);
+                        Image image = FileSystemUtils.isDir(fileData.getPath()) ? ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FOLDER) :
+                                ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FILE);
                         return image != null ? new ImageView(image) : null;
                     }
                 }
@@ -146,7 +148,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         EventBus.subscribe(PathChangedEvent.class, event -> refreshTable());
         EventBus.subscribe(NewFileInDirEvent.class, event -> refreshTable());
         EventBus.subscribe(FileSystemChangedEvent.class, event -> {
-            if (fileSystemId.equals(event.getFileSystemId()) || event.getFileSystemId().equals("all"))
+            if (getFileSystem().getCurrentPath().equals(event.getPath()) || event.getPath().equals("all"))
                 refreshTable();
         });
 
@@ -169,14 +171,14 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 updateSettings();
                 refreshTable();
             }
-            else if (fileInfo.isDirectory())
+            else if (FileSystemUtils.isDir(fileInfo.getPath()))
             {
                 getFileSystem().goDownTree(fileName);
                 updateSettings();
                 refreshTable();
             }
             else
-                AppContext.getIntegrationService().openFile(fileInfo.getAbsolutePath());
+                AppContext.getIntegrationService().openFile(fileInfo.getPath());
         }
     }
 
@@ -211,17 +213,18 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             ObservableList<FileData> fileData = FXCollections.observableArrayList();
 
             if (!getFileSystem().isCurrentPathRoot())
-                fileData.add(new FileData("..", "", "", true));
+                fileData.add(new FileData(getFileSystem().getCurrentPath().getParent(),
+                                new ReadOnlyStringWrapper(".."),
+                                new ReadOnlyStringWrapper(),
+                                new ReadOnlyStringWrapper()));
 
-            List<String> files = getFileSystem().listCurrentPath(false);
-            for (String file : files)
+            List<Path> files = getFileSystem().listCurrentPath(false);
+            for (Path path : files)
             {
-                String fileSize = FileSystemUtils.getFileSize(file);
-                String fileEditDate = FileSystemUtils.lastModifiedDate(file);
-
-                FileData fileInfo = new FileData(file, fileSize, fileEditDate,
-                    FileSystemUtils.isDir(file));
-                fileData.add(fileInfo);
+                long fileSize = FileSystemUtils.getFileAttributes(path).size();
+                FileTime fileEditDate = FileSystemUtils.getFileAttributes(path).lastModifiedTime();
+                FileData data = new FileData(path, Converter.convertFileSize(fileSize), Converter.convertDateTime(fileEditDate));
+                fileData.add(data);
             }
 
             fileViewer.getItems().clear();
@@ -235,7 +238,10 @@ public final class Panel extends VBox implements IWidget, ITranslatable
      * к экземпляру
      * @return объект файловой системы для данной панели
      * */
-    private FileSystem getFileSystem() { return FileSystemController.get(fileSystemID); }
+    private FileSystem getFileSystem()
+    {
+        return FileSystemController.get(fileSystemID);
+    }
 
     /**
      * Записать директорию в настройки
@@ -243,10 +249,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     private void updateSettings()
     {
         if (getFileSystem() != null)
-        {
-            String currentPath = getFileSystem().getCurrentPath();
-            settingsHelper.setPath(fileSystemID, currentPath);
-        }
+            settingsHelper.setPath(fileSystemID, getFileSystem().getCurrentPath());
     }
 
     /**
@@ -276,7 +279,8 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     {
         ObservableList<FileData> files = fileViewer.getSelectionModel().getSelectedItems();
         for (FileData data : files)
-            FileSystemUtils.delete(data.getAbsolutePath());
+            if (!data.getNameValue().equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
+                FileSystemUtils.delete(data.getPath());
         refreshTable();
     }
 
@@ -287,7 +291,8 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     {
         ObservableList<FileData> files = fileViewer.getSelectionModel().getSelectedItems();
         for (FileData data : files)
-            AppContext.getIntegrationService().moveToTrash(data.getAbsolutePath());
+            if (!data.getNameValue().equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
+                AppContext.getIntegrationService().moveToTrash(data.getPath());
         refreshTable();
     }
 
@@ -347,7 +352,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                             icon = ResourceHandler.getIcon(IconSize.BIG, IconName.BACK);
                         else
                         {
-                            String fullPath = getFileSystem().buildPath(file.getNameValue());
+                            Path fullPath = file.getPath();
                             if (FileSystemUtils.isDir(fullPath))
                                 icon = ResourceHandler.getIcon(IconSize.BIG, IconName.FOLDER);
                             else
@@ -437,9 +442,9 @@ public final class Panel extends VBox implements IWidget, ITranslatable
 
 
         // настраиваем колонку с размером файла
-        fileSizeColumn.setCellValueFactory(cellData -> cellData.getValue().size());
+        fileSizeColumn.setCellValueFactory(cellData -> cellData.getValue().sizeProperty());
         // настраиваем колонку с датой последнего изменения
-        fileEditDateColumn.setCellValueFactory(cellData -> cellData.getValue().date());
+        fileEditDateColumn.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
     }
 
     /**
@@ -533,14 +538,13 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             {
                 if (data.getNameValue().equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
                     continue;
-                String path = getFileSystem().buildPath(data.getNameValue());
-                filesToDrag.add(new File(path));
+                filesToDrag.add(data.getPath().toFile());
             }
 
             Dragboard dragBoard = fileViewer.startDragAndDrop(TransferMode.ANY);
             ClipboardContent content = new ClipboardContent();
             content.putFiles(filesToDrag);
-            content.put(AppContext.getPanelDataFormat(), fileSystemID);
+            content.put(AppContext.getPanelDataFormat(), getFileSystem().getCurrentPath().toString());
             dragBoard.setContent(content);
 
             event.consume();
@@ -552,9 +556,9 @@ public final class Panel extends VBox implements IWidget, ITranslatable
 
             if (dragBoard.hasFiles() && dragBoard.hasContent(AppContext.getPanelDataFormat()))
             {
-                String sourceFileSystemId = (String) dragBoard.getContent(AppContext.getPanelDataFormat());
+                String sourceFileSystemPath = (String) dragBoard.getContent(AppContext.getPanelDataFormat());
                 // проверяем, что сейчас курсор находится над другой панелью. Тогда разрешаем завершение перетаскивания
-                if (sourceFileSystemId != null && !sourceFileSystemId.equals(fileSystemID))
+                if (sourceFileSystemPath != null && !sourceFileSystemPath.equals(getFileSystem().getCurrentPath().toString()))
                     event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
             }
 
@@ -573,9 +577,9 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             {
                 targetFileSystem.moveInto(filesToTransfer);
                 // при перемещении надо обновить панель источник, чтобы актуализировать интерфейс
-                String sourceFileSystemId = (String) dragBoard.getContent(AppContext.getPanelDataFormat());
-                if (sourceFileSystemId != null)
-                    EventBus.publish(new FileSystemChangedEvent(sourceFileSystemId));
+                String sourceFileSystemPath = (String) dragBoard.getContent(AppContext.getPanelDataFormat());
+                if (sourceFileSystemPath != null)
+                    EventBus.publish(new FileSystemChangedEvent(Path.of(sourceFileSystemPath)));
             }
             else if (acceptedMode == TransferMode.COPY)
                 targetFileSystem.copyInto(filesToTransfer);

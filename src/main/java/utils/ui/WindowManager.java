@@ -41,8 +41,11 @@ public final class WindowManager
 
         if (mainStage != null)
         {
-            settingsStage.initModality(Modality.WINDOW_MODAL);
+            // на Hyprland происходит баг с курсором (он не может покинуть область окна), так что блокировать окно будем вручную
+            settingsStage.initModality(Modality.NONE);
             settingsStage.initOwner(mainStage);
+
+            disableMainStage(settingsStage);
 
             try
             {
@@ -66,8 +69,23 @@ public final class WindowManager
         return settingsStage;
     }
 
+    // Приватные методы
     /**
-     * Создать/выдать окно с 
+     * Блокирует главное окно при показе дочернего окна. При скрытии дочернего окна автоматически разблокирует главное окно
+     * @param childStage дочернее окно
+     */
+    private void disableMainStage(Stage childStage)
+    {
+        // блокируем главное окно на момент показа дочернего
+        Parent root = mainStage.getScene().getRoot();
+        root.setDisable(true);
+
+        // и снимаем блокировку, когда окно пропадает
+        childStage.setOnHidden(event -> root.setDisable(false));
+    }
+
+    /**
+     * Создать/выдать окно с
      * @return
      */
     public Stage createOrGetTrashStage()
@@ -81,10 +99,10 @@ public final class WindowManager
         try
         {
             trashStage = new Stage();
-            
+
             FXMLLoader trashLoader = new FXMLLoader(ResourceHandler.getLayout("TrashViewer.fxml"), languageManager.getBundle());
             Parent root = trashLoader.load();
-            
+
             trashStage.setScene(new Scene(root));
             trashStage.setTitle(languageManager.getString(StringKeys.TRASH_TITLE));
             trashStage.initModality(Modality.NONE);

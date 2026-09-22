@@ -14,6 +14,7 @@ import utils.trash.WindowsTrashManager;
 import utils.ui.*;
 import utils.ui.context.ContextMenuManager;
 import javafx.scene.input.DataFormat;
+import java.nio.file.Path;
 
 /**
  * Вспомогательный класс приложения. Хранит общую для приложения информацию, отвечает за работу с модальными окнами
@@ -21,7 +22,7 @@ import javafx.scene.input.DataFormat;
 public final class AppContext
 {
     private static final String appName = "Prosto File Manager"; // название приложения
-    private static String appFolder;// папка приложения
+    private static Path appFolder;// папка приложения
     private static SettingsManager settingsManager;
     private static FileSystemSettingsHelper settingsHelper;
     private static LanguageManager languageManager;
@@ -42,7 +43,7 @@ public final class AppContext
     {
         appFolder = createAppFolder();
         
-        String settingsPath = FileSystemUtils.adjustPath(appFolder, "user_settings.properties");
+        Path settingsPath = appFolder.resolve("user_settings.properties");
         settingsManager = new SettingsManager(settingsPath);
         settingsHelper = new FileSystemSettingsHelper(settingsManager);
         languageManager = new LanguageManager(settingsManager);
@@ -99,7 +100,7 @@ public final class AppContext
      * Получить путь к директории приложения
      * @return путь к директории
      * */
-    public static String getAppFolder() { return appFolder; }
+    public static Path getAppFolder() { return appFolder; }
 
     /**
      * Получить название приложения
@@ -117,10 +118,10 @@ public final class AppContext
      * Создать директорию приложения, если она ещё не создана
      * @return путь к директории приложения
      * */
-    private static String createAppFolder()
+    private static Path createAppFolder()
     {
-        String userFolder = System.getProperty("user.home");
-        String path = FileSystemUtils.adjustPath(userFolder, appName);
+        Path userFolder = Path.of(System.getProperty("user.home"));
+        Path path = userFolder.resolve(appName);
 
         if (!FileSystemUtils.isExist(path))
             FileSystemUtils.createDir(path);

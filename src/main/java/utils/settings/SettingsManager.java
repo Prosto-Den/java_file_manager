@@ -5,17 +5,18 @@ import utils.filesystem.FileSystemUtils;
 
 import java.io.*;
 import java.util.Properties;
-
+import java.nio.file.Path;
+import java.nio.file.Files;
 
 
 public final class SettingsManager
 {
-    private final String settingsPath; // путь к настройкам пользователя
+    private final Path settingsPath; // путь к настройкам пользователя
     private final Properties properties; // настройки
     private Properties bufferProperties = null; // временные настройки (для того, чтобы сразу не применять изменения с UI)
-    private static final String SETTINGS_PATH = "/settings/default_settings.properties";
+    private static final String SETTINGS_PATH = "/settings/default_settings.properties"; // настройки по умолчанию
 
-    public SettingsManager(String settingsPath)
+    public SettingsManager(Path settingsPath)
     {
         this.settingsPath = settingsPath;
         this.properties = new Properties();
@@ -29,9 +30,9 @@ public final class SettingsManager
     {
         if (FileSystemUtils.isExist(settingsPath))
         {
-            try (FileInputStream fis = new FileInputStream(settingsPath))
+            try (InputStream input = Files.newInputStream(settingsPath))
             {
-                properties.load(fis);
+                properties.load(input);
             }
             catch (IOException ex)
             {
@@ -51,9 +52,9 @@ public final class SettingsManager
         if (!FileSystemUtils.isExist(settingsPath))
             FileSystemUtils.createFile(settingsPath);
 
-        try (FileOutputStream fos = new FileOutputStream(settingsPath))
+        try (OutputStream output = Files.newOutputStream(settingsPath))
         {
-            properties.store(fos, "Prosto File Manager settings");
+            properties.store(output, "Prosto File Manager settings");
         }
         catch (IOException ex)
         {

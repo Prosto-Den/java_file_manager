@@ -2,20 +2,23 @@ package models;
 
 
 import javafx.beans.property.StringProperty;
-import utils.filesystem.FileSystemUtils;
 import javafx.beans.property.SimpleStringProperty;
-
+import javafx.beans.property.ReadOnlyStringWrapper;
+import java.nio.file.Path;
 
 /**
  * Класс для хранения информации по файлу. Необходимо для отображения данных в менеджере
  *
  */
-public record FileData(StringProperty absolutePath, StringProperty size, StringProperty date, boolean isDirectory)
+public record FileData(Path filePath, StringProperty nameProperty, StringProperty sizeProperty, StringProperty dateProperty)
 {
-    public FileData(String absolutePath, String size, String date, boolean isDirectory)
+    public FileData(Path filePath, String size, String date)
     {
-        this(new SimpleStringProperty(absolutePath), new SimpleStringProperty(size), new SimpleStringProperty(date),
-                isDirectory);
+        this(filePath, 
+            new ReadOnlyStringWrapper(filePath.getFileName() != null ? filePath.getFileName().toString() : ""),
+            new ReadOnlyStringWrapper(size),
+            new ReadOnlyStringWrapper(date)
+        );
     }
 
     public StringProperty getName()
@@ -25,20 +28,19 @@ public record FileData(StringProperty absolutePath, StringProperty size, StringP
 
     public String getNameValue() 
     {
-        String absolutePathStr = absolutePath.getValue();
-        return FileSystemUtils.getFilenameFromPath(absolutePathStr);
+       return nameProperty.getValue();
     }
 
-    public String getAbsolutePath()
+    public Path getPath()
     {
-        return absolutePath.getValue();
+        return filePath;
     }
 
     public String getSizeValue() {
-        return size.getValue();
+        return sizeProperty.getValue();
     }
 
     public String getDateValue() {
-        return date.getValue();
+        return dateProperty.getValue();
     }
 }
