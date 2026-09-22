@@ -5,7 +5,6 @@ import java.io.File;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.jetbrains.annotations.Nullable;
@@ -18,26 +17,11 @@ import org.jetbrains.annotations.Nullable;
 public class FileSystemUtils
 {
     /**
-     * Существует ли файл (директория) по этому пути
-     * @param path Путь к файлу/директории
-     * @return True если существует, иначе False
-     * */
-    @Deprecated(since = "0.0.8", forRemoval = true)
-    public static boolean isExist(String path)
-    {
-        return new File(path).exists();
-    }
-
-    public static boolean isExist(Path path)
-    {
-        return Files.exists(path);
-    }
-
-    /**
      * Возвращает список со всеми логическими дисками системы (C:\, D:\ и т.д).
      * Вызов функции актуален только для Windows.
      * @return Список со всеми логическими дисками системы для Windows, пустой список для Linux.
      * */
+    // TODO пока работает на String, так как кроме комбобокса больше нигде не используется
     public static @Nullable List<String> getLogicalDrives()
     {
         if (OSType.is(OSType.WINDOWS))
@@ -45,48 +29,18 @@ public class FileSystemUtils
             List<String> logicalDrives = new ArrayList<>();
             for (char letter = 'A'; letter <= 'Z'; ++letter)
             {
-                String path = String.format("%s:", letter);
-                if (isExist(path))
-                    logicalDrives.add(path);
-            }
-
-            return logicalDrives;
-        }
-
-        return null;
-    }
-
-    public static @Nullable List<Path> getLogicalDrivesV2()
-    {
-        if (OSType.is(OSType.WINDOWS))
-        {
-            List<Path> logicalDrives = new ArrayList<>();
-            for (char letter = 'A'; letter <= 'Z'; ++letter)
-            {
                 Path path = Path.of(String.format("&s:", letter));
                 if (isExist(path))
-                    logicalDrives.add(path);
+                    logicalDrives.add(path.toString());
             }
         }
 
         return null;
     }
 
-    /**
-     * Получить дату последнего изменения файла
-     * @param filePath путь к файлу
-     * @return строку с датой последнего изменения файла
-     * @deprecated Используйте {@link #getFileAttributes(Path)} для получения даты последней модификации файла и прочих атрибутов. А
-     * для перевода даты в "человеческий" вид используйте {@link utils.Converter#convertDateTime(java.nio.file.attribute.FileTime)}
-     * */
-    @Deprecated(since="0.0.8", forRemoval = true)
-    public static String lastModifiedDate(String filePath)
+    public static boolean isExist(Path path)
     {
-        //TODO формат для даты вынести в строковые ресурсы
-        long lastModified = new File(filePath).lastModified();
-        Date date = new Date(lastModified);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        return dateFormat.format(date);
+        return Files.exists(path);
     }
 
     /**
@@ -108,53 +62,6 @@ public class FileSystemUtils
     }
 
     /**
-     * Получить имя файла из абсолютного пути к нему
-     * @param filePath Абсолютный путь к файлу
-     * @return Имя файла
-     * @deprecated Передача строк в качестве путей более не актуальна. Используйте метод класса {@link Path} для получения имена файла
-     * */
-    @Deprecated(since="0.0.8", forRemoval = true)
-    public static String getFilenameFromPath(String filePath)
-    {
-        return new File(filePath).getName();
-    }
-
-    //TODO возможно стоит сделать метод более гибким (например, задать возможность выбора размерности)
-    /**
-     * Получить строку с информацией о размере файла
-     * @param filePath Абсолютный путь к файлу
-     * @return Строка с размером файла
-     * @deprecated Используйте {@link #getFileAttributes(Path)} для получения размера файла и прочих атрибутов
-     * */
-    @Deprecated(since = "0.0.8", forRemoval = true)
-    public static String getFileSize(String filePath)
-    {
-        String[] units = {"B", "KB", "MB", "GB", "TB"};
-        int unitIndex = 0;
-        double size = new File(filePath).length();
-
-        while (size >= 1024 && unitIndex < units.length - 1)
-        {
-            size /= 1024;
-            unitIndex++;
-        }
-
-        return String.format("%.2f %s", size, units[unitIndex]);
-    }
-
-    /**
-     * Является ли переданный путь директорией
-     * @param path Путь
-     * @return True - если переданный путь существует и является директорией, иначе False
-     * @deprecated Передача строк в качестве пути болле не актуальна. Используйте метод {@link #isDir(Path)}
-     * */
-    @Deprecated(since="0.0.8", forRemoval = true)
-    public static boolean isDir(String path)
-    {
-        return new File(path).isDirectory();
-    }
-
-    /**
      * Является ли переданный путь директорией
      * @param path путь
      * @return true, если путь указывает на директорию, иначе false
@@ -167,24 +74,6 @@ public class FileSystemUtils
     public static boolean isFile(Path path)
     {
         return !isDir(path);
-    }
-
-    /**
-     * Пуста ли директория?
-     * @param path путь к директории
-     * @return true, если жиректоряи пуста, иначе false
-     * @deprecated Передача строк в качестве пути более не пктуальна. Используйте метод {@link #isDirEmpty(Path)}
-     */
-    @Deprecated(since = "0.0.8", forRemoval = true)
-    public static boolean isDirEmpty(String path)
-    {
-        boolean res = false;
-        File dir = new File(path);
-
-        if (dir.isDirectory())
-            res = dir.list().length == 0;
-
-        return res;
     }
 
     /**
@@ -206,19 +95,6 @@ public class FileSystemUtils
             System.err.println("Не удалось создать поток для чтения директории: " + ex.getMessage());
             return false;
         }
-    }
-
-    /**
-     * Провести конкатенацию пути и имени файла / директории
-     * @param path путь к родительской директории
-     * @param filename название файла / директории в родительской директории
-     * @return путь до файла / директории
-     * @deprecated Более не актуален. Используйте {@link java.nio.file.Path#resolve(String)}
-     * */
-    @Deprecated(since = "0.0.8", forRemoval = true)
-    public static String adjustPath(String path, String filename)
-    {
-        return String.join(System.getProperty("file.separator"), path, filename);
     }
 
     /**
@@ -246,30 +122,6 @@ public class FileSystemUtils
      * Создать директорию по указанному пути
      * @param path путь к директории
      * @return true, если директорию удалось создать, иначе false
-     * @deprecated Используйте {@link #createDir(Path)}
-     */
-    @Deprecated(since = "0.0.8", forRemoval = true)
-    public static boolean createDir(String path)
-    {
-        File file = new File(path);
-        boolean res = false;
-
-        try
-        {
-            res = file.mkdir();
-        }
-        catch (SecurityException ex)
-        {
-            System.err.println("Ошибка доступа");
-        }
-
-        return res;
-    }
-
-    /**
-     * Создать директорию по указанному пути
-     * @param path путь к директории
-     * @return true, если директорию удалось создать, иначе false
      */
     public static boolean createDir(Path path)
     {
@@ -286,29 +138,6 @@ public class FileSystemUtils
         }
     }
 
-    /**
-     * Создать файл по указанному пути
-     * @param path путь к файлу
-     * @return true, если файл удалось создать, иначе false
-     * @deprecated Используйте {@link #createFile(Path)}
-     */
-    @Deprecated(since = "0.0.8", forRemoval = true)
-    public static boolean createFile(String path)
-    {
-        File file = new File(path);
-        boolean res = false;
-        try
-        {
-            res = file.createNewFile();
-        }
-        catch (IOException ex)
-        {
-            System.err.println("Не удалось создать файл");
-        }
-
-        return res;
-    }
-
     public static boolean createFile(Path path)
     {
         try
@@ -322,20 +151,6 @@ public class FileSystemUtils
             System.err.println("Не удалось создать файл: " + ex.getMessage());
             return false;
         }
-    }
-
-    /**
-     * Переименовать файл
-     * @param oldFilePath старый путь к файлу
-     * @param newFilePath новый путь к файлу
-     * @return true, если файл удалось переименовать, иначе false
-     * @deprecated Используйте {@link #renameFile(Path, String)}
-     */
-    @Deprecated(since = "0.0.8", forRemoval = true)
-    public static boolean renameFile(String oldFilePath, String newFilePath)
-    {
-        File file = new File(oldFilePath);
-        return file.renameTo(new File(newFilePath));
     }
 
     /**
