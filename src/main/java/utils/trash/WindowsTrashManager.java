@@ -66,7 +66,7 @@ public final class WindowsTrashManager implements ITrashManager
     @Override
     public boolean deletePermanently(TrashItem item)
     {
-        return FileSystemUtils.delete(item.getTrashFile());
+        return FileSystemUtils.delete(item.getTrashFile().toPath());
     }
 
     private boolean executePowerShell(String script)

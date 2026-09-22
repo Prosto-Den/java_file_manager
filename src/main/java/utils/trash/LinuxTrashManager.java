@@ -82,7 +82,7 @@ public final class LinuxTrashManager implements ITrashManager
     @Override
     public boolean deletePermanently(TrashItem item)
     {
-        return FileSystemUtils.delete(item.getTrashFile()) && FileSystemUtils.delete(item.getInfoFile());
+        return FileSystemUtils.delete(item.getTrashFile().toPath()) && FileSystemUtils.delete(item.getInfoFile().toPath());
     }
 
     private Optional<TrashMetaData> parseTrashInfo(File file)

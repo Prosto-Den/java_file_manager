@@ -86,11 +86,11 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             {
                 case (ContextMenuItemId.OPEN_ITEM) -> handleDoubleClick((FileData) data);
                 case (ContextMenuItemId.COPY_ITEM) ->
-                    getFileData().ifPresent(fileData -> ClipboardUtil.copyToClipboard(fileData.getAbsolutePath()));
+                    getFileData().ifPresent(fileData -> ClipboardUtil.copyToClipboard(fileData.getPath()));
                 case (ContextMenuItemId.DELETE_ITEM) -> onDeleteItem();
                 case (ContextMenuItemId.MOVE_TO_TRASH_ITEM) -> onMoveToTrashItem();
                 case (ContextMenuItemId.OPEN_IN_TERMINAL_ITEM) ->
-                    getFileData().ifPresent(fileData -> AppContext.getIntegrationService().openInTerminal(fileData.getAbsolutePath()));
+                    getFileData().ifPresent(fileData -> AppContext.getIntegrationService().openInTerminal(fileData.getPath()));
                 case (ContextMenuItemId.REFRESH_ITEM) -> refreshTable();
                 case (ContextMenuItemId.RENAME_ITEM) -> onRenameItem();
                 default -> {/*ничего не делаем*/}

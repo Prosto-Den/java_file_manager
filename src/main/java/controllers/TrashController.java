@@ -109,8 +109,6 @@ public class TrashController implements Initializable
         }
 
         refreshTable();
-
-        EventBus.publish(new FileSystemChangedEvent("all"));
     }
 
     private void onDeletePermanentlyItem()
