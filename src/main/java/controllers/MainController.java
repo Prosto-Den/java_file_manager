@@ -14,6 +14,7 @@ import widgets.ControlPanel;
 import widgets.Panel;
 import java.nio.file.Path;
 import javafx.collections.ListChangeListener;
+import javafx.scene.layout.BorderPane;
 
 
 /**
@@ -46,9 +47,13 @@ public class MainController implements Initializable
         if (lastDirectoryKey != null)
             AppContext.getSettingsHelper().setFileSystemSettingsKey(fileSystemId, lastDirectoryKey);
         Panel panel = new Panel(fileSystemId, AppContext.getSettingsHelper());
+        ControlPanel controlPanel = new ControlPanel(fileSystemId);
+        BorderPane borderPane = new BorderPane();
+        borderPane.setTop(controlPanel);
+        borderPane.setCenter(panel);
 
         Tab tab = new Tab();
-        tab.setContent(panel);
+        tab.setContent(borderPane);
         tab.textProperty().bind(panel.getCurrentDirProperty());
         tab.setClosable(false);
 
