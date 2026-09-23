@@ -26,6 +26,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.util.UUID;
 
 import app.AppContext;
 import models.StringKeys;
@@ -59,7 +60,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     @FXML
     private TableColumn<FileData, String> fileEditDateColumn; // дата последнего изменения файла
 
-    private final String fileSystemID;
+    private final UUID fileSystemID;
     private final FileSystemSettingsHelper settingsHelper;
     private final StringProperty dirNameProperty;
 
@@ -129,7 +130,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
      *                     через FileSystemController. ВАЖНО!!! внутри конструктора нет проверки, что объект ФС
      *                     по этому ID существует, так что передавать нужно точно валидный ID
      * */
-    public Panel(String fileSystemId, FileSystemSettingsHelper helper)
+    public Panel(UUID fileSystemId, FileSystemSettingsHelper helper)
     {
         fileSystemID = fileSystemId;
         settingsHelper = helper;
@@ -138,11 +139,17 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         load(ResourceHandler.getLayout("Panel.fxml"));
         initUI();
 
-        EventBus.subscribe(InsertButtonClickedEvent.class, event -> refreshTable());
-        EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
-        EventBus.subscribe(PathChangedEvent.class, event -> refreshTable());
-        EventBus.subscribe(NewFileInDirEvent.class, event -> refreshTable());
-        EventBus.subscribe(FileSystemChangedEvent.class, event -> {
+        EventBus.subscribe(InsertButtonClickedEvent.class, this, event -> refreshTable());
+        EventBus.subscribe(LocaleChangedEvent.class, this, event -> updateText());
+        EventBus.subscribe(PathChangedEvent.class, this, event -> {
+            if (event.getFileSystemId().equals(fileSystemId))
+                refreshTable();
+        });
+        EventBus.subscribe(NewFileInDirEvent.class, this, event -> {
+            if (getFileSystem().getCurrentPath().equals(event.getPath()))
+                refreshTable();
+        });
+        EventBus.subscribe(FileSystemChangedEvent.class, this, event -> {
             if (getFileSystem().getCurrentPath().equals(event.getPath()))
                 refreshTable();
         });
@@ -525,7 +532,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 default -> {/* ничего не делаем */}
             }
             
-            event.consume();
+            //event.consume();
         });
 
         // задаём поведение при начале перетаскивания

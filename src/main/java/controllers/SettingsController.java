@@ -68,7 +68,7 @@ public class SettingsController implements Initializable, ITranslatable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
+        EventBus.subscribe(LocaleChangedEvent.class, this, event -> updateText());
 
         localeBox.setCellFactory(lv -> new ListCell<Language>() {
             @Override
@@ -169,6 +169,7 @@ public class SettingsController implements Initializable, ITranslatable
     {
         if (dialogStage != null)
             dialogStage.close();
+        EventBus.unsubscribe(this);
         settingsManager.rollbackEdit();
         // пересохраняем текущую локаль, чтобы сбросить изменения
         languageManager.setCurrentLanguage(settingsManager.get(SettingKeys.LOCALE));

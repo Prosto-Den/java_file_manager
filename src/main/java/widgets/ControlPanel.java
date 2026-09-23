@@ -13,6 +13,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import java.util.Optional;
 import java.nio.file.Path;
+import java.util.UUID;
 
 import app.AppContext;
 import events.EventBus;
@@ -59,7 +60,7 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     @FXML
     private TextField currentPathField; // текстовое поле текущей директории
 
-    private final String fileSystemId; // ID файловой системы
+    private final UUID fileSystemId; // ID файловой системы
 
 
     /**
@@ -67,24 +68,24 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
      * @param fileSystemId идентификатор файловой системы. Так же, как и Panel не проверяет, что файловая
      *                     система с этим ID существует
      * */
-    public ControlPanel(String fileSystemId)
+    public ControlPanel(UUID fileSystemId)
     {
+        this.fileSystemId = fileSystemId;
+
         load(ResourceHandler.getLayout("ControlPanel.fxml"));
         insertButton.setOnAction(event -> onInsertItemClick());
-
-        this.fileSystemId = fileSystemId;
         
         currentPathField.setText(getFileSystem().getCurrentPath().toString());
         currentPathField.setUserData(getFileSystem().getCurrentPath());
         initUI();
 
-        EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
-        EventBus.subscribe(PathChangedEvent.class, event -> {
+        EventBus.subscribe(LocaleChangedEvent.class, this, event -> updateText());
+        EventBus.subscribe(PathChangedEvent.class, this, event -> {
             currentPathField.setText(getFileSystem().getCurrentPath().toString());
             backButton.setDisable(getFileSystem().isBackStackEmpty());
             forwardButton.setDisable(getFileSystem().isForwardStackEmpty());
         });
-        EventBus.subscribe(ClipboardEvent.class, event -> {
+        EventBus.subscribe(ClipboardEvent.class, this, event -> {
             insertButton.setDisable(!event.isHasFiles());
         });
 
@@ -118,7 +119,7 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     private void onCreateFolderItemClick()
     {
         if (getFileSystem().createFolderInCurrentDirectory())
-            EventBus.publish(new NewFileInDirEvent());
+            EventBus.publish(new NewFileInDirEvent(getFileSystem().getCurrentPath()));
     }
 
     /**
@@ -127,7 +128,7 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     private void onCreateTextFileItemClick()
     {
         if (getFileSystem().createTextFileInCurrentDirectory())
-            EventBus.publish(new NewFileInDirEvent());
+            EventBus.publish(new NewFileInDirEvent(getFileSystem().getCurrentPath()));
     }
 
     /**
