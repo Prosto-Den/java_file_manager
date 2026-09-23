@@ -2,19 +2,20 @@ package controllers;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.nio.file.Path;
 
-import app.AppContext;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.collections.ListChangeListener;
+import javafx.scene.layout.BorderPane;
+
+import app.AppContext;
 import models.SettingKeys;
 import utils.filesystem.FileSystemController;
 import widgets.ControlPanel;
 import widgets.Panel;
-import java.nio.file.Path;
-import javafx.collections.ListChangeListener;
-import javafx.scene.layout.BorderPane;
 
 
 /**
@@ -30,7 +31,6 @@ public class MainController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        // Создаём экземпляры файловых систем
         Path leftPath = Path.of(AppContext.getSettings().get(SettingKeys.LastDirectory.LEFT));
         Path rightPath = Path.of(AppContext.getSettings().get(SettingKeys.LastDirectory.RIGHT));
 
@@ -41,11 +41,19 @@ public class MainController implements Initializable
         configureTabPane(rightTabPane);
     }
 
+    // TODO так как теперь на каждой стороне несколько вкладок, надо решить, как сохранять последнюю открытую директорию
+    /**
+     * Создать новую вкладку панели
+     * @param tabPane панельный виджет, для которого создаётся вкладка
+     * @param initPath инициализирующий путь
+     * @param lastDirectoryKey ключ для сохранения директории
+     */
     private void createNewTab(TabPane tabPane, Path initPath, String lastDirectoryKey)
     {
         String fileSystemId = FileSystemController.create(initPath);
         if (lastDirectoryKey != null)
             AppContext.getSettingsHelper().setFileSystemSettingsKey(fileSystemId, lastDirectoryKey);
+
         Panel panel = new Panel(fileSystemId, AppContext.getSettingsHelper());
         ControlPanel controlPanel = new ControlPanel(fileSystemId);
         BorderPane borderPane = new BorderPane();
@@ -61,12 +69,17 @@ public class MainController implements Initializable
         tabPane.getSelectionModel().select(tab);
     }
 
+    /**
+     * Настроить панельный виджет
+     * @param tabPane панельный виджет
+     */
     private void configureTabPane(TabPane tabPane)
     {
         Tab addTab = new Tab("+");
         addTab.setClosable(false);
         tabPane.getTabs().add(addTab);
 
+        // настраиваем поведение при добавлении новой вкладки
         tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
             if (newTab == addTab)
             {
@@ -76,6 +89,7 @@ public class MainController implements Initializable
             }
         });
 
+        // настраиваем вкладки, когда их остаётся только 2 (последняя открытая + кнопка "+")
         tabPane.getTabs().addListener((ListChangeListener<Tab>) listener -> {
             if (tabPane.getTabs().size() == 2)
                 tabPane.getTabs().get(0).setClosable(false);
@@ -86,36 +100,3 @@ public class MainController implements Initializable
         });
     }
 }
-
-// public class MainController implements Initializable
-// {
-//     // левая панель с отображаемыми файлами директории
-//     @FXML
-//     private BorderPane leftContainer;
-
-//     // правая панель с отображаемыми файлами директории
-//     @FXML
-//     private BorderPane rightContainer;
-
-//     @Override
-//     public void initialize(URL url, ResourceBundle bundle)
-//     {
-//         // Создаём экземпляры файловых систем
-//         Path leftPath = Path.of(AppContext.getSettings().get(SettingKeys.LastDirectory.LEFT));
-//         Path rightPath = Path.of(AppContext.getSettings().get(SettingKeys.LastDirectory.RIGHT));
-//         String leftFileSystemID = FileSystemController.create(leftPath);
-//         String rightFileSystemID = FileSystemController.create(rightPath);
-
-//         // устанавливаем связь между UUID файловой системы и ключом в настройках
-//         AppContext.getSettingsHelper().setFileSystemSettingsKey(leftFileSystemID, SettingKeys.LastDirectory.LEFT);
-//         AppContext.getSettingsHelper().setFileSystemSettingsKey(rightFileSystemID, SettingKeys.LastDirectory.RIGHT);
-
-//         // настраиваем левую часть окна
-//         leftContainer.setTop(new ControlPanel(leftFileSystemID));
-//         leftContainer.setCenter(new Panel(leftFileSystemID, AppContext.getSettingsHelper()));
-
-//         // настраиваем правую часть окна
-//         rightContainer.setTop(new ControlPanel(rightFileSystemID));
-//         rightContainer.setCenter(new Panel(rightFileSystemID, AppContext.getSettingsHelper()));
-//     }
-// }
