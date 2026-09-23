@@ -6,6 +6,8 @@ import events.LocaleChangedEvent;
 import events.NewFileInDirEvent;
 import events.PathChangedEvent;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -59,6 +61,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
 
     private final String fileSystemID;
     private final FileSystemSettingsHelper settingsHelper;
+    private final StringProperty dirNameProperty;
 
     /**
      * Класс контекста для панели. Служит для передачи данных от панели к контекстному меню
@@ -126,10 +129,11 @@ public final class Panel extends VBox implements IWidget, ITranslatable
      *                     через FileSystemController. ВАЖНО!!! внутри конструктора нет проверки, что объект ФС
      *                     по этому ID существует, так что передавать нужно точно валидный ID
      * */
-    public Panel(String fileSystemId, FileSystemSettingsHelper helper, int panelId)
+    public Panel(String fileSystemId, FileSystemSettingsHelper helper)
     {
         fileSystemID = fileSystemId;
         settingsHelper = helper;
+        dirNameProperty = new SimpleStringProperty(getFileSystem().getCurrentPath().getFileName().toString());
 
         load(ResourceHandler.getLayout("Panel.fxml"));
         initUI();
@@ -192,6 +196,11 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         fileEditDateColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
     }
 
+    public StringProperty getCurrentDirProperty()
+    {
+        return dirNameProperty;
+    }
+
     // Приватные методы
 
     /**
@@ -201,6 +210,8 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     {
         if (getFileSystem() != null)
         {
+            dirNameProperty.setValue(getFileSystem().getCurrentPath().getFileName().toString());
+
             ObservableList<FileData> fileData = FXCollections.observableArrayList();
 
             if (!getFileSystem().isCurrentPathRoot())
