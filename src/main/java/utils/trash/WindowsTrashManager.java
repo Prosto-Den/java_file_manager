@@ -11,9 +11,12 @@ import utils.filesystem.FileSystemUtils;
 
 public final class WindowsTrashManager implements ITrashManager
 {
-    private final String SEARCH_SCRIPT = "(New-Object -ComObject Shell.Application).Namespace(0x0a).Items() | " +
-                        "Select-Object Name, Path, @{n='OrigPath';e={$_.ExtendedProperty('System.Recycle.DeletedFrom')}}, " +
-                        "@{n='DelDate';e={$_.ExtendedProperty('System.Recycle.DateDeleted')}} | ConvertTo-Csv -NoTypeInformation";
+    private final String SEARCH_SCRIPT = "(New-Object -ComObject Shell.Application).NameSpace(0x0a).Items() | " +
+            "Select-Object Name, " +
+            "Path, " +
+            "@{n='OriginalPath';e={$_.ExtendedProperty('{9B174B33-40FF-11D2-A27E-00C04FC30871} 2')}}, " +
+            "@{n='DeletionDate';e={$_.ExtendedProperty('{9B174B33-40FF-11D2-A27E-00C04FC30871} 3')}} | " +
+            "ConvertTo-Csv -NoTypeInformation";
 
     private final String RESTORE_SCRIPT = "(New-Object -ComObject Shell.Application).Namespace(0x0a).Items() | " + 
                         "Where-Object {$_.Path -eq '%s'} | ForEach-Object {$_.InvokeVerb('Window.Recycle.Restore')}";
@@ -33,7 +36,7 @@ public final class WindowsTrashManager implements ITrashManager
 
                 while ((line = reader.readLine()) != null)
                 {
-                    String[] parts = line.split("\", \"");
+                    String[] parts = line.split("\",\"");
                     if (parts.length >= 4)
                     {
                         String name = parts[0].replace("\"", "");
