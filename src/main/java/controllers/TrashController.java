@@ -100,7 +100,7 @@ public class TrashController implements Initializable
         boolean anyError = false;
 
         for (TrashItem item : selectedItems)
-            anyError |= AppContext.getTrashManager().restoreItem(item);
+            anyError |= !AppContext.getTrashManager().restoreItem(item);
 
         if (anyError)
         {

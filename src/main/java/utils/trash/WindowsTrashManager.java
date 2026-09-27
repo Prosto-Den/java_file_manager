@@ -18,8 +18,10 @@ public final class WindowsTrashManager implements ITrashManager
             "@{n='DeletionDate';e={$_.ExtendedProperty('{9B174B33-40FF-11D2-A27E-00C04FC30871} 3')}} | " +
             "ConvertTo-Csv -NoTypeInformation";
 
-    private final String RESTORE_SCRIPT = "(New-Object -ComObject Shell.Application).Namespace(0x0a).Items() | " + 
-                        "Where-Object {$_.Path -eq '%s'} | ForEach-Object {$_.InvokeVerb('Window.Recycle.Restore')}";
+    private final String RESTORE_SCRIPT = "$shell = New-Object -ComObject Shell.Application; " +
+            "$recycleBin = $shell.NameSpace(0x0a); " +
+            "$item = $recycleBin.Items() | Where-Object { $_.Path -eq '%s' } | Select-Object -First 1; " +
+            "if ($item) { $item.InvokeVerb('Undelete'); Write-Output 'SUCCESS' } else { Write-Output 'NOT_FOUND' }";
 
     @Override
     public List<TrashItem> getTrashItems()
@@ -28,6 +30,7 @@ public final class WindowsTrashManager implements ITrashManager
 
         try
         {
+
             Process process = new ProcessBuilder("powershell.exe", "-Command", SEARCH_SCRIPT).start();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream())))
             {
@@ -62,7 +65,8 @@ public final class WindowsTrashManager implements ITrashManager
     @Override
     public boolean restoreItem(TrashItem item)
     {
-        String script = String.format(RESTORE_SCRIPT, item.getTrashFile().getAbsolutePath().replace("\\", "\\\\"));
+        String path = item.getTrashFile().getPath().replace("'", "''");
+        String script = String.format(RESTORE_SCRIPT, path);
         return executePowerShell(script);
     }
 
