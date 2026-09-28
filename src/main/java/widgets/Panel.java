@@ -67,7 +67,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     /**
      * Класс контекста для панели. Служит для передачи данных от панели к контекстному меню
      */
-    public class PanelMenuContext implements IContextMenuConfig
+    public final class PanelMenuContext implements IContextMenuConfig
     {
         private final FileData data;
 
@@ -127,14 +127,16 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     /**
      * Конструктор
      * @param fileSystemId идентификатор файловой системы для данной панели. Идентификатор можно получить
-     *                     через FileSystemController. ВАЖНО!!! внутри конструктора нет проверки, что объект ФС
-     *                     по этому ID существует, так что передавать нужно точно валидный ID
+     *                     через {@link FileSystemController}.
+     * @param helper помощник для связи пути файловой системы с настройками
      * */
     public Panel(UUID fileSystemId, FileSystemSettingsHelper helper)
     {
+        //super();
+
         fileSystemID = fileSystemId;
         settingsHelper = helper;
-        dirNameProperty = new SimpleStringProperty(getFileSystem().getCurrentPath().getFileName().toString());
+        dirNameProperty = new SimpleStringProperty(getFileSystem().getCurrentDirName().toString());
 
         load(ResourceHandler.getLayout("Panel.fxml"));
         initUI();
@@ -188,8 +190,6 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     @Override
     public void initUI()
     {
-        // Меняем поведение fileViewer при увеличении размера окна. По умолчанию, будет создаваться четвёртая колонка.
-        // Тут же ставим, чтобы последняя колонка подстраивалась под новый размер окна
         setupFileViewer();
         refreshTable();
     }
@@ -217,7 +217,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     {
         if (getFileSystem() != null)
         {
-            dirNameProperty.setValue(getFileSystem().getCurrentPath().getFileName().toString());
+            dirNameProperty.setValue(getFileSystem().getCurrentDirName().toString());
 
             ObservableList<FileData> fileData = FXCollections.observableArrayList();
 
@@ -461,7 +461,9 @@ public final class Panel extends VBox implements IWidget, ITranslatable
      */
     private void setupFileViewer()
     {
-        fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        // Меняем поведение fileViewer при увеличении размера окна. По умолчанию, будет создаваться четвёртая колонка.
+        // Тут же ставим, чтобы последняя колонка подстраивалась под новый размер окна
+        //fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         fileViewer.setEditable(false);
         fileViewer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
@@ -531,8 +533,6 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 }
                 default -> {/* ничего не делаем */}
             }
-            
-            //event.consume();
         });
 
         // задаём поведение при начале перетаскивания

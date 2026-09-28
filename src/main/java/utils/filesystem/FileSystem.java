@@ -121,6 +121,14 @@ public final class FileSystem
      * */
     public Path getCurrentPath() { return currentPath; }
 
+    public Path getCurrentDirName()
+    {
+        Path fileName = getCurrentPath().getFileName();
+        if (fileName != null)
+            return fileName;
+        return getCurrentPath();
+    }
+
     /**
      * Является ли текущая директория корнем системы?
      * */

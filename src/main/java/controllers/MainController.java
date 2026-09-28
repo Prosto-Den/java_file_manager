@@ -1,36 +1,26 @@
 package controllers;
 
-import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.nio.file.Path;
 import java.util.UUID;
-import java.util.List;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.input.TransferMode;
-import javafx.animation.PauseTransition;
-import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
-import javafx.collections.ListChangeListener;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.control.Label;
-import javafx.util.Duration;
+import javafx.scene.control.SplitPane;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
+import javafx.event.Event;
 
 import app.AppContext;
+import events.CloseTabEvent;
 import events.EventBus;
-import events.NewFileInDirEvent;
-import models.SettingKeys;
+import events.NewTabEvent;
 import utils.filesystem.FileSystemController;
-import widgets.ControlPanel;
-import widgets.Panel;
-import utils.filesystem.FileSystem;
+import widgets.TabViewer;
 
 
 /**
@@ -39,221 +29,98 @@ import utils.filesystem.FileSystem;
 public class MainController implements Initializable
 {
     @FXML 
-    private TabPane leftTabPane;
-    @FXML
-    private TabPane rightTabPane;
+    private SplitPane mainWidget;
 
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        Path leftPath = Path.of(AppContext.getSettings().get(SettingKeys.LastDirectory.LEFT));
-        Path rightPath = Path.of(AppContext.getSettings().get(SettingKeys.LastDirectory.RIGHT));
-
-        configureTabPane(leftTabPane);
-        configureTabPane(rightTabPane);
+        TabViewer left = new TabViewer(FileSystemController.create(), AppContext.getSettingsHelper());   
+        TabViewer right = new TabViewer(FileSystemController.create(), AppContext.getSettingsHelper());   
+        mainWidget.getItems().addAll(left, right);
+        EventBus.subscribe(NewTabEvent.class, this, event -> {
+            UUID fileSystemId = FileSystemController.create();
+            Node tabOwner = event.getTabOwner();
+            if (tabOwner != null && tabOwner instanceof TabViewer)
+                ((TabViewer) tabOwner).createNewTab(fileSystemId, AppContext.getSettingsHelper());
+        });
+        EventBus.subscribe(CloseTabEvent.class, this, event -> FileSystemController.delete(event.getFileSystemId()));
         
-        createNewTab(leftTabPane, leftPath, SettingKeys.LastDirectory.LEFT);
-        createNewTab(rightTabPane, rightPath, SettingKeys.LastDirectory.RIGHT);
-
-
-        setupTabShortCuts();
+        setupTabViewerShortCut();
     }
 
-    // TODO так как теперь на каждой стороне несколько вкладок, надо решить, как сохранять последнюю открытую директорию
+    // TODO может просто считать активной ту панель, которая под курсором?
     /**
-     * Создать новую вкладку панели
-     * @param tabPane панельный виджет, для которого создаётся вкладка
-     * @param initPath инициализирующий путь
-     * @param lastDirectoryKey ключ для сохранения директории
+     * Получить активную панель вкладок
+     * @return активная панель вкладок
      */
-    private void createNewTab(TabPane tabPane, Path initPath, String lastDirectoryKey)
+    private TabViewer getActiveTabViewer()
     {
-        UUID fileSystemId = FileSystemController.create(initPath);
-        if (lastDirectoryKey != null)
-            AppContext.getSettingsHelper().setFileSystemSettingsKey(fileSystemId, lastDirectoryKey);
+        TabViewer result = null;
 
-        Panel panel = new Panel(fileSystemId, AppContext.getSettingsHelper());
-        ControlPanel controlPanel = new ControlPanel(fileSystemId);
-        BorderPane borderPane = new BorderPane();
-        borderPane.setTop(controlPanel);
-        borderPane.setCenter(panel);
+        Scene scene = mainWidget.getScene();
+        Node current = scene.getFocusOwner();
+        ObservableList<Node> items = mainWidget.getItems();
 
-        Tab tab = new Tab();
-        Label tabLabel = new Label();
-        tabLabel.textProperty().bind(panel.getCurrentDirProperty());
-        tab.setContent(borderPane);
-        tab.setGraphic(tabLabel);
-        tab.setClosable(false);
+        while (current != null)
+        {
+            if (items.contains(current))
+                break;
 
-        tab.setOnClosed(event -> {
-            EventBus.unsubscribe(panel);
-            EventBus.unsubscribe(controlPanel);
-        });
+            current = current.getParent();
+        }
 
-        PauseTransition hoverTimer = new PauseTransition(Duration.millis(300));
-        hoverTimer.setOnFinished(event -> {
-            if (tabPane.getTabs().contains(tab))
-                tabPane.getSelectionModel().select(tab);
-        });
-
-        // у самой вкладки нет настройки событий для drag'n'drop, так что настраиваем через Label
-        tabLabel.setOnDragEntered(event -> {
-            if (event.getDragboard().hasFiles())
-                hoverTimer.playFromStart();
-
-            event.consume();
-        });
-
-        tabLabel.setOnDragOver(event -> {
-            Dragboard dragBoard = event.getDragboard();
-            if (dragBoard.hasFiles())
-            {
-                Object rawFilePath = dragBoard.getContent(AppContext.getPanelDataFormat());
-                if (rawFilePath != null && rawFilePath instanceof String)
+        if (current != null && current instanceof TabViewer)
+            result = (TabViewer) current;
+        else
+            for (Node item : items)
+                if (item.isHover() && item instanceof TabViewer)
                 {
-                    String filePath = (String) rawFilePath;
-                    if (!FileSystemController.get(fileSystemId).getCurrentPath().toString().equals(filePath))
-                        event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-                }
-            }
-
-            event.consume();
-        });
-
-        tabLabel.setOnDragExited(event -> {
-            hoverTimer.stop();
-            event.consume();
-        });
-
-        tabLabel.setOnDragDropped(event -> {
-            Dragboard dragboard = event.getDragboard();
-            if (dragboard.hasFiles())
-            {
-                FileSystem fileSystem = FileSystemController.get(fileSystemId);
-                List<File> files = dragboard.getFiles();
-                if (event.getAcceptedTransferMode() == TransferMode.MOVE)
-                {
-                    fileSystem.moveInto(files);
-                    EventBus.publish(new NewFileInDirEvent(fileSystem.getCurrentPath()));
-                }
-                else if (event.getAcceptedTransferMode() == TransferMode.COPY)
-                {
-                    fileSystem.copyInto(files);
-                    EventBus.publish(new NewFileInDirEvent(fileSystem.getCurrentPath()));
+                    result = (TabViewer) item;
+                    break;
                 }
 
-                event.setDropCompleted(true);
-            }
-            else
-                event.setDropCompleted(false);
-
-            event.consume();
-        });
-
-        tabPane.getTabs().add(tabPane.getTabs().size() - 1, tab);
-        tabPane.getSelectionModel().select(tab);
+        return result;
     }
 
     /**
-     * Настроить панельный виджет
-     * @param tabPane панельный виджет
+     * Настроить горячие клавиши для панели вкладок
      */
-    private void configureTabPane(TabPane tabPane)
-    {
-        Tab addTab = new Tab("+");
-        addTab.setClosable(false);
-        tabPane.getTabs().add(addTab);
-
-        // настраиваем поведение при добавлении новой вкладки
-        tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
-            if (newTab == addTab)
-            {
-                //tabPane.getTabs().remove(addTab);
-                createNewTab(tabPane, Path.of(System.getProperty("user.home")), null);
-                //tabPane.getTabs().add(addTab);
-            }
-        });
-
-        // настраиваем поведение вкладок, когда их остаётся только 2 (последняя открытая + кнопка "+")
-        tabPane.getTabs().addListener((ListChangeListener<Tab>) listener -> {
-            if (tabPane.getTabs().size() == 2)
-                tabPane.getTabs().get(0).setClosable(false);
-            else
-                for (Tab tab : tabPane.getTabs())
-                    if (tab != addTab)
-                        tab.setClosable(true);
-        });
-    }
-
-    private void setupTabShortCuts()
+    private void setupTabViewerShortCut()
     {
         Platform.runLater(() -> {
-            //TabPane activeTabPane = getActiveTabPane();
-            Scene scene = leftTabPane.getScene();
+            Scene scene = mainWidget.getScene();
             if (scene == null)
                 return;
 
             scene.setOnKeyPressed(event -> {
                 if (event.isControlDown())
                 {
+                    TabViewer activeTabViewer = getActiveTabViewer();
                     switch (event.getCode())
                     {
+                        // создание новой вкладки
                         case KeyCode.T -> {
-                            TabPane activeTabPane = getActiveTabPane();
-                            Path homePath = Path.of(System.getProperty("user.home"));
-                            createNewTab(activeTabPane, homePath, null);
+                            UUID fileSystemId = FileSystemController.create();
+                            activeTabViewer.createNewTab(fileSystemId, AppContext.getSettingsHelper());
+                            event.consume();
                         }
-
+                        // закрытие активной вкладки
                         case KeyCode.W -> {
-                            TabPane activeTabPane = getActiveTabPane();
-                            Tab activeTab = activeTabPane.getSelectionModel().getSelectedItem();
-                            if (activeTab != null && activeTabPane.getTabs().size() > 2)
-                                activeTabPane.getTabs().remove(activeTab);
+                            if (activeTabViewer.getTabs().size() > 2)
+                            {
+                                Tab activeTab = activeTabViewer.getSelectionModel().getSelectedItem();
+                                activeTabViewer.getTabs().remove(activeTab);
+                                // при ручном удалении вкладки событие закрытия не генерируется, поэтому вызовем его сами
+                                Event closedEvent = new Event(activeTab, activeTab, Tab.CLOSED_EVENT);
+                                Event.fireEvent(activeTab, closedEvent);
+                                event.consume();
+                            }
                         }
 
                         default -> {/* ничего не делаем */}
                     }
                 }
-
-                event.consume();
             });
         });
-    }
-
-    /**
-     * Вычислить активный панельный виджет
-     * @return активный панельный виджет
-     */
-    private TabPane getActiveTabPane()
-    {
-        // у панелей один и тот же контейнер, сцену можно взять от любого, но на всякий случай вставим проверку
-        Scene scene = leftTabPane.getScene();
-        TabPane result = null;
-
-        if (scene == null)
-            scene = rightTabPane.getScene();
-        if (scene != null)
-        {
-            Node focusOwner = scene.getFocusOwner();
-            if (focusOwner != null)
-            {
-                Node current = focusOwner;
-                while (current != null)
-                {
-                    if (current == leftTabPane || current == rightTabPane)
-                        break;
-
-                    current = current.getParent();
-                }
-
-                if (current != null)
-                    result = (TabPane) current;
-            }
-        }
-        
-        if (result == null)
-            result = rightTabPane.isHover() ? rightTabPane : leftTabPane;
-
-        return result; // по умолчанию будем возвращать левую
     }
 }

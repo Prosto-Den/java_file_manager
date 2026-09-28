@@ -18,7 +18,7 @@
          prefHeight="30.0" prefWidth="600.0"
          spacing="5"
          alignment="CENTER_LEFT"
-         style="-fx-border-color: #000; -fx-border-width: 2 1 2 1">
+         style="-fx-background-color: #008fbf;">
 
     <padding>
         <Insets bottom="5" top="5" left="5"/>

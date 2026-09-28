@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+
+<fx:root xmlns="http://javafx.com/javafx/17.0.12"
+         xmlns:fx="http://javafx.com/fxml/1"
+         type="TabPane"
+         tabClosingPolicy="ALL_TABS">
+    <tabs>
+        <Tab fx:id="addTab" text="+" closable="false"/>
+    </tabs>
+</fx:root>

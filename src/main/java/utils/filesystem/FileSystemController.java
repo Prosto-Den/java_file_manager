@@ -40,4 +40,13 @@ public class FileSystemController
     {
         return instances.get(id);
     }
+
+    /**
+     * Удалить файловую систему
+     * @param id идентефикатор файловой системы
+     */
+    public static void delete(UUID id)
+    {
+        instances.remove(id);
+    }
 }

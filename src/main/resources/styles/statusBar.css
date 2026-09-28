@@ -1,0 +1,28 @@
+/* Стиль для контейнера */
+.status-bar-container {
+    -fx-background-color: #f0f0f0;
+    -fx-border-color: #cccccc transparent transparent transparent;
+    -fx-border-width: 1px;
+    -fx-alignment: center-left;
+    -fx-min-height: 26px;
+    -fx-max-height: 26px;
+}
+
+/* Стиль для элемента контейнера */
+.status-bar-item,
+.status-bar-item-last {
+    -fx-font-family: "DejaVu Sans", "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-padding: 4px 0px 4px 0px;
+    -fx-text-fill: #333333;
+    -fx-cursor: default;
+    -fx-max-height: 26px;
+
+    -fx-alignment: center;
+}
+
+/* Для обычного элемента (не последнего) ещё добавляем разделитель справа */
+.status-bar-item {
+    -fx-border-color: transparent #cccccc transparent transparent;
+    -fx-border-width: 2px;
+}

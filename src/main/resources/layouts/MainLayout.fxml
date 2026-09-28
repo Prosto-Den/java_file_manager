@@ -12,12 +12,9 @@
         <!--Панель инструментов файлового менеджера-->
         <fx:include source="ToolBar.fxml" VBox.vgrow="ALWAYS"/>
 
-        <SplitPane dividerPositions="0.5" VBox.vgrow="ALWAYS">
-            <items>
-                <TabPane fx:id="leftTabPane" tabClosingPolicy="ALL_TABS"/>
-                <TabPane fx:id="rightTabPane" tabClosingPolicy="ALL_TABS"/>
-            </items>
-        </SplitPane>
+        <SplitPane fx:id="mainWidget" dividerPositions="0.5" VBox.vgrow="ALWAYS"/>
+        
+        <fx:include source="StatusBar.fxml"/>
 
         <!-- HBox VBox.vgrow="ALWAYS" -->
             <!--Метка HBox.hgrow="ALWAYS" позволяет виджету растягиваться по горизонтали !-->
