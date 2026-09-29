@@ -10,6 +10,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import models.StringKeys;
+import events.KeyEvent;
+import javafx.scene.input.KeyCode;
 
 import java.net.URL;
 
@@ -23,11 +25,22 @@ public class StatusBarController implements Initializable, ITranslatable
     private Label createTabShortCutLabel;
     @FXML
     private Label closeTabShortcutLabel;
+    @FXML
+    private Label deleteShortcutLabel;
 
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
         EventBus.subscribe(LocaleChangedEvent.class, this, event -> updateText());
+        EventBus.subscribe(KeyEvent.class, this, event -> {
+            if (event.getCode() == KeyCode.SHIFT)
+            {
+                if (event.isPressed())
+                    deleteShortcutLabel.setText(AppContext.getLanguageManager().getString(StringKeys.SHORTCUT_DELETE));
+                else
+                    deleteShortcutLabel.setText(AppContext.getLanguageManager().getString(StringKeys.SHORTCUT_MOVE_TO_TRASH));
+            }
+        });
     }
 
     @Override

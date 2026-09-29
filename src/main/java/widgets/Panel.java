@@ -83,13 +83,15 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         {
             switch (actionID)
             {
-                case (PanelContextMenuItemId.OPEN_ITEM) -> handleDoubleClick(data);
-                case (PanelContextMenuItemId.COPY_ITEM) -> ClipboardUtil.copyToClipboard(data.getPath());
-                case (PanelContextMenuItemId.DELETE_ITEM) -> onDeleteItem();
-                case (PanelContextMenuItemId.MOVE_TO_TRASH_ITEM) -> onMoveToTrashItem();
-                case (PanelContextMenuItemId.OPEN_IN_TERMINAL_ITEM) -> AppContext.getIntegrationService().openInTerminal(data.getPath());
-                case (PanelContextMenuItemId.REFRESH_ITEM) -> refreshTable();
-                case (PanelContextMenuItemId.RENAME_ITEM) -> onRenameItem();
+                case PanelContextMenuItemId.OPEN_ITEM -> handleDoubleClick(data);
+                case PanelContextMenuItemId.COPY_ITEM -> {
+                    ClipboardUtil.copyToClipboard(data.getPath()); 
+                }
+                case PanelContextMenuItemId.DELETE_ITEM -> onDeleteItem();
+                case PanelContextMenuItemId.MOVE_TO_TRASH_ITEM -> onMoveToTrashItem();
+                case PanelContextMenuItemId.OPEN_IN_TERMINAL_ITEM -> AppContext.getIntegrationService().openInTerminal(data.getPath());
+                case PanelContextMenuItemId.REFRESH_ITEM -> refreshTable();
+                case PanelContextMenuItemId.RENAME_ITEM -> onRenameItem();
                 default -> {/*ничего не делаем*/}
             }
         }
@@ -508,14 +510,22 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             switch (event.getCode())
             {
                 // переименование файлов при нажатии F2
-                case KeyCode.F2 -> onRenameItem();
+                case KeyCode.F2 -> {
+                    onRenameItem();
+                    event.consume();
+                }
                 // снятие выделения 
-                case KeyCode.ESCAPE -> fileViewer.getSelectionModel().clearSelection();
+                case KeyCode.ESCAPE -> {
+                    fileViewer.getSelectionModel().clearSelection();
+                    event.consume();
+                }
                 case KeyCode.DELETE -> {
                     if (event.isShiftDown())
                         onDeleteItem();
                     else
                         onMoveToTrashItem();
+
+                    event.consume();
                 }
                 default -> {/* ничего не делаем */}
             }

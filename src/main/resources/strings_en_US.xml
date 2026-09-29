@@ -43,6 +43,8 @@
     <entry key="shortcut.rename">F2 - rename</entry>
     <entry key="shortcut.create_new_tab">Ctrl + T - create new tab in active panel</entry>
     <entry key="shortcut.close_active_tab">Ctrl + W - close active tab</entry>
+    <entry key="shortcut.move_to_trash">Delete - move selected files to trash</entry>
+    <entry key="shortcut.delete">Shift + Delete - permanently delete selected files</entry>
 
     <entry key="error.load_user_settings">Loading user settings failed. Applying default settings</entry>
     <entry key="error.save_user_settings">Failed to save settings</entry>

@@ -12,5 +12,7 @@
                styleClass="status-bar-item" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
         <Label fx:id="closeTabShortcutLabel" text="%shortcut.close_active_tab" 
                styleClass="status-bar-item-last" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+        <Label fx:id="deleteShortcutLabel" text="%shortcut.move_to_trash"
+               styleClass="status-bar-item-last" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
     </children>
 </HBox>

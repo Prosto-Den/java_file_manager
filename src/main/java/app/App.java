@@ -63,6 +63,8 @@ public final class App extends Application
             stage.setMinWidth(800);
             stage.setScene(scene);
             stage.setTitle(AppContext.getAppName());
+
+            AppContext.initKeyboardEvent(scene);
         }
         catch (IOException ex)
         {

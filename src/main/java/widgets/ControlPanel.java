@@ -76,7 +76,6 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
         insertButton.setOnAction(event -> onInsertItemClick());
         
         currentPathField.setText(getFileSystem().getCurrentPath().toString());
-        currentPathField.setUserData(getFileSystem().getCurrentPath());
         initUI();
 
         EventBus.subscribe(LocaleChangedEvent.class, this, event -> updateText());
@@ -105,12 +104,9 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
      * */
     private void onInsertItemClick()
     {   
-        Object userData = currentPathField.getUserData();
-        if (userData != null && userData instanceof Path)
-        {
-            ClipboardUtil.insert((Path) userData);
-            EventBus.publish(new InsertButtonClickedEvent());
-        }
+        String currentPath = currentPathField.getText();
+        ClipboardUtil.insert(Path.of(currentPath));
+        EventBus.publish(new InsertButtonClickedEvent());
     }
 
     /**

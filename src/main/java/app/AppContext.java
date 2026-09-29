@@ -2,6 +2,8 @@ package app;
 
 
 import javafx.stage.Stage;
+import javafx.scene.Scene;
+import events.KeyEvent;
 import monitors.ClipboardMonitor;
 import settings.*;
 import types.OSType;
@@ -11,14 +13,19 @@ import utils.platform.OSIntegrationService;
 import utils.ui.*;
 import utils.ui.context.ContextMenuManager;
 import javafx.scene.input.DataFormat;
+import javafx.scene.input.KeyCode;
+
 import java.nio.file.Path;
+
+import events.EventBus;
 
 /**
  * Вспомогательный класс приложения. Хранит общую для приложения информацию, отвечает за работу с модальными окнами
  * */
 public final class AppContext
 {
-    private static final String appName = "Prosto File Manager"; // название приложения
+    private static final String APP_NAME = "Prosto File Manager"; // название приложения
+    private static final String USER_SETTINGS_FILENAME = "user_settings.yaml";
     private static Path appFolder;// папка приложения
     private static SettingsManager settingsManager;
     private static LanguageManager languageManager;
@@ -40,7 +47,7 @@ public final class AppContext
         appWindow = stage;
         appFolder = createAppFolder();
         
-        Path settingsPath = appFolder.resolve("user_settings.yaml");
+        Path settingsPath = appFolder.resolve(USER_SETTINGS_FILENAME);
         settingsManager = new SettingsManager(settingsPath);
         languageManager = new LanguageManager(settingsManager.getSettings());
         integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager.getSettings());
@@ -49,6 +56,22 @@ public final class AppContext
 
         panelDataFormat = new DataFormat("application/panel");
         ClipboardMonitor.start();
+    }
+
+    public static void initKeyboardEvent(Scene scene)
+    {
+        if (scene != null)
+        {
+            scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                if (event.getCode() == KeyCode.SHIFT)
+                    EventBus.publish(new KeyEvent(event.getCode(), true));
+            });
+
+            scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_RELEASED, event -> {
+                if (event.getCode() == KeyCode.SHIFT)
+                    EventBus.publish(new KeyEvent(event.getCode(), false));
+            });
+        }
     }
 
     /**
@@ -101,7 +124,7 @@ public final class AppContext
      * Получить название приложения
      * @return название приложения
      * */
-    public static String getAppName() {return appName;}
+    public static String getAppName() {return APP_NAME;}
 
     public static DataFormat getPanelDataFormat() {return panelDataFormat;}
 
@@ -116,7 +139,7 @@ public final class AppContext
     private static Path createAppFolder()
     {
         Path userFolder = Path.of(System.getProperty("user.home"));
-        Path path = userFolder.resolve(appName);
+        Path path = userFolder.resolve(APP_NAME);
 
         if (!FileSystemUtils.isExist(path))
             FileSystemUtils.createDir(path);

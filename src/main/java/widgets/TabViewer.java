@@ -10,9 +10,11 @@ import javafx.collections.ListChangeListener;
 import javafx.util.Duration;
 import models.AppSettings;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.TransferMode;
 import javafx.fxml.FXML;
 import javafx.application.Platform;
+import javafx.event.Event;
 
 import java.util.UUID;
 
@@ -88,6 +90,40 @@ public final class TabViewer extends TabPane implements IWidget
                     if (tab != addTab)
                         tab.setClosable(true);
             }
+        });
+
+        setOnKeyPressed(event -> {
+            if (event.isControlDown())
+                {
+                    //TabViewer activeTabViewer = (TabViewer) getActiveTabViewer();
+                    switch (event.getCode())
+                    {
+                        // создание новой вкладки
+                        case KeyCode.T -> {
+                            createNewTab(FileSystemController.create());
+                            event.consume();
+                        }
+                        // закрытие активной вкладки
+                        case KeyCode.W -> {
+                            if (getTabs().size() > 2)
+                            {
+                                Tab activeTab = getSelectionModel().getSelectedItem();
+                                int index = getSelectionModel().getSelectedIndex();
+                                getTabs().remove(activeTab);
+                                // иногда при закрытии самой первой вкладки, селектирование может уйти на кнопки тулбара
+                                // чтобы такого не было, проверим, какую вкеладку закрываем и если что, вернём селектирование
+                                if (index == 0)
+                                    getSelectionModel().select(0);
+                                // при ручном удалении вкладки событие закрытия не генерируется, поэтому вызовем его сами
+                                Event closedEvent = new Event(activeTab, activeTab, Tab.CLOSED_EVENT);
+                                Event.fireEvent(activeTab, closedEvent);
+                                event.consume();
+                            }
+                        }
+
+                        default -> {/* ничего не делаем */}
+                    }
+                }
         });
 
         if (!side.tabs.isEmpty())
