@@ -8,26 +8,27 @@ import javafx.scene.Node;
 import javafx.animation.PauseTransition;
 import javafx.collections.ListChangeListener;
 import javafx.util.Duration;
+import models.AppSettings;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.fxml.FXML;
+import javafx.application.Platform;
 
 import java.util.UUID;
+
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 import java.io.File;
+import java.nio.file.Path;
 
 import app.AppContext;
-import events.CloseTabEvent;
 import events.EventBus;
 import events.NewFileInDirEvent;
-import events.NewTabEvent;
 import utils.filesystem.FileSystemController;
-import utils.settings.FileSystemSettingsHelper;
 import widgets.interfaces.IWidget;
 import utils.filesystem.FileSystem;
 import resourceHandler.ResourceHandler;
-
-
 /**
  * Виджет вкладок панели
  * TabViewer
@@ -37,23 +38,43 @@ public final class TabViewer extends TabPane implements IWidget
     @FXML
     private Tab addTab;
 
+    private final AppSettings.SideData side;
+
     /**
      * Конструктор
      * @param fileSystemId идентификатор файловой системы. Нужен для создания первой вкладки. Идентификатор можно получить
      *                     через {@link FileSystemController}
      * @param helper помощник для связи пути файловой системы с настройками
      */
-    public TabViewer(UUID fileSystemId, FileSystemSettingsHelper helper)
+    public TabViewer(AppSettings.SideData side)
     {
         super();
+        this.side = side;
         load(ResourceHandler.getLayout("TabViewer.fxml"));
         initUI();
+
+        // сохранение настроек перед удалением виджета
+        sceneProperty().addListener((observable, oldScene, newScene) -> {
+            if (newScene == null)
+            {
+                this.side.tabs.clear();
+                for (Tab tab : getTabs())
+                {
+                    if (tab == addTab)
+                        continue;
+                    UUID id = getUUIDFromTab(tab);
+                    this.side.tabs.add(FileSystemController.get(id).getCurrentPath().toString());
+                }
+                this.side.activeIndex = getSelectionModel().getSelectedIndex();
+            }
+        });
 
         // создание новой вкладки при нажатии на вкладку "+"
         getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
             if (newTab == addTab)
             {
-                EventBus.publish(new NewTabEvent(this));
+                Tab createdTab = createNewTab(FileSystemController.create());
+                getSelectionModel().select(createdTab);
             }
         });
 
@@ -69,7 +90,16 @@ public final class TabViewer extends TabPane implements IWidget
             }
         });
 
-        createNewTab(fileSystemId, helper);
+        if (!side.tabs.isEmpty())
+            for (String path : side.tabs)
+            {
+                UUID id = FileSystemController.create(Path.of(path));
+                createNewTab(id);
+            }
+        else
+            createNewTab(FileSystemController.create());
+
+        getSelectionModel().select(getTabs().get(side.activeIndex));
     }
 
     @Override 
@@ -80,10 +110,10 @@ public final class TabViewer extends TabPane implements IWidget
      * @param fileSystemId идентификатор файловой системы для данной вкладки
      * @param helper
      */
-    public void createNewTab(UUID fileSystemId, FileSystemSettingsHelper helper)
+    public Tab createNewTab(UUID fileSystemId)
     {
         Tab newTab = new Tab();
-        TabBody body = new TabBody(fileSystemId, helper);
+        TabBody body = new TabBody(fileSystemId);
         Label tabLabel = new Label();
 
         tabLabel.textProperty().bind(body.currentDirProperty());
@@ -95,7 +125,10 @@ public final class TabViewer extends TabPane implements IWidget
 
         // последней всегда располагается вкладка "+", так что новую помещаем перед ней
         getTabs().add(getTabs().size() - 1, newTab);
-        getSelectionModel().select(newTab);
+
+        Platform.runLater(() -> body.requestFocus());
+
+        return newTab;
     }
 
     /**
@@ -104,14 +137,16 @@ public final class TabViewer extends TabPane implements IWidget
      */
     private void configureNewTab(Tab tab)
     {
+
         // отписываеимся от событий при закрытии вкладки и удаляем объект файловой системы
         tab.setOnClosed(event -> {
             Node content = tab.getContent();
             if (content != null && content instanceof TabBody)
                 ((TabBody) content).unsubscribe();
-            Object userData = tab.getUserData();
-            if (userData != null && userData instanceof UUID)
-                EventBus.publish(new CloseTabEvent((UUID) userData));
+
+            UUID fsId = getUUIDFromTab(tab);
+            if (fsId != null)
+                FileSystemController.delete(fsId);
         });
 
         Node tabLabel = tab.getGraphic();
@@ -182,5 +217,16 @@ public final class TabViewer extends TabPane implements IWidget
 
             event.consume();
         });
+    }
+
+    @Nullable 
+    private UUID getUUIDFromTab(Tab tab)
+    {
+        UUID result = null;
+        Object userData = tab.getUserData();
+        if (userData != null && userData instanceof UUID)
+            result = (UUID) userData;
+
+        return result;
     }
 }

@@ -5,25 +5,26 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
+
+import models.AppSettings;
+
 import java.awt.Desktop;
 
-import models.SettingKeys;
 import types.FileSystemErrors;
 import types.OSType;
 import utils.filesystem.FileSystemUtils;
-import utils.settings.SettingsManager;
 
 public class OSIntegrationService
 {
-    private final SettingsManager settings;
+    private final AppSettings settings;
     private final OSType osType;
     private final String WINDOWS_OPEN_COMMAND = "explorer %s";
     private final String WINDOWS_OPEN_IN_TERMINAL_COMMAND = "cd /d %s";
 
-    public OSIntegrationService(OSType osType, SettingsManager settingsManager)
+    public OSIntegrationService(OSType osType, AppSettings settings)
     {
         this.osType = osType;
-        settings = settingsManager;
+        this.settings = settings;
     }
 
     /**
@@ -48,7 +49,7 @@ public class OSIntegrationService
      */
     public void openInTerminal(Path path)
     {
-        String command = OSType.is(OSType.LINUX) ? settings.get(SettingKeys.LINUX_CONSOLE) : WINDOWS_OPEN_IN_TERMINAL_COMMAND;
+        String command = OSType.is(OSType.LINUX) ? settings.settings.linuxCommands.console : WINDOWS_OPEN_IN_TERMINAL_COMMAND;
         runCommand(command, path.toString());
     }
 
@@ -76,7 +77,9 @@ public class OSIntegrationService
      */
     public boolean moveToTrashViaGio(Path filePath)
     {
-        String command = settings.get(SettingKeys.LINUX_MOVE_TO_TRASH_COMMAND);
+        if (OSType.is(OSType.WINDOWS))
+            return false;
+        String command = settings.settings.linuxCommands.moveToTrash;
         return runCommandWithWait(command, filePath.toString());
     }
 
@@ -90,7 +93,7 @@ public class OSIntegrationService
         switch (osType)
         {
             case OSType.WINDOWS -> runCommand(WINDOWS_OPEN_COMMAND, path.toString());
-            case OSType.LINUX -> runCommand(settings.get(SettingKeys.LINUX_OPEN_COMMAND), path.toString());
+            case OSType.LINUX -> runCommand(settings.settings.linuxCommands.open, path.toString());
         }
     }
 

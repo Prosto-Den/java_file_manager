@@ -1,13 +1,11 @@
 package widgets;
 
 import javafx.scene.layout.BorderPane;
+
 import java.util.UUID;
 
-import utils.filesystem.FileSystemController;
-import utils.settings.FileSystemSettingsHelper;
 import events.EventBus;
 import javafx.beans.property.StringProperty;
-
 
 /**
  * Класс-контейнер для виджетов вкладки
@@ -23,12 +21,12 @@ public final class TabBody extends BorderPane
      * @param fileSystemId идентификатор файловой системы. Идентификатор можно получить через {@link utils.filesystem.FileSystemController}
      * @param helper помощник для связи пути файловой системы с настройками
      */
-    public TabBody(UUID fileSystemId, FileSystemSettingsHelper helper)
+    public TabBody(UUID fileSystemId)
     {
         super();
         
         controlPanel = new ControlPanel(fileSystemId);
-        panel = new Panel(fileSystemId, helper);
+        panel = new Panel(fileSystemId);
 
         setTop(controlPanel);
         setCenter(panel);
@@ -50,5 +48,12 @@ public final class TabBody extends BorderPane
     {
         EventBus.unsubscribe(controlPanel);
         EventBus.unsubscribe(panel);
+    }
+
+    @Override
+    public void requestFocus()
+    {
+        super.requestFocus();
+        panel.requestFocus();
     }
 }

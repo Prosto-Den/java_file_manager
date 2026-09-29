@@ -3,11 +3,11 @@ package app;
 
 import javafx.stage.Stage;
 import monitors.ClipboardMonitor;
+import settings.*;
 import types.OSType;
 import utils.filesystem.FileSystemUtils;
 import utils.i18n.LanguageManager;
 import utils.platform.OSIntegrationService;
-import utils.settings.*;
 import utils.ui.*;
 import utils.ui.context.ContextMenuManager;
 import javafx.scene.input.DataFormat;
@@ -21,13 +21,14 @@ public final class AppContext
     private static final String appName = "Prosto File Manager"; // название приложения
     private static Path appFolder;// папка приложения
     private static SettingsManager settingsManager;
-    private static FileSystemSettingsHelper settingsHelper;
     private static LanguageManager languageManager;
     private static OSIntegrationService integrationService;
     private static WindowManager windowManager;
     private static ContextMenuManager contextMenuManager;
     // TODO пока сойдёт, но если их станет много, надо будет сделать отдельынй менеджер
     private static DataFormat panelDataFormat;
+
+    private static Stage appWindow;
 
     /**
      * Выполнить первичную инициализацию для приложения. Будет определено главное окно приложения, загружены настройки,
@@ -36,13 +37,13 @@ public final class AppContext
      * */
     public static void init(Stage stage)
     {
+        appWindow = stage;
         appFolder = createAppFolder();
         
-        Path settingsPath = appFolder.resolve("user_settings.properties");
+        Path settingsPath = appFolder.resolve("user_settings.yaml");
         settingsManager = new SettingsManager(settingsPath);
-        settingsHelper = new FileSystemSettingsHelper(settingsManager);
-        languageManager = new LanguageManager(settingsManager);
-        integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager);
+        languageManager = new LanguageManager(settingsManager.getSettings());
+        integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager.getSettings());
         windowManager = new WindowManager(stage, settingsManager, languageManager);
         contextMenuManager = new ContextMenuManager();
 
@@ -55,12 +56,6 @@ public final class AppContext
      * @return менеджер настроек
      */
     public static SettingsManager getSettings() { return settingsManager; }
-
-    /**
-     * Выдать вспомогательный менеджер для работы с настройками
-     * @return вспомогательный менеджер работы с настройками
-     */
-    public static FileSystemSettingsHelper getSettingsHelper() { return settingsHelper; }
 
     /**
      * Выдать менеджер переводов приложения
@@ -109,6 +104,8 @@ public final class AppContext
     public static String getAppName() {return appName;}
 
     public static DataFormat getPanelDataFormat() {return panelDataFormat;}
+
+    public static Stage getMainWindow() { return appWindow; }
 
     // Приватные методы
 

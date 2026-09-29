@@ -33,7 +33,6 @@ import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
-import utils.settings.FileSystemSettingsHelper;
 import utils.ui.ClipboardUtil;
 import utils.ui.context.IContextMenuConfig;
 import models.PanelContextMenuItemId;
@@ -61,7 +60,6 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     private TableColumn<FileData, String> fileEditDateColumn; // дата последнего изменения файла
 
     private final UUID fileSystemID;
-    private final FileSystemSettingsHelper settingsHelper;
     private final StringProperty dirNameProperty;
 
     /**
@@ -130,12 +128,11 @@ public final class Panel extends VBox implements IWidget, ITranslatable
      *                     через {@link FileSystemController}.
      * @param helper помощник для связи пути файловой системы с настройками
      * */
-    public Panel(UUID fileSystemId, FileSystemSettingsHelper helper)
+    public Panel(UUID fileSystemId)
     {
         //super();
 
         fileSystemID = fileSystemId;
-        settingsHelper = helper;
         dirNameProperty = new SimpleStringProperty(getFileSystem().getCurrentDirName().toString());
 
         load(ResourceHandler.getLayout("Panel.fxml"));
@@ -172,13 +169,11 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             if (fileName.equals(".."))
             {
                 getFileSystem().goUpTree();
-                updateSettings();
                 refreshTable();
             }
             else if (FileSystemUtils.isDir(fileInfo.getPath()))
             {
                 getFileSystem().goDownTree(fileName);
-                updateSettings();
                 refreshTable();
             }
             else
@@ -250,15 +245,6 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     private FileSystem getFileSystem() 
     { 
         return FileSystemController.get(fileSystemID); 
-    }
-
-    /**
-     * Записать директорию в настройки
-     * */
-    private void updateSettings()
-    {
-        if (getFileSystem() != null)
-            settingsHelper.setPath(fileSystemID, getFileSystem().getCurrentPath());
     }
 
     /**

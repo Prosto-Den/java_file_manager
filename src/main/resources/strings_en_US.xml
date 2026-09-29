@@ -40,6 +40,10 @@
     <entry key="new.textfile.name">Text file</entry>
     <entry key="pattern.newfile">^%s(?:\s\((\d+)\))?%s$</entry>
 
+    <entry key="shortcut.rename">F2 - rename</entry>
+    <entry key="shortcut.create_new_tab">Ctrl + T - create new tab in active panel</entry>
+    <entry key="shortcut.close_active_tab">Ctrl + W - close active tab</entry>
+
     <entry key="error.load_user_settings">Loading user settings failed. Applying default settings</entry>
     <entry key="error.save_user_settings">Failed to save settings</entry>
     <entry key="error.load_default_settings">Failed to load default settings</entry>

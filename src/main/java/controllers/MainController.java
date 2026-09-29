@@ -12,13 +12,9 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.control.SplitPane;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.event.Event;
 
 import app.AppContext;
-import events.CloseTabEvent;
-import events.EventBus;
-import events.NewTabEvent;
 import utils.filesystem.FileSystemController;
 import widgets.TabViewer;
 
@@ -31,20 +27,19 @@ public class MainController implements Initializable
     @FXML 
     private SplitPane mainWidget;
 
+    private Node lastActiveTabPane;
+
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        TabViewer left = new TabViewer(FileSystemController.create(), AppContext.getSettingsHelper());   
-        TabViewer right = new TabViewer(FileSystemController.create(), AppContext.getSettingsHelper());   
+        TabViewer left = new TabViewer(AppContext.getSettings().getSettings().session.left);   
+        TabViewer right = new TabViewer(AppContext.getSettings().getSettings().session.right);
         mainWidget.getItems().addAll(left, right);
-        EventBus.subscribe(NewTabEvent.class, this, event -> {
-            UUID fileSystemId = FileSystemController.create();
-            Node tabOwner = event.getTabOwner();
-            if (tabOwner != null && tabOwner instanceof TabViewer)
-                ((TabViewer) tabOwner).createNewTab(fileSystemId, AppContext.getSettingsHelper());
-        });
-        EventBus.subscribe(CloseTabEvent.class, this, event -> FileSystemController.delete(event.getFileSystemId()));
+        lastActiveTabPane = left; // по умолчанию оставим активной левую панель
         
+        // при закрытии приложения удаляем виджеты, чтобы спровоцировать сохранение настроек
+        AppContext.getMainWindow().setOnCloseRequest(event -> mainWidget.getItems().clear());
+
         setupTabViewerShortCut();
     }
 
@@ -53,33 +48,26 @@ public class MainController implements Initializable
      * Получить активную панель вкладок
      * @return активная панель вкладок
      */
-    private TabViewer getActiveTabViewer()
+    private Node getActiveTabViewer()
     {
-        TabViewer result = null;
-
         Scene scene = mainWidget.getScene();
-        Node current = scene.getFocusOwner();
-        ObservableList<Node> items = mainWidget.getItems();
 
-        while (current != null)
+        if (scene == null)
+            return lastActiveTabPane;
+
+        Node focusOwner = scene.getFocusOwner();
+        while (focusOwner != null)
         {
-            if (items.contains(current))
-                break;
-
-            current = current.getParent();
-        }
-
-        if (current != null && current instanceof TabViewer)
-            result = (TabViewer) current;
-        else
-            for (Node item : items)
-                if (item.isHover() && item instanceof TabViewer)
+            if (mainWidget.getItems().contains(focusOwner))
                 {
-                    result = (TabViewer) item;
+                    lastActiveTabPane = focusOwner;
                     break;
                 }
 
-        return result;
+                focusOwner = focusOwner.getParent();
+        }
+
+        return lastActiveTabPane;
     }
 
     /**
@@ -95,13 +83,12 @@ public class MainController implements Initializable
             scene.setOnKeyPressed(event -> {
                 if (event.isControlDown())
                 {
-                    TabViewer activeTabViewer = getActiveTabViewer();
+                    TabViewer activeTabViewer = (TabViewer) getActiveTabViewer();
                     switch (event.getCode())
                     {
                         // создание новой вкладки
                         case KeyCode.T -> {
-                            UUID fileSystemId = FileSystemController.create();
-                            activeTabViewer.createNewTab(fileSystemId, AppContext.getSettingsHelper());
+                            activeTabViewer.createNewTab(FileSystemController.create());
                             event.consume();
                         }
                         // закрытие активной вкладки

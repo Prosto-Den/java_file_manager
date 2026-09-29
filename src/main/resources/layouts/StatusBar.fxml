@@ -3,10 +3,14 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 
-<HBox stylesheets="@/styles/statusBar.css" styleClass="status-bar-container" xmlns="http://javafx.com" xmlns:fx="http://javafx.com">
+<HBox stylesheets="@/styles/statusBar.css" styleClass="status-bar-container" xmlns="http://javafx.com" xmlns:fx="http://javafx.com"
+        fx:controller="controllers.StatusBarController">
     <children>
-        <Label text="F2 - Переименовать" styleClass="status-bar-item" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
-        <Label text="Ctrl + T - создать вкладку" styleClass="status-bar-item" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
-        <Label text="Ctrl + W - удалить активную вкладку" styleClass="status-bar-item-last" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+        <Label fx:id="renameShortcutLabel" text="%shortcut.rename" 
+               styleClass="status-bar-item" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+        <Label fx:id="createTabShortCutLabel" text="%shortcut.create_new_tab" 
+               styleClass="status-bar-item" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+        <Label fx:id="closeTabShortcutLabel" text="%shortcut.close_active_tab" 
+               styleClass="status-bar-item-last" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
     </children>
 </HBox>
