@@ -41,6 +41,13 @@
     <entry key="new.textfile.name">Текстовый файл</entry>
     <entry key="pattern.newfile">^%s(?:\s\((\d+)\))?%s$</entry>
 
+    <!-- Горячие клавиши -->
+    <entry key="shortcut.rename">F2 - переименовать</entry>
+    <entry key="shortcut.create_new_tab">Ctrl + T - создать вкладку в активной панели</entry>
+    <entry key="shortcut.close_active_tab">Ctrl + W - закрыть активную вкладку</entry>
+    <entry key="shortcut.move_to_trash">Delete - переместить выбранные файлы в корзину</entry>
+    <entry key="shortcut.delete">Shift + Delete - удалить выбранные файлы</entry>
+
     <entry key="error.load_user_settings">Не удалось загрузить файл пользовательских настроек. Будут применены настройки по умолчанию</entry>
     <entry key="error.save_user_settings">Не удалось сохранить пользовательские настройки</entry>
     <entry key="error.load_default_settings">Не удалось загрузить файл настроек по умолчанию</entry>

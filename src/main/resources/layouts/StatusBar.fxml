@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<HBox stylesheets="@/styles/statusBar.css" styleClass="status-bar-container" xmlns="http://javafx.com" xmlns:fx="http://javafx.com"
+        fx:controller="controllers.StatusBarController">
+    <children>
+        <Label fx:id="renameShortcutLabel" text="%shortcut.rename" 
+               styleClass="status-bar-item" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+        <Label fx:id="createTabShortCutLabel" text="%shortcut.create_new_tab" 
+               styleClass="status-bar-item" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+        <Label fx:id="closeTabShortcutLabel" text="%shortcut.close_active_tab" 
+               styleClass="status-bar-item-last" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+        <Label fx:id="deleteShortcutLabel" text="%shortcut.move_to_trash"
+               styleClass="status-bar-item-last" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+    </children>
+</HBox>

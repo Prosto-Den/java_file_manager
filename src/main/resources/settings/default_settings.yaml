@@ -1,0 +1,16 @@
+# настройки по умолчанию
+settings:
+  # язык
+  locale: "ru_RU"
+
+  # пути по умолчанию
+  defaultDir:
+    windows: "C:\\"
+    linux: "/"
+  
+  # команды линукс
+  linuxCommands:
+    console: "foot -D"
+    open: "xdg-open"
+    moveToTrash: "gio trash"
+  

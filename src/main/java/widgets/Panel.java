@@ -6,6 +6,8 @@ import events.LocaleChangedEvent;
 import events.NewFileInDirEvent;
 import events.PathChangedEvent;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -24,13 +26,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.util.UUID;
 
 import app.AppContext;
 import models.StringKeys;
 import resourceHandler.IconName;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
-import utils.settings.FileSystemSettingsHelper;
 import utils.ui.ClipboardUtil;
 import utils.ui.context.IContextMenuConfig;
 import models.PanelContextMenuItemId;
@@ -57,13 +59,13 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     @FXML
     private TableColumn<FileData, String> fileEditDateColumn; // дата последнего изменения файла
 
-    private final String fileSystemID;
-    private final FileSystemSettingsHelper settingsHelper;
+    private final UUID fileSystemID;
+    private final StringProperty dirNameProperty;
 
     /**
      * Класс контекста для панели. Служит для передачи данных от панели к контекстному меню
      */
-    public class PanelMenuContext implements IContextMenuConfig
+    public final class PanelMenuContext implements IContextMenuConfig
     {
         private final FileData data;
 
@@ -81,13 +83,15 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         {
             switch (actionID)
             {
-                case (PanelContextMenuItemId.OPEN_ITEM) -> handleDoubleClick(data);
-                case (PanelContextMenuItemId.COPY_ITEM) -> ClipboardUtil.copyToClipboard(data.getPath());
-                case (PanelContextMenuItemId.DELETE_ITEM) -> onDeleteItem();
-                case (PanelContextMenuItemId.MOVE_TO_TRASH_ITEM) -> onMoveToTrashItem();
-                case (PanelContextMenuItemId.OPEN_IN_TERMINAL_ITEM) -> AppContext.getIntegrationService().openInTerminal(data.getPath());
-                case (PanelContextMenuItemId.REFRESH_ITEM) -> refreshTable();
-                case (PanelContextMenuItemId.RENAME_ITEM) -> onRenameItem();
+                case PanelContextMenuItemId.OPEN_ITEM -> handleDoubleClick(data);
+                case PanelContextMenuItemId.COPY_ITEM -> {
+                    ClipboardUtil.copyToClipboard(data.getPath()); 
+                }
+                case PanelContextMenuItemId.DELETE_ITEM -> onDeleteItem();
+                case PanelContextMenuItemId.MOVE_TO_TRASH_ITEM -> onMoveToTrashItem();
+                case PanelContextMenuItemId.OPEN_IN_TERMINAL_ITEM -> AppContext.getIntegrationService().openInTerminal(data.getPath());
+                case PanelContextMenuItemId.REFRESH_ITEM -> refreshTable();
+                case PanelContextMenuItemId.RENAME_ITEM -> onRenameItem();
                 default -> {/*ничего не делаем*/}
             }
         }
@@ -123,22 +127,30 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     /**
      * Конструктор
      * @param fileSystemId идентификатор файловой системы для данной панели. Идентификатор можно получить
-     *                     через FileSystemController. ВАЖНО!!! внутри конструктора нет проверки, что объект ФС
-     *                     по этому ID существует, так что передавать нужно точно валидный ID
+     *                     через {@link FileSystemController}.
+     * @param helper помощник для связи пути файловой системы с настройками
      * */
-    public Panel(String fileSystemId, FileSystemSettingsHelper helper, int panelId)
+    public Panel(UUID fileSystemId)
     {
+        //super();
+
         fileSystemID = fileSystemId;
-        settingsHelper = helper;
+        dirNameProperty = new SimpleStringProperty(getFileSystem().getCurrentDirName().toString());
 
         load(ResourceHandler.getLayout("Panel.fxml"));
         initUI();
 
-        EventBus.subscribe(InsertButtonClickedEvent.class, event -> refreshTable());
-        EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
-        EventBus.subscribe(PathChangedEvent.class, event -> refreshTable());
-        EventBus.subscribe(NewFileInDirEvent.class, event -> refreshTable());
-        EventBus.subscribe(FileSystemChangedEvent.class, event -> {
+        EventBus.subscribe(InsertButtonClickedEvent.class, this, event -> refreshTable());
+        EventBus.subscribe(LocaleChangedEvent.class, this, event -> updateText());
+        EventBus.subscribe(PathChangedEvent.class, this, event -> {
+            if (event.getFileSystemId().equals(fileSystemId))
+                refreshTable();
+        });
+        EventBus.subscribe(NewFileInDirEvent.class, this, event -> {
+            if (getFileSystem().getCurrentPath().equals(event.getPath()))
+                refreshTable();
+        });
+        EventBus.subscribe(FileSystemChangedEvent.class, this, event -> {
             if (getFileSystem().getCurrentPath().equals(event.getPath()))
                 refreshTable();
         });
@@ -159,13 +171,11 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             if (fileName.equals(".."))
             {
                 getFileSystem().goUpTree();
-                updateSettings();
                 refreshTable();
             }
             else if (FileSystemUtils.isDir(fileInfo.getPath()))
             {
                 getFileSystem().goDownTree(fileName);
-                updateSettings();
                 refreshTable();
             }
             else
@@ -177,8 +187,6 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     @Override
     public void initUI()
     {
-        // Меняем поведение fileViewer при увеличении размера окна. По умолчанию, будет создаваться четвёртая колонка.
-        // Тут же ставим, чтобы последняя колонка подстраивалась под новый размер окна
         setupFileViewer();
         refreshTable();
     }
@@ -192,6 +200,11 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         fileEditDateColumn.setText(AppContext.getLanguageManager().getString(StringKeys.PANEL_COLUMN_EDIT_DATE));
     }
 
+    public StringProperty getCurrentDirProperty()
+    {
+        return dirNameProperty;
+    }
+
     // Приватные методы
 
     /**
@@ -201,6 +214,8 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     {
         if (getFileSystem() != null)
         {
+            dirNameProperty.setValue(getFileSystem().getCurrentDirName().toString());
+
             ObservableList<FileData> fileData = FXCollections.observableArrayList();
 
             if (!getFileSystem().isCurrentPathRoot())
@@ -232,15 +247,6 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     private FileSystem getFileSystem() 
     { 
         return FileSystemController.get(fileSystemID); 
-    }
-
-    /**
-     * Записать директорию в настройки
-     * */
-    private void updateSettings()
-    {
-        if (getFileSystem() != null)
-            settingsHelper.setPath(fileSystemID, getFileSystem().getCurrentPath());
     }
 
     /**
@@ -443,7 +449,9 @@ public final class Panel extends VBox implements IWidget, ITranslatable
      */
     private void setupFileViewer()
     {
-        fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        // Меняем поведение fileViewer при увеличении размера окна. По умолчанию, будет создаваться четвёртая колонка.
+        // Тут же ставим, чтобы последняя колонка подстраивалась под новый размер окна
+        //fileViewer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         fileViewer.setEditable(false);
         fileViewer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
@@ -502,19 +510,25 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             switch (event.getCode())
             {
                 // переименование файлов при нажатии F2
-                case KeyCode.F2 -> onRenameItem();
+                case KeyCode.F2 -> {
+                    onRenameItem();
+                    event.consume();
+                }
                 // снятие выделения 
-                case KeyCode.ESCAPE -> fileViewer.getSelectionModel().clearSelection();
+                case KeyCode.ESCAPE -> {
+                    fileViewer.getSelectionModel().clearSelection();
+                    event.consume();
+                }
                 case KeyCode.DELETE -> {
                     if (event.isShiftDown())
                         onDeleteItem();
                     else
                         onMoveToTrashItem();
+
+                    event.consume();
                 }
                 default -> {/* ничего не делаем */}
             }
-            
-            event.consume();
         });
 
         // задаём поведение при начале перетаскивания

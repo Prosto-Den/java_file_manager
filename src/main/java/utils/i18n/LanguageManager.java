@@ -1,7 +1,7 @@
 package utils.i18n;
 
+import models.AppSettings;
 import models.Language;
-import models.SettingKeys;
 
 import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.Yaml;
@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import resourceHandler.StringResourceBundleControl;
-import utils.settings.SettingsManager;
 
 /**
  * Класс для работы с переводами приложения
@@ -38,22 +37,20 @@ public final class LanguageManager
 
     private List<Language> languages;
     private Language currentLanguage;
-    private final SettingsManager settingsManager;
     private final String LANGUAGES_FILE = "/languages.yaml";
 
-    public LanguageManager(SettingsManager settingsManager)
+    public LanguageManager(AppSettings settings)
     {
-        this.settingsManager = settingsManager;
         loadLanguages();
-        initCurrentLanguage();
+        initCurrentLanguage(settings);
     }
 
     /**
      * Загрузить язык из настроек
      */
-    private void initCurrentLanguage()
+    private void initCurrentLanguage(AppSettings settings)
     {
-        String langCode = settingsManager.get(SettingKeys.LOCALE);
+        String langCode = settings.settings.locale;
         if (langCode != null)
             this.currentLanguage = getLanguageByCode(langCode);
         else

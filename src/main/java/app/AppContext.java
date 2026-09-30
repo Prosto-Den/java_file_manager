@@ -2,32 +2,40 @@ package app;
 
 
 import javafx.stage.Stage;
+import javafx.scene.Scene;
+import events.KeyEvent;
 import monitors.ClipboardMonitor;
+import settings.*;
 import types.OSType;
 import utils.filesystem.FileSystemUtils;
 import utils.i18n.LanguageManager;
 import utils.platform.OSIntegrationService;
-import utils.settings.*;
 import utils.ui.*;
 import utils.ui.context.ContextMenuManager;
 import javafx.scene.input.DataFormat;
+import javafx.scene.input.KeyCode;
+
 import java.nio.file.Path;
+
+import events.EventBus;
 
 /**
  * Вспомогательный класс приложения. Хранит общую для приложения информацию, отвечает за работу с модальными окнами
  * */
 public final class AppContext
 {
-    private static final String appName = "Prosto File Manager"; // название приложения
+    private static final String APP_NAME = "Prosto File Manager"; // название приложения
+    private static final String USER_SETTINGS_FILENAME = "user_settings.yaml";
     private static Path appFolder;// папка приложения
     private static SettingsManager settingsManager;
-    private static FileSystemSettingsHelper settingsHelper;
     private static LanguageManager languageManager;
     private static OSIntegrationService integrationService;
     private static WindowManager windowManager;
     private static ContextMenuManager contextMenuManager;
     // TODO пока сойдёт, но если их станет много, надо будет сделать отдельынй менеджер
     private static DataFormat panelDataFormat;
+
+    private static Stage appWindow;
 
     /**
      * Выполнить первичную инициализацию для приложения. Будет определено главное окно приложения, загружены настройки,
@@ -36,13 +44,13 @@ public final class AppContext
      * */
     public static void init(Stage stage)
     {
+        appWindow = stage;
         appFolder = createAppFolder();
         
-        Path settingsPath = appFolder.resolve("user_settings.properties");
+        Path settingsPath = appFolder.resolve(USER_SETTINGS_FILENAME);
         settingsManager = new SettingsManager(settingsPath);
-        settingsHelper = new FileSystemSettingsHelper(settingsManager);
-        languageManager = new LanguageManager(settingsManager);
-        integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager);
+        languageManager = new LanguageManager(settingsManager.getSettings());
+        integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager.getSettings());
         windowManager = new WindowManager(stage, settingsManager, languageManager);
         contextMenuManager = new ContextMenuManager();
 
@@ -50,17 +58,27 @@ public final class AppContext
         ClipboardMonitor.start();
     }
 
+    public static void initKeyboardEvent(Scene scene)
+    {
+        if (scene != null)
+        {
+            scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                if (event.getCode() == KeyCode.SHIFT)
+                    EventBus.publish(new KeyEvent(event.getCode(), true));
+            });
+
+            scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_RELEASED, event -> {
+                if (event.getCode() == KeyCode.SHIFT)
+                    EventBus.publish(new KeyEvent(event.getCode(), false));
+            });
+        }
+    }
+
     /**
      * Выдать менеджер настроек приложения
      * @return менеджер настроек
      */
     public static SettingsManager getSettings() { return settingsManager; }
-
-    /**
-     * Выдать вспомогательный менеджер для работы с настройками
-     * @return вспомогательный менеджер работы с настройками
-     */
-    public static FileSystemSettingsHelper getSettingsHelper() { return settingsHelper; }
 
     /**
      * Выдать менеджер переводов приложения
@@ -106,9 +124,11 @@ public final class AppContext
      * Получить название приложения
      * @return название приложения
      * */
-    public static String getAppName() {return appName;}
+    public static String getAppName() {return APP_NAME;}
 
     public static DataFormat getPanelDataFormat() {return panelDataFormat;}
+
+    public static Stage getMainWindow() { return appWindow; }
 
     // Приватные методы
 
@@ -119,7 +139,7 @@ public final class AppContext
     private static Path createAppFolder()
     {
         Path userFolder = Path.of(System.getProperty("user.home"));
-        Path path = userFolder.resolve(appName);
+        Path path = userFolder.resolve(APP_NAME);
 
         if (!FileSystemUtils.isExist(path))
             FileSystemUtils.createDir(path);
