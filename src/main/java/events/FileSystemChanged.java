@@ -2,11 +2,11 @@ package events;
 
 import java.util.UUID;
 
-public final class PathChangedEvent 
+public final class FileSystemChanged 
 {
-    private UUID fileSystemId;
+    private final UUID fileSystemId;
 
-    public PathChangedEvent(UUID fileSystemId)
+    public FileSystemChanged(UUID fileSystemId)
     {
         this.fileSystemId = fileSystemId;
     }

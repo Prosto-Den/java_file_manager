@@ -8,8 +8,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import models.StringKeys;
 import resourceHandler.ResourceHandler;
+import settings.SettingsManager;
 import utils.i18n.LanguageManager;
-import utils.settings.SettingsManager;
 
 import java.io.IOException;
 

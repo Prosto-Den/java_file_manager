@@ -8,12 +8,11 @@ import java.util.*;
 
 import org.jetbrains.annotations.Nullable;
 
-//TODO некоторые утилиты не нужны для линукса. Возможно, стоит завезти отдельный класс WindowsFileSystemUtils?
 
 /**
  * Статические методы для работы с файловой системой
  * */
-public class FileSystemUtils
+public final class FileSystemUtils
 {
     /**
      * Возвращает список со всеми логическими дисками системы (C:\, D:\ и т.д).
@@ -75,6 +74,9 @@ public class FileSystemUtils
      */
     public static boolean isDir(Path path)
     {
+        if (path == null || path.toString().isBlank())
+            return false;
+
         return Files.isDirectory(path);
     }
 

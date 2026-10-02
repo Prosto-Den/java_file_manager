@@ -2,21 +2,26 @@
 
 
 <?import javafx.scene.layout.*?>
-
+<?import javafx.scene.control.*?>
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="controllers.MainController">
 
-    <!--Панель инструментов файлового менеджера-->
-    <fx:include source="ToolBar.fxml" VBox.vgrow="ALWAYS"/>
+    <children>
+        <!--Панель инструментов файлового менеджера-->
+        <fx:include source="ToolBar.fxml" VBox.vgrow="ALWAYS"/>
 
-    <HBox VBox.vgrow="ALWAYS">
-        <!--Метка HBox.hgrow="ALWAYS" позволяет виджету растягиваться по горизонтали !-->
-        <!--Левая панель-->
-        <BorderPane HBox.hgrow="ALWAYS" fx:id="leftContainer"/>
-        <!--Правая панель-->
-        <BorderPane HBox.hgrow="ALWAYS" fx:id="rightContainer"/>
-    </HBox>
+        <SplitPane fx:id="mainWidget" dividerPositions="0.5" VBox.vgrow="ALWAYS"/>
+        
+        <fx:include source="StatusBar.fxml"/>
 
+        <!-- HBox VBox.vgrow="ALWAYS" -->
+            <!--Метка HBox.hgrow="ALWAYS" позволяет виджету растягиваться по горизонтали !-->
+            <!--Левая панель-->
+            <!-- BorderPane HBox.hgrow="ALWAYS" fx:id="leftContainer"/ -->
+            <!--Правая панель-->
+            <!-- BorderPane HBox.hgrow="ALWAYS" fx:id="rightContainer"/-->
+        <!--/HBox-->
+    </children>
 </VBox>

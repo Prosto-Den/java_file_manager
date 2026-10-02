@@ -2,6 +2,7 @@ package controllers;
 
 
 import app.AppContext;
+
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -18,7 +19,7 @@ public class ToolBarController implements Initializable
     @FXML
     private Button settingsButton;
 
-    @FXML 
+    @FXML
     private Button trashButton;
 
     @Override

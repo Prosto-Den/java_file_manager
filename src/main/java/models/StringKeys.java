@@ -72,6 +72,13 @@ public class StringKeys
     public static final String ALERT_RESTORE_ERROR_TITLE = "alert.restore.error.title";
     public static final String ALERT_RESTORE_ERROR_TEXT = "alert.restore.error.text";
 
+    // подсказки по горячим клавишам
+    public static final String SHORTCUT_RENAME = "shortcut.rename";
+    public static final String SHORTCUT_CREATE_NEW_TAB = "shortcut.create_new_tab";
+    public static final String SHORTCUT_CLOSE_ACTIVE_TAB = "shortcut.close_active_tab";
+    public static final String SHORTCUT_MOVE_TO_TRASH = "shortcut.move_to_trash";
+    public static final String SHORTCUT_DELETE = "shortcut.delete";
+
     // текста ошибок
     public static final String ERROR_LOAD_USER_SETTINGS = "error.load_user_settings";
     public static final String ERROR_SAVE_USER_SETTINGS = "error.save_user_settings";

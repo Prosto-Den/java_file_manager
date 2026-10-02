@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.Set;
+import java.util.UUID;
 import java.util.HashSet;
 import java.util.Deque;
 import java.util.ArrayDeque;
@@ -28,6 +29,7 @@ public final class FileSystem
 {   
     // Абсолютный путь к текущей директории
     private Path currentPath;
+    private UUID id;
 
     // история перемещений пользователя
     // TODO добавить настройки с количеством файлов в истории
@@ -43,8 +45,9 @@ public final class FileSystem
      * Конструктор по умолчанию. После создания будет указывать на корень системы
      * (C:\ у Windows и / у Linux)
      * */
-    public FileSystem()
+    public FileSystem(UUID id)
     {
+        this.id = id;
         currentPath = FileSystemUtils.getDefaultPath();
         backStack = new ArrayDeque<>();
         forwardStack = new ArrayDeque<>();
@@ -54,8 +57,9 @@ public final class FileSystem
      * Конструктор с передачей пути, на который объект будет указывать после создания.
      * Если директории по такому пути не существует, будет указывать на корень (C:\ для Windows и / для Linux)
      * */
-    public FileSystem(Path path)
+    public FileSystem(Path path, UUID id)
     {
+        this.id = id;
         currentPath = FileSystemUtils.isDir(path) ? path : FileSystemUtils.getDefaultPath();
         backStack = new ArrayDeque<>();
         forwardStack = new ArrayDeque<>();
@@ -116,6 +120,14 @@ public final class FileSystem
      * @return текущая директория, на которую указывает объект
      * */
     public Path getCurrentPath() { return currentPath; }
+
+    public Path getCurrentDirName()
+    {
+        Path fileName = getCurrentPath().getFileName();
+        if (fileName != null)
+            return fileName;
+        return getCurrentPath();
+    }
 
     /**
      * Является ли текущая директория корнем системы?
@@ -288,7 +300,8 @@ public final class FileSystem
     private void changeCurrentPath(Path newPath)
     {
         currentPath = newPath;
-        EventBus.publish(new PathChangedEvent());
+        FileSystemController.updateWatcher(id);
+        EventBus.publish(new PathChangedEvent(id));
     }
 
     /**

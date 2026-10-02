@@ -25,8 +25,15 @@ public final class App extends Application
     @Override
     public void stop()
     {
-        // при закрытии приложения сохраним настройки. Это нужно, чтобы запомнить последние открытые директории
-        AppContext.getSettings().saveSettings();
+        try 
+        {
+            super.stop();
+            AppContext.shutdown();
+        }
+        catch (Exception ex)
+        {
+            System.err.println("Что-то пошло не так при закрытии приложения: " + ex.getMessage());
+        }
     }
 
     /**
@@ -47,7 +54,7 @@ public final class App extends Application
         try
         {
             FXMLLoader mainLoader = new FXMLLoader(Objects.requireNonNull(
-                    getClass().getResource("/layouts/MainLayout.fxml")));
+                    getClass().getResource("/layouts/MainLayout.fxml")), AppContext.getLanguageManager().getBundle());
             VBox layout = mainLoader.load();
 
             Scene scene = new Scene(layout);
@@ -55,6 +62,8 @@ public final class App extends Application
             stage.setMinWidth(800);
             stage.setScene(scene);
             stage.setTitle(AppContext.getAppName());
+
+            AppContext.initKeyboardEvent(scene);
         }
         catch (IOException ex)
         {

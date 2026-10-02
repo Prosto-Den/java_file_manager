@@ -9,14 +9,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import models.AppSettings;
 import models.Language;
-import models.SettingKeys;
 import models.StringKeys;
 import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
+import settings.SettingsManager;
 import types.OSType;
 import utils.i18n.LanguageManager;
-import utils.settings.SettingsManager;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -68,7 +68,7 @@ public class SettingsController implements Initializable, ITranslatable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        EventBus.subscribe(LocaleChangedEvent.class, event -> updateText());
+        EventBus.subscribe(LocaleChangedEvent.class, this, event -> updateText());
 
         localeBox.setCellFactory(lv -> new ListCell<Language>() {
             @Override
@@ -145,10 +145,12 @@ public class SettingsController implements Initializable, ITranslatable
      * */
     private void onApplyButtonClicked()
     {
+        AppSettings settings = settingsManager.getSettings();
         // сохраняем локаль
         Language value = localeBox.getValue();
-        if (settingsManager.set(SettingKeys.LOCALE, value.code()))
-            languageManager.setCurrentLanguage(value);
+        settings.settings.locale = value.code();
+        //if (settingsManager.set(SettingKeys.LOCALE, value.code()))
+        languageManager.setCurrentLanguage(value);
 
         // сохраняем настройки Linux
         if (OSType.is(OSType.LINUX))
@@ -156,9 +158,11 @@ public class SettingsController implements Initializable, ITranslatable
             // сохраняем используемый терминал и команду открытия
             String linuxTerminal = terminalTextField.getText();
             String linuxOpenCommand = openCommandTextField.getText();
-
-            settingsManager.set(SettingKeys.LINUX_CONSOLE, linuxTerminal);
-            settingsManager.set(SettingKeys.LINUX_OPEN_COMMAND, linuxOpenCommand);
+            
+            settings.settings.linuxCommands.console = linuxTerminal;
+            //settingsManager.set(SettingKeys.LINUX_CONSOLE, linuxTerminal);
+            settings.settings.linuxCommands.open = linuxOpenCommand;
+            //settingsManager.set(SettingKeys.LINUX_OPEN_COMMAND, linuxOpenCommand);
         }
     }
 
@@ -169,9 +173,10 @@ public class SettingsController implements Initializable, ITranslatable
     {
         if (dialogStage != null)
             dialogStage.close();
+        EventBus.unsubscribe(this);
         settingsManager.rollbackEdit();
         // пересохраняем текущую локаль, чтобы сбросить изменения
-        languageManager.setCurrentLanguage(settingsManager.get(SettingKeys.LOCALE));
+        languageManager.setCurrentLanguage(settingsManager.getSettings().settings.locale);
     }
 
     @Override
@@ -205,8 +210,9 @@ public class SettingsController implements Initializable, ITranslatable
      * */
     private void configureLinuxControls()
     {
-        terminalTextField.setText(settingsManager.get(SettingKeys.LINUX_CONSOLE));
-        openCommandTextField.setText(settingsManager.get(SettingKeys.LINUX_OPEN_COMMAND));
-        moveToTrashTextField.setText(settingsManager.get(SettingKeys.LINUX_MOVE_TO_TRASH_COMMAND));
+        AppSettings settings = settingsManager.getSettings();
+        terminalTextField.setText(settings.settings.linuxCommands.console);
+        openCommandTextField.setText(settings.settings.linuxCommands.open);
+        moveToTrashTextField.setText(settings.settings.linuxCommands.moveToTrash);
     }
 }

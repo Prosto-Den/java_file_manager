@@ -2,7 +2,9 @@ package app;
 
 
 import javafx.stage.Stage;
-import monitors.ClipboardMonitor;
+import javafx.scene.Scene;
+import events.KeyEvent;
+import settings.*;
 import types.OSType;
 import utils.filesystem.FileSystemUtils;
 import utils.i18n.LanguageManager;
@@ -13,26 +15,44 @@ import utils.trash.LinuxTrashManager;
 import utils.trash.WindowsTrashManager;
 import utils.ui.*;
 import utils.ui.context.ContextMenuManager;
+import watchers.ClipboardWatcher;
 import javafx.scene.input.DataFormat;
+import javafx.scene.input.KeyCode;
+
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+
+import events.EventBus;
 
 /**
  * Вспомогательный класс приложения. Хранит общую для приложения информацию, отвечает за работу с модальными окнами
  * */
 public final class AppContext
 {
-    private static final String appName = "Prosto File Manager"; // название приложения
+    private static final String APP_NAME = "Prosto File Manager"; // название приложения
+    private static final String USER_SETTINGS_FILENAME = "user_settings.yaml";
     private static Path appFolder;// папка приложения
     private static SettingsManager settingsManager;
-    private static FileSystemSettingsHelper settingsHelper;
     private static LanguageManager languageManager;
     private static OSIntegrationService integrationService;
     private static WindowManager windowManager;
     private static ContextMenuManager contextMenuManager;
+    private static ClipboardWatcher clipboardWatcher;
     private static ITrashManager trashManager;
+
+    private static final ExecutorService threadPool = Executors.newCachedThreadPool(runnable -> {
+        Thread thread = new Thread(runnable);
+        thread.setDaemon(true);
+        thread.setName("FileManager-Worker-" + thread.threadId());
+        return thread;
+    });
 
     // TODO пока сойдёт, но если их станет много, надо будет сделать отдельный менеджер
     private static DataFormat panelDataFormat;
+
+    private static Stage appWindow;
 
     /**
      * Выполнить первичную инициализацию для приложения. Будет определено главное окно приложения, загружены настройки,
@@ -41,13 +61,13 @@ public final class AppContext
      * */
     public static void init(Stage stage)
     {
+        appWindow = stage;
         appFolder = createAppFolder();
         
-        Path settingsPath = appFolder.resolve("user_settings.properties");
+        Path settingsPath = appFolder.resolve(USER_SETTINGS_FILENAME);
         settingsManager = new SettingsManager(settingsPath);
-        settingsHelper = new FileSystemSettingsHelper(settingsManager);
-        languageManager = new LanguageManager(settingsManager);
-        integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager);
+        languageManager = new LanguageManager(settingsManager.getSettings());
+        integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager.getSettings());
         windowManager = new WindowManager(stage, settingsManager, languageManager);
         contextMenuManager = new ContextMenuManager();
 
@@ -57,7 +77,34 @@ public final class AppContext
             trashManager = new WindowsTrashManager();
 
         panelDataFormat = new DataFormat("application/panel");
-        ClipboardMonitor.start();
+        clipboardWatcher = new ClipboardWatcher();
+        clipboardWatcher.start();
+    }
+
+    /**
+     * Действия при завершении работы приложения
+     */
+    public static void shutdown()
+    {
+        clipboardWatcher.stop();
+        getSettings().saveSettings();
+        threadPool.shutdownNow();
+    }
+
+    public static void initKeyboardEvent(Scene scene)
+    {
+        if (scene != null)
+        {
+            scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                if (event.getCode() == KeyCode.SHIFT)
+                    EventBus.publish(new KeyEvent(event.getCode(), true));
+            });
+
+            scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_RELEASED, event -> {
+                if (event.getCode() == KeyCode.SHIFT)
+                    EventBus.publish(new KeyEvent(event.getCode(), false));
+            });
+        }
     }
 
     /**
@@ -65,12 +112,6 @@ public final class AppContext
      * @return менеджер настроек
      */
     public static SettingsManager getSettings() { return settingsManager; }
-
-    /**
-     * Выдать вспомогательный менеджер для работы с настройками
-     * @return вспомогательный менеджер работы с настройками
-     */
-    public static FileSystemSettingsHelper getSettingsHelper() { return settingsHelper; }
 
     /**
      * Выдать менеджер переводов приложения
@@ -97,6 +138,15 @@ public final class AppContext
     public static ContextMenuManager getContextMenuManager() { return contextMenuManager; }
 
     /**
+     * Создать окно для работы с настройками приложения
+     * @return окно для работы с настройками
+     */
+    public static Stage getSettingsStage()
+    {
+        return windowManager.createSettingsStage();
+    }
+
+    /**
      * Получить путь к директории приложения
      * @return путь к директории
      * */
@@ -106,11 +156,15 @@ public final class AppContext
      * Получить название приложения
      * @return название приложения
      * */
-    public static String getAppName() {return appName;}
+    public static String getAppName() {return APP_NAME;}
 
     public static DataFormat getPanelDataFormat() {return panelDataFormat;}
 
     public static ITrashManager getTrashManager() { return trashManager; }
+
+    public static Stage getMainWindow() { return appWindow; }
+
+    public static ExecutorService getThreadPool() { return threadPool; }
 
     // Приватные методы
 
@@ -121,7 +175,7 @@ public final class AppContext
     private static Path createAppFolder()
     {
         Path userFolder = Path.of(System.getProperty("user.home"));
-        Path path = userFolder.resolve(appName);
+        Path path = userFolder.resolve(APP_NAME);
 
         if (!FileSystemUtils.isExist(path))
             FileSystemUtils.createDir(path);
