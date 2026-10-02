@@ -19,13 +19,13 @@ public class TrashItem
     private final StringProperty originalPath;
     private final StringProperty deletionDate;
 
-    public TrashItem(File trashFile, File infoFile, String originalPath, String deletionDate)
+    public TrashItem(File trashFile, File infoFile, String fileName, String originalPath, String deletionDate)
     {
         this.trashFile = trashFile;
         this.infoFile = infoFile;
 
         this.originalPath = new SimpleStringProperty(originalPath);
-        this.originalName = new SimpleStringProperty(new File(originalPath).getName());
+        this.originalName = new SimpleStringProperty(fileName);
         this.deletionDate = new SimpleStringProperty(deletionDate);
     }
 

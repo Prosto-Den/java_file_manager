@@ -46,7 +46,7 @@ public final class LinuxTrashManager implements ITrashManager
                 continue;
 
             parseTrashInfo(infoFile).ifPresent(metadata -> {
-                TrashItem item = new TrashItem(trashFile, infoFile, metadata.originalPath, metadata.deletionDate);
+                TrashItem item = new TrashItem(trashFile, infoFile, baseName, metadata.originalPath, metadata.deletionDate);
                 items.add(item);
             });
         }

@@ -47,7 +47,7 @@ public final class WindowsTrashManager implements ITrashManager
                         String originalPath = parts[2].replace("\"", "");
                         String delDate = parts[3].replace("\"", "");
 
-                        items.add(new TrashItem(new File(trashPath), new File(trashPath), originalPath, delDate));
+                        items.add(new TrashItem(new File(trashPath), new File(trashPath), name, originalPath, delDate));
                     }
                 }
             }

@@ -24,8 +24,7 @@ import models.StringKeys;
 import models.TrashItem;
 import utils.i18n.LanguageManager;
 import utils.ui.context.IContextMenuConfig;
-import events.EventBus;
-import events.FileSystemChanged;
+
 
 public class TrashController implements Initializable
 {
@@ -105,7 +104,8 @@ public class TrashController implements Initializable
         if (anyError)
         {
             LanguageManager langManager = AppContext.getLanguageManager();
-            showErrorAlert(langManager.getString(StringKeys.ALERT_RESTORE_ERROR_TITLE), langManager.getString(StringKeys.ALERT_RESTORE_ERROR_TEXT));
+            showErrorAlert(langManager.getString(StringKeys.ALERT_RESTORE_ERROR_TITLE),
+                    langManager.getString(StringKeys.ALERT_RESTORE_ERROR_TEXT));
         }
 
         refreshTable();
