@@ -237,12 +237,12 @@ public final class TabViewer extends TabPane implements IWidget
                     if (event.getAcceptedTransferMode() == TransferMode.MOVE)
                     {
                         fileSystem.moveInto(files);
-                        EventBus.publish(new NewFileInDirEvent(fileSystem.getCurrentPath()));
+                        EventBus.publish(new NewFileInDirEvent(fileSystemId));
                     }
                     else if (event.getAcceptedTransferMode() == TransferMode.COPY)
                     {
                         fileSystem.copyInto(files);
-                        EventBus.publish(new NewFileInDirEvent(fileSystem.getCurrentPath()));
+                        EventBus.publish(new NewFileInDirEvent(fileSystemId));
                     }
 
                     event.setDropCompleted(true);

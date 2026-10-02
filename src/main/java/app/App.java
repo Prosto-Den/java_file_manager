@@ -29,7 +29,7 @@ public final class App extends Application
         {
             super.stop();
             // при закрытии приложения сохраним настройки. Это нужно, чтобы запомнить последние открытые директории
-            AppContext.getSettings().saveSettings();
+            AppContext.shutdown();
         }
         catch (Exception ex)
         {

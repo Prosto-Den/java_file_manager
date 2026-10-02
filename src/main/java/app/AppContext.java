@@ -16,6 +16,9 @@ import javafx.scene.input.DataFormat;
 import javafx.scene.input.KeyCode;
 
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 import events.EventBus;
 
@@ -32,7 +35,15 @@ public final class AppContext
     private static OSIntegrationService integrationService;
     private static WindowManager windowManager;
     private static ContextMenuManager contextMenuManager;
-    // TODO пока сойдёт, но если их станет много, надо будет сделать отдельынй менеджер
+
+    private static final ExecutorService threadPool = Executors.newCachedThreadPool(runnable -> {
+        Thread thread = new Thread(runnable);
+        thread.setDaemon(true);
+        thread.setName("FileManager-Worker-" + thread.threadId());
+        return thread;
+    });
+
+    // TODO пока сойдёт, но если их станет много, надо будет сделать отдельный менеджер
     private static DataFormat panelDataFormat;
 
     private static Stage appWindow;
@@ -56,6 +67,12 @@ public final class AppContext
 
         panelDataFormat = new DataFormat("application/panel");
         ClipboardMonitor.start();
+    }
+
+    public static void shutdown()
+    {
+        getSettings().saveSettings();
+        threadPool.shutdownNow();
     }
 
     public static void initKeyboardEvent(Scene scene)
@@ -129,6 +146,8 @@ public final class AppContext
     public static DataFormat getPanelDataFormat() {return panelDataFormat;}
 
     public static Stage getMainWindow() { return appWindow; }
+
+    public static ExecutorService getThreadPool() { return threadPool; }
 
     // Приватные методы
 

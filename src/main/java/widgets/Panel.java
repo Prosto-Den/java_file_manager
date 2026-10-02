@@ -13,6 +13,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.application.Platform;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
@@ -40,7 +41,6 @@ import models.FileData;
 import widgets.interfaces.IWidget;
 import widgets.interfaces.ITranslatable;
 import javafx.scene.Node;
-import events.FileSystemChangedEvent;
 import utils.Converter;
 import utils.filesystem.*;
 
@@ -144,15 +144,11 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         EventBus.subscribe(LocaleChangedEvent.class, this, event -> updateText());
         EventBus.subscribe(PathChangedEvent.class, this, event -> {
             if (event.getFileSystemId().equals(fileSystemId))
-                refreshTable();
+                Platform.runLater(() -> refreshTable());
         });
         EventBus.subscribe(NewFileInDirEvent.class, this, event -> {
-            if (getFileSystem().getCurrentPath().equals(event.getPath()))
-                refreshTable();
-        });
-        EventBus.subscribe(FileSystemChangedEvent.class, this, event -> {
-            if (getFileSystem().getCurrentPath().equals(event.getPath()))
-                refreshTable();
+            if (fileSystemId.equals(event.getFileSystemId()))
+                Platform.runLater(() -> refreshTable());
         });
 
         refreshTable();
@@ -549,7 +545,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             Dragboard dragBoard = fileViewer.startDragAndDrop(TransferMode.ANY);
             ClipboardContent content = new ClipboardContent();
             content.putFiles(filesToDrag);
-            content.put(AppContext.getPanelDataFormat(), getFileSystem().getCurrentPath().toString());
+            content.put(AppContext.getPanelDataFormat(), fileSystemID);
             dragBoard.setContent(content);
 
             event.consume();
@@ -561,9 +557,9 @@ public final class Panel extends VBox implements IWidget, ITranslatable
 
             if (dragBoard.hasFiles() && dragBoard.hasContent(AppContext.getPanelDataFormat()))
             {
-                String sourceFileSystemPath = (String) dragBoard.getContent(AppContext.getPanelDataFormat());
+                UUID sourceFileSystemId = (UUID) dragBoard.getContent(AppContext.getPanelDataFormat());
                 // проверяем, что сейчас курсор находится над другой панелью. Тогда разрешаем завершение перетаскивания
-                if (sourceFileSystemPath != null && !sourceFileSystemPath.equals(getFileSystem().getCurrentPath().toString()))
+                if (sourceFileSystemId != null && !sourceFileSystemId.equals(fileSystemID))
                     event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
             }
 
@@ -582,9 +578,9 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             {
                 targetFileSystem.moveInto(filesToTransfer);
                 // при перемещении надо обновить панель источник, чтобы актуализировать интерфейс
-                String sourceFileSystemPath = (String) dragBoard.getContent(AppContext.getPanelDataFormat());
-                if (sourceFileSystemPath != null)
-                    EventBus.publish(new FileSystemChangedEvent(Path.of(sourceFileSystemPath)));
+                UUID sourceFileSystemId = (UUID) dragBoard.getContent(AppContext.getPanelDataFormat());
+                if (sourceFileSystemId != null)
+                    EventBus.publish(new NewFileInDirEvent(sourceFileSystemId));
             }
             else if (acceptedMode == TransferMode.COPY)
                 targetFileSystem.copyInto(filesToTransfer);

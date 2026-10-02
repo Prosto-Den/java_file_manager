@@ -300,6 +300,7 @@ public final class FileSystem
     private void changeCurrentPath(Path newPath)
     {
         currentPath = newPath;
+        FileSystemController.updateWatcher(id);
         EventBus.publish(new PathChangedEvent(id));
     }
 

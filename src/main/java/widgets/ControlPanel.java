@@ -115,7 +115,7 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     private void onCreateFolderItemClick()
     {
         if (getFileSystem().createFolderInCurrentDirectory())
-            EventBus.publish(new NewFileInDirEvent(getFileSystem().getCurrentPath()));
+            EventBus.publish(new NewFileInDirEvent(fileSystemId));
     }
 
     /**
@@ -124,7 +124,7 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     private void onCreateTextFileItemClick()
     {
         if (getFileSystem().createTextFileInCurrentDirectory())
-            EventBus.publish(new NewFileInDirEvent(getFileSystem().getCurrentPath()));
+            EventBus.publish(new NewFileInDirEvent(fileSystemId));
     }
 
     /**

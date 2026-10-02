@@ -2,16 +2,16 @@ package events;
 
 
 import java.nio.file.Path;
-
+import java.util.UUID;
 
 public final class NewFileInDirEvent 
 {
-    private final Path dirPath;
+    private final UUID fileSystemId;
 
-    public NewFileInDirEvent(Path path)
+    public NewFileInDirEvent(UUID fileSystemId)
     {
-        dirPath = path;
+        this.fileSystemId = fileSystemId;
     }
 
-    public Path getPath() { return dirPath; }
+    public UUID getFileSystemId() { return fileSystemId; }
 }
