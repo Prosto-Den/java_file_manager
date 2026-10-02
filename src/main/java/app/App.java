@@ -28,7 +28,6 @@ public final class App extends Application
         try 
         {
             super.stop();
-            // при закрытии приложения сохраним настройки. Это нужно, чтобы запомнить последние открытые директории
             AppContext.shutdown();
         }
         catch (Exception ex)

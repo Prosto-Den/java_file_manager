@@ -4,7 +4,6 @@ package app;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import events.KeyEvent;
-import monitors.ClipboardMonitor;
 import settings.*;
 import types.OSType;
 import utils.filesystem.FileSystemUtils;
@@ -12,6 +11,7 @@ import utils.i18n.LanguageManager;
 import utils.platform.OSIntegrationService;
 import utils.ui.*;
 import utils.ui.context.ContextMenuManager;
+import watchers.ClipboardWatcher;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.KeyCode;
 
@@ -35,6 +35,7 @@ public final class AppContext
     private static OSIntegrationService integrationService;
     private static WindowManager windowManager;
     private static ContextMenuManager contextMenuManager;
+    private static ClipboardWatcher clipboardWatcher;
 
     private static final ExecutorService threadPool = Executors.newCachedThreadPool(runnable -> {
         Thread thread = new Thread(runnable);
@@ -66,11 +67,16 @@ public final class AppContext
         contextMenuManager = new ContextMenuManager();
 
         panelDataFormat = new DataFormat("application/panel");
-        ClipboardMonitor.start();
+        clipboardWatcher = new ClipboardWatcher();
+        clipboardWatcher.start();
     }
 
+    /**
+     * Действия при завершении работы приложения
+     */
     public static void shutdown()
     {
+        clipboardWatcher.stop();
         getSettings().saveSettings();
         threadPool.shutdownNow();
     }
