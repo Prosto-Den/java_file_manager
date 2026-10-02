@@ -1,9 +1,8 @@
 package widgets;
 
 import events.EventBus;
-import events.InsertButtonClickedEvent;
 import events.LocaleChangedEvent;
-import events.NewFileInDirEvent;
+import events.FileSystemChanged;
 import events.PathChangedEvent;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
@@ -140,18 +139,15 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         load(ResourceHandler.getLayout("Panel.fxml"));
         initUI();
 
-        EventBus.subscribe(InsertButtonClickedEvent.class, this, event -> refreshTable());
         EventBus.subscribe(LocaleChangedEvent.class, this, event -> updateText());
         EventBus.subscribe(PathChangedEvent.class, this, event -> {
             if (event.getFileSystemId().equals(fileSystemId))
                 Platform.runLater(() -> refreshTable());
         });
-        EventBus.subscribe(NewFileInDirEvent.class, this, event -> {
+        EventBus.subscribe(FileSystemChanged.class, this, event -> {
             if (fileSystemId.equals(event.getFileSystemId()))
                 Platform.runLater(() -> refreshTable());
         });
-
-        refreshTable();
     }
 
     /**
@@ -274,7 +270,6 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         for (FileData data : files)
             if (!data.getNameValue().equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
                 FileSystemUtils.delete(data.getPath());
-        refreshTable();
     }
 
     /**
@@ -286,7 +281,6 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         for (FileData data : files)
             if (!data.getNameValue().equals(AppContext.getLanguageManager().getString(StringKeys.FILEVIEWER_ROW_BACK)))
                 AppContext.getIntegrationService().moveToTrash(data.getPath());
-        refreshTable();
     }
 
     /**
@@ -577,18 +571,12 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             if (acceptedMode == TransferMode.MOVE)
             {
                 targetFileSystem.moveInto(filesToTransfer);
-                // при перемещении надо обновить панель источник, чтобы актуализировать интерфейс
-                UUID sourceFileSystemId = (UUID) dragBoard.getContent(AppContext.getPanelDataFormat());
-                if (sourceFileSystemId != null)
-                    EventBus.publish(new NewFileInDirEvent(sourceFileSystemId));
             }
             else if (acceptedMode == TransferMode.COPY)
                 targetFileSystem.copyInto(filesToTransfer);
             
             event.setDropCompleted(true);
             event.consume();
-
-            refreshTable();
         });
     }
 }

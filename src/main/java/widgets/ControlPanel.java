@@ -17,9 +17,7 @@ import java.util.UUID;
 
 import app.AppContext;
 import events.EventBus;
-import events.InsertButtonClickedEvent;
 import events.LocaleChangedEvent;
-import events.NewFileInDirEvent;
 import events.PathChangedEvent;
 import events.ClipboardEvent;
 import models.CreateButtonMenuId;
@@ -106,7 +104,6 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     {   
         String currentPath = currentPathField.getText();
         ClipboardUtil.insert(Path.of(currentPath));
-        EventBus.publish(new InsertButtonClickedEvent());
     }
 
     /**
@@ -114,8 +111,7 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
      */
     private void onCreateFolderItemClick()
     {
-        if (getFileSystem().createFolderInCurrentDirectory())
-            EventBus.publish(new NewFileInDirEvent(fileSystemId));
+        getFileSystem().createFolderInCurrentDirectory();
     }
 
     /**
@@ -123,8 +119,7 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
      */
     private void onCreateTextFileItemClick()
     {
-        if (getFileSystem().createTextFileInCurrentDirectory())
-            EventBus.publish(new NewFileInDirEvent(fileSystemId));
+        getFileSystem().createTextFileInCurrentDirectory();
     }
 
     /**

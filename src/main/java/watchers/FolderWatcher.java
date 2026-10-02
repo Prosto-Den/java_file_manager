@@ -3,7 +3,7 @@ package watchers;
 
 import java.util.UUID;
 
-import events.NewFileInDirEvent;
+import events.FileSystemChanged;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -72,7 +72,7 @@ public class FolderWatcher implements Runnable
                     if (kind == StandardWatchEventKinds.OVERFLOW)
                         continue;
                 
-                    EventBus.publish(new NewFileInDirEvent(fileSystemId));
+                    EventBus.publish(new FileSystemChanged(fileSystemId));
 
                     break;
                 }
