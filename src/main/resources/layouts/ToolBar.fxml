@@ -28,4 +28,13 @@
         </graphic>
     </Button>
 
+    <!-- Кнопка просмотра корзины -->
+     <Button fx:id="trashButton">
+        <graphic>
+            <ImageView>
+                <Image url="@/icons/24x24/trash.png"/>
+            </ImageView>
+        </graphic>
+     </Button>
+
 </ToolBar>

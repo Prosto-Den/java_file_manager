@@ -93,7 +93,7 @@ public final class FileSystemUtils
     /**
      * Пуста ли директория?
      * @param path путь к директории
-     * @return true, если удалось считать содержимое директории и в директории есть хотя бы один файл. false, 
+     * @return true, если удалось считать содержимое директории и в директории есть хотя бы один файл. false,
      * если путь ведёт не к директории или не удалось считать содержимое
      */
     public static boolean isDirEmpty(Path path)
@@ -140,7 +140,7 @@ public final class FileSystemUtils
      */
     public static boolean createDir(Path path)
     {
-        try 
+        try
         {
             // TODO подумать над проверкой
             Files.createDirectory(path);
@@ -197,7 +197,7 @@ public final class FileSystemUtils
             return false;
         }
     }
-    
+
     /**
      * Выдать корень файловой системы (C:\ для Windows и / для Linux)
      * @return Корень системы
@@ -267,7 +267,7 @@ public final class FileSystemUtils
             {
                 if (!isExist(dest))
                     return;
-                
+
                 Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -275,7 +275,7 @@ public final class FileSystemUtils
                         if (isMove)
                             Files.move(source, dest, StandardCopyOption.REPLACE_EXISTING);
                         else
-                            Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);  
+                            Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING);
 
                         return FileVisitResult.CONTINUE;
                     }

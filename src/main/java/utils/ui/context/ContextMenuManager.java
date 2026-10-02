@@ -16,7 +16,8 @@ import javafx.scene.Node;
 public final class ContextMenuManager
 {   
     private ContextMenu panelContextMenu;
-    private static final String PANEL_CONTEXT_MENU = "ContextMenu.fxml";
+    private static final String PANEL_CONTEXT_MENU = "PanelContextMenu.fxml";
+    private static final String TRASH_CONTEXT_MENU = "TrashContextMenu.fxml";
 
     /**
      * Создать контекстное меню для панели или получить его, если оно уже было создано
@@ -27,6 +28,11 @@ public final class ContextMenuManager
         if (panelContextMenu == null)
             panelContextMenu = loadContextMenuLayout(PANEL_CONTEXT_MENU);
         return panelContextMenu;
+    }
+
+    public ContextMenu createTrashContextMenu()
+    {
+        return loadContextMenuLayout(TRASH_CONTEXT_MENU);
     }
 
     /**
@@ -76,7 +82,7 @@ public final class ContextMenuManager
                 item.setGraphic(icon);
         }
 
-        setUserData(menu, context.getFileData());
+        setUserData(menu, context.getUserData());
     }
 
 

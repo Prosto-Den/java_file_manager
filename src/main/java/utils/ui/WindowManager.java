@@ -19,6 +19,7 @@ import java.io.IOException;
 public final class WindowManager
 {
     private final Stage mainStage;
+    private Stage trashStage; // окно корзины не блокирует главное окно, поэтому храним его, чтобы не создавать по новой, если вдруг оно открыто
     private final SettingsManager settingsManager;
     private final LanguageManager languageManager;
 
@@ -81,5 +82,38 @@ public final class WindowManager
 
         // и снимаем блокировку, когда окно пропадает
         childStage.setOnHidden(event -> root.setDisable(false));
+    }
+
+    /**
+     * Создать/выдать окно с
+     * @return
+     */
+    public Stage createOrGetTrashStage()
+    {
+        if (trashStage != null && trashStage.isShowing())
+        {
+            trashStage.requestFocus();
+            return trashStage;
+        }
+
+        try
+        {
+            trashStage = new Stage();
+
+            FXMLLoader trashLoader = new FXMLLoader(ResourceHandler.getLayout("TrashViewer.fxml"), languageManager.getBundle());
+            Parent root = trashLoader.load();
+
+            trashStage.setScene(new Scene(root));
+            trashStage.setTitle(languageManager.getString(StringKeys.TRASH_TITLE));
+            trashStage.initModality(Modality.NONE);
+            trashStage.initOwner(mainStage);
+
+            return trashStage;
+        }
+        catch (IOException ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
     }
 }

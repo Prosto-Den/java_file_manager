@@ -24,6 +24,7 @@ import javafx.fxml.FXML;
 import java.util.List;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.UUID;
@@ -35,7 +36,7 @@ import resourceHandler.IconSize;
 import resourceHandler.ResourceHandler;
 import utils.ui.ClipboardUtil;
 import utils.ui.context.IContextMenuConfig;
-import models.PanelContextMenuItemId;
+import models.ContextMenuItemId;
 import models.FileData;
 import widgets.interfaces.IWidget;
 import widgets.interfaces.ITranslatable;
@@ -64,17 +65,19 @@ public final class Panel extends VBox implements IWidget, ITranslatable
     /**
      * Класс контекста для панели. Служит для передачи данных от панели к контекстному меню
      */
-    public final class PanelMenuContext implements IContextMenuConfig
+    public final class PanelMenuContext extends IContextMenuConfig
     {
-        private final FileData data;
-
         public PanelMenuContext(FileData data)
         {
             this.data = data;
         }
 
-        @Override
-        public FileData getFileData() { return data; };
+        private Optional<FileData> getFileData()
+        {
+            if (data != null && data instanceof FileData)
+                return Optional.of((FileData) data);
+            return Optional.empty();
+        }
 
         // TODO переработать на работу с несколькими файлами
         @Override
@@ -82,15 +85,15 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         {
             switch (actionID)
             {
-                case PanelContextMenuItemId.OPEN_ITEM -> handleDoubleClick(data);
-                case PanelContextMenuItemId.COPY_ITEM -> {
-                    ClipboardUtil.copyToClipboard(data.getPath()); 
-                }
-                case PanelContextMenuItemId.DELETE_ITEM -> onDeleteItem();
-                case PanelContextMenuItemId.MOVE_TO_TRASH_ITEM -> onMoveToTrashItem();
-                case PanelContextMenuItemId.OPEN_IN_TERMINAL_ITEM -> AppContext.getIntegrationService().openInTerminal(data.getPath());
-                case PanelContextMenuItemId.REFRESH_ITEM -> refreshTable();
-                case PanelContextMenuItemId.RENAME_ITEM -> onRenameItem();
+                case (ContextMenuItemId.OPEN_ITEM) -> handleDoubleClick((FileData) data);
+                case (ContextMenuItemId.COPY_ITEM) ->
+                    getFileData().ifPresent(fileData -> ClipboardUtil.copyToClipboard(fileData.getPath()));
+                case (ContextMenuItemId.DELETE_ITEM) -> onDeleteItem();
+                case (ContextMenuItemId.MOVE_TO_TRASH_ITEM) -> onMoveToTrashItem();
+                case (ContextMenuItemId.OPEN_IN_TERMINAL_ITEM) ->
+                    getFileData().ifPresent(fileData -> AppContext.getIntegrationService().openInTerminal(fileData.getPath()));
+                case (ContextMenuItemId.REFRESH_ITEM) -> refreshTable();
+                case (ContextMenuItemId.RENAME_ITEM) -> onRenameItem();
                 default -> {/*ничего не делаем*/}
             }
         }
@@ -100,7 +103,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         {
             switch (actionID)
             {
-                case (PanelContextMenuItemId.REFRESH_ITEM) : return true;
+                case (ContextMenuItemId.REFRESH_ITEM) : return true;
                 default : return data != null;
             }
         }
@@ -108,14 +111,18 @@ public final class Panel extends VBox implements IWidget, ITranslatable
         @Override
         public Node getActionGraphic(String actionID)
         {
-            if (actionID.equals(PanelContextMenuItemId.OPEN_ITEM))
+            if (actionID.equals(ContextMenuItemId.OPEN_ITEM))
             {
-                FileData fileData = getFileData();
-                if (fileData != null)
+                Object rawFileData = getUserData();
+                if (rawFileData != null &&  rawFileData instanceof FileData)
                 {
-                    Image image = FileSystemUtils.isDir(fileData.getPath()) ? ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FOLDER) : 
-                        ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FILE);
-                    return image != null ? new ImageView(image) : null;
+                    FileData fileData = (FileData) rawFileData;
+                    if (fileData != null)
+                    {
+                        Image image = FileSystemUtils.isDir(fileData.getPath()) ? ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FOLDER) :
+                                ResourceHandler.getIcon(IconSize.SMALL, IconName.OPEN_FILE);
+                        return image != null ? new ImageView(image) : null;
+                    }
                 }
             }
 
@@ -211,8 +218,8 @@ public final class Panel extends VBox implements IWidget, ITranslatable
             ObservableList<FileData> fileData = FXCollections.observableArrayList();
 
             if (!getFileSystem().isCurrentPathRoot())
-                fileData.add(new FileData(getFileSystem().getCurrentPath().getParent(), 
-                                new ReadOnlyStringWrapper(".."), 
+                fileData.add(new FileData(getFileSystem().getCurrentPath().getParent(),
+                                new ReadOnlyStringWrapper(".."),
                                 new ReadOnlyStringWrapper(),
                                 new ReadOnlyStringWrapper()));
 
@@ -224,7 +231,7 @@ public final class Panel extends VBox implements IWidget, ITranslatable
                 FileData data = new FileData(path, Converter.convertFileSize(fileSize), Converter.convertDateTime(fileEditDate));
                 fileData.add(data);
             }
-            
+
             fileViewer.getItems().clear();
             fileViewer.setItems(fileData);
             fileViewer.refresh();
@@ -236,9 +243,9 @@ public final class Panel extends VBox implements IWidget, ITranslatable
      * к экземпляру
      * @return объект файловой системы для данной панели
      * */
-    private FileSystem getFileSystem() 
-    { 
-        return FileSystemController.get(fileSystemID); 
+    private FileSystem getFileSystem()
+    {
+        return FileSystemController.get(fileSystemID);
     }
 
     /**

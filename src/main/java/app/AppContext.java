@@ -9,6 +9,9 @@ import types.OSType;
 import utils.filesystem.FileSystemUtils;
 import utils.i18n.LanguageManager;
 import utils.platform.OSIntegrationService;
+import utils.trash.ITrashManager;
+import utils.trash.LinuxTrashManager;
+import utils.trash.WindowsTrashManager;
 import utils.ui.*;
 import utils.ui.context.ContextMenuManager;
 import watchers.ClipboardWatcher;
@@ -36,6 +39,7 @@ public final class AppContext
     private static WindowManager windowManager;
     private static ContextMenuManager contextMenuManager;
     private static ClipboardWatcher clipboardWatcher;
+    private static ITrashManager trashManager;
 
     private static final ExecutorService threadPool = Executors.newCachedThreadPool(runnable -> {
         Thread thread = new Thread(runnable);
@@ -65,6 +69,11 @@ public final class AppContext
         integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager.getSettings());
         windowManager = new WindowManager(stage, settingsManager, languageManager);
         contextMenuManager = new ContextMenuManager();
+
+        if (OSType.is(OSType.LINUX))
+            trashManager = new LinuxTrashManager();
+        else if (OSType.is(OSType.WINDOWS))
+            trashManager = new WindowsTrashManager();
 
         panelDataFormat = new DataFormat("application/panel");
         clipboardWatcher = new ClipboardWatcher();
@@ -116,8 +125,8 @@ public final class AppContext
     public static OSIntegrationService getIntegrationService() { return integrationService; }
 
     /**
-     * Выдать менеджер контекстного меню
-     * @return менеджер контекстного меню
+     * Выдать менеджер окон приложения
+     * @return менеджер окон приложения
      */
     public static WindowManager getWindowManager() { return windowManager; }
 
@@ -126,16 +135,6 @@ public final class AppContext
      * @return менеджер контекстного меню
      */
     public static ContextMenuManager getContextMenuManager() { return contextMenuManager; }
-
-    /**
-     * Создать окно для работы с настройками приложения.
-     *
-     * @return окно для работы с настройками
-     */
-    public static Stage getSettingsStage()
-    {
-        return windowManager.createSettingsStage();
-    }
 
     /**
      * Получить путь к директории приложения
@@ -150,6 +149,8 @@ public final class AppContext
     public static String getAppName() {return APP_NAME;}
 
     public static DataFormat getPanelDataFormat() {return panelDataFormat;}
+
+    public static ITrashManager getTrashManager() { return trashManager; }
 
     public static Stage getMainWindow() { return appWindow; }
 
