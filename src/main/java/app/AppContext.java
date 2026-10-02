@@ -4,7 +4,6 @@ package app;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import events.KeyEvent;
-import monitors.ClipboardMonitor;
 import settings.*;
 import types.OSType;
 import utils.filesystem.FileSystemUtils;
@@ -12,10 +11,14 @@ import utils.i18n.LanguageManager;
 import utils.platform.OSIntegrationService;
 import utils.ui.*;
 import utils.ui.context.ContextMenuManager;
+import watchers.ClipboardWatcher;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.KeyCode;
 
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 import events.EventBus;
 
@@ -32,7 +35,16 @@ public final class AppContext
     private static OSIntegrationService integrationService;
     private static WindowManager windowManager;
     private static ContextMenuManager contextMenuManager;
-    // TODO пока сойдёт, но если их станет много, надо будет сделать отдельынй менеджер
+    private static ClipboardWatcher clipboardWatcher;
+
+    private static final ExecutorService threadPool = Executors.newCachedThreadPool(runnable -> {
+        Thread thread = new Thread(runnable);
+        thread.setDaemon(true);
+        thread.setName("FileManager-Worker-" + thread.threadId());
+        return thread;
+    });
+
+    // TODO пока сойдёт, но если их станет много, надо будет сделать отдельный менеджер
     private static DataFormat panelDataFormat;
 
     private static Stage appWindow;
@@ -55,7 +67,18 @@ public final class AppContext
         contextMenuManager = new ContextMenuManager();
 
         panelDataFormat = new DataFormat("application/panel");
-        ClipboardMonitor.start();
+        clipboardWatcher = new ClipboardWatcher();
+        clipboardWatcher.start();
+    }
+
+    /**
+     * Действия при завершении работы приложения
+     */
+    public static void shutdown()
+    {
+        clipboardWatcher.stop();
+        getSettings().saveSettings();
+        threadPool.shutdownNow();
     }
 
     public static void initKeyboardEvent(Scene scene)
@@ -129,6 +152,8 @@ public final class AppContext
     public static DataFormat getPanelDataFormat() {return panelDataFormat;}
 
     public static Stage getMainWindow() { return appWindow; }
+
+    public static ExecutorService getThreadPool() { return threadPool; }
 
     // Приватные методы
 

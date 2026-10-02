@@ -25,8 +25,6 @@ import java.io.File;
 import java.nio.file.Path;
 
 import app.AppContext;
-import events.EventBus;
-import events.NewFileInDirEvent;
 import utils.filesystem.FileSystemController;
 import widgets.interfaces.IWidget;
 import utils.filesystem.FileSystem;
@@ -202,20 +200,25 @@ public final class TabViewer extends TabPane implements IWidget
             event.consume();
         });
 
+        // переключение на вкладку по истечению таймера
+        hoverTime.setOnFinished(event -> {
+            getSelectionModel().select(tab);
+        });
+
         // курсор задержался на вкладке
         tabLabel.setOnDragOver(event -> {
             Dragboard dragboard = event.getDragboard();
             if (dragboard.hasFiles())
             {
-                Object rawFileObject = dragboard.getContent(AppContext.getPanelDataFormat());
-                if (rawFileObject != null && rawFileObject instanceof String)
+                Object rawFileSystemId = dragboard.getContent(AppContext.getPanelDataFormat());
+                if (rawFileSystemId != null && rawFileSystemId instanceof UUID)
                 {
-                    String filePath = (String) rawFileObject;
+                    UUID sourceFileSystemId = (UUID) rawFileSystemId;
                     Object userData = tab.getUserData();
                     if (userData != null && userData instanceof UUID)
                     {
                         UUID fileSystemId = (UUID) userData;
-                        if (!FileSystemController.get(fileSystemId).getCurrentPath().toString().equals(filePath))
+                        if (!fileSystemId.equals(sourceFileSystemId))
                             event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
                     }
                 }
@@ -237,12 +240,10 @@ public final class TabViewer extends TabPane implements IWidget
                     if (event.getAcceptedTransferMode() == TransferMode.MOVE)
                     {
                         fileSystem.moveInto(files);
-                        EventBus.publish(new NewFileInDirEvent(fileSystem.getCurrentPath()));
                     }
                     else if (event.getAcceptedTransferMode() == TransferMode.COPY)
                     {
                         fileSystem.copyInto(files);
-                        EventBus.publish(new NewFileInDirEvent(fileSystem.getCurrentPath()));
                     }
 
                     event.setDropCompleted(true);
