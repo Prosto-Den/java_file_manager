@@ -25,7 +25,7 @@ import models.TrashItem;
 import utils.i18n.LanguageManager;
 import utils.ui.context.IContextMenuConfig;
 import events.EventBus;
-import events.FileSystemChangedEvent;
+import events.FileSystemChanged;
 
 public class TrashController implements Initializable
 {

@@ -9,7 +9,6 @@ import types.OSType;
 import utils.filesystem.FileSystemUtils;
 import utils.i18n.LanguageManager;
 import utils.platform.OSIntegrationService;
-import utils.settings.*;
 import utils.trash.ITrashManager;
 import utils.trash.LinuxTrashManager;
 import utils.trash.WindowsTrashManager;
@@ -136,15 +135,6 @@ public final class AppContext
      * @return менеджер контекстного меню
      */
     public static ContextMenuManager getContextMenuManager() { return contextMenuManager; }
-
-    /**
-     * Создать окно для работы с настройками приложения
-     * @return окно для работы с настройками
-     */
-    public static Stage getSettingsStage()
-    {
-        return windowManager.createSettingsStage();
-    }
 
     /**
      * Получить путь к директории приложения
