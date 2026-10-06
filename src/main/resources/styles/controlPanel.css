@@ -1,3 +1,8 @@
+/* Главный виджет */
+.main-widget {
+    -fx-background-color: #008fbf;
+}
+
 /* Кнопка "Создать" */
 .add-button {
     -fx-background-color: #f5f5f5;
@@ -11,12 +16,6 @@
 /* Кнопка "Создать" - поведение при наведении */
 .add-button:hover {
     -fx-background-color: #e0e0e0;
-}
-
-
-/* Главный виджет */
-.main-widget {
-    -fx-background-color: #008fbf;
 }
 
 /* Контейнер кнопок навигации */
@@ -51,15 +50,18 @@
     -fx-border-color: #cccccc #cccccc #cccccc #cccccc
 }
 
+/* Строка поиска */
 .search-field {
     -fx-prompt-text-fill: #777777;
     -fx-padding: 4px 30px 4px 7px;
 }
 
+/* Строка поиска - поведение при фокусировке */
 .search-field:focused {
     -fx-prompt-text-fill: #666666;
 }
 
+/* Кнопка очистки */
 .clear-field-button {
     -fx-background-color: transparent;
     -fx-padding: 0px 10px 0px 0px;
@@ -68,6 +70,7 @@
     -fx-cursor: hand;
 }
 
+/* Кнопка очистки - поведение при наведении */
 .clear-field-button:hover {
     -fx-text-fill: #333333;
 }

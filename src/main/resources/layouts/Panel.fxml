@@ -17,6 +17,6 @@
         <TableColumn prefWidth="300" fx:id="fileNameColumn" minWidth="150" text="%panel.column.filename"/>
         <TableColumn prefWidth="150" fx:id="fileSizeColumn" minWidth="75" text="%panel.column.fileSize"/>
         <TableColumn prefWidth="200" fx:id="fileEditDateColumn" minWidth="150" text="%panel.column.fileEditDate"/>
-        </columns>
+    </columns>
 
 </fx:root>

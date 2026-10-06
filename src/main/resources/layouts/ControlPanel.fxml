@@ -26,6 +26,7 @@
     </padding>
 
     <!--Комбобокс с выбором диска. Не актуален для Linux-->
+    <!--TODO объединить в контейнер иконку с выпадающим списком? -->
     <ImageView HBox.hgrow="ALWAYS" fx:id="diskIcon">
         <Image url="/icons/24x24/disk.png"/>
     </ImageView>
@@ -123,7 +124,7 @@
                     onAction="#onClearButtonClick"
                     styleClass="clear-field-button"
                     visible="false"/>
-
         </children>
     </StackPane>
+
 </fx:root>
