@@ -9,6 +9,10 @@
          type="TabPane"
          tabClosingPolicy="ALL_TABS">
     <tabs>
-        <Tab fx:id="addTab" text="+" closable="false"/>
+        <Tab fx:id="addTab" text="+" closable="false">
+            <tooltip>
+                <Tooltip text="%tableviewer.add.tooltip"/>
+            </tooltip>
+        </Tab>
     </tabs>
 </fx:root>

@@ -9,6 +9,7 @@ import javafx.animation.PauseTransition;
 import javafx.collections.ListChangeListener;
 import javafx.util.Duration;
 import models.AppSettings;
+import models.StringKeys;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.TransferMode;
@@ -25,7 +26,10 @@ import java.io.File;
 import java.nio.file.Path;
 
 import app.AppContext;
+import events.EventBus;
+import events.LocaleChangedEvent;
 import utils.filesystem.FileSystemController;
+import widgets.interfaces.ITranslatable;
 import widgets.interfaces.IWidget;
 import utils.filesystem.FileSystem;
 import resourceHandler.ResourceHandler;
@@ -33,7 +37,7 @@ import resourceHandler.ResourceHandler;
  * Виджет вкладок панели
  * TabViewer
  */
-public final class TabViewer extends TabPane implements IWidget
+public final class TabViewer extends TabPane implements IWidget, ITranslatable
 {
     @FXML
     private Tab addTab;
@@ -51,7 +55,6 @@ public final class TabViewer extends TabPane implements IWidget
         super();
         this.side = side;
         load(ResourceHandler.getLayout("TabViewer.fxml"));
-        initUI();
 
         // сохранение настроек перед удалением виджета
         sceneProperty().addListener((observable, oldScene, newScene) -> {
@@ -90,10 +93,10 @@ public final class TabViewer extends TabPane implements IWidget
             }
         });
 
+        // настройка горячих клавиш для вкладок
         setOnKeyPressed(event -> {
             if (event.isControlDown())
                 {
-                    //TabViewer activeTabViewer = (TabViewer) getActiveTabViewer();
                     switch (event.getCode())
                     {
                         // создание новой вкладки
@@ -108,10 +111,10 @@ public final class TabViewer extends TabPane implements IWidget
                                 Tab activeTab = getSelectionModel().getSelectedItem();
                                 int index = getSelectionModel().getSelectedIndex();
                                 getTabs().remove(activeTab);
-                                // иногда при закрытии самой первой вкладки, селектирование может уйти на кнопки тулбара
-                                // чтобы такого не было, проверим, какую вкеладку закрываем и если что, вернём селектирование
-                                if (index == 0)
-                                    getSelectionModel().select(0);
+                                // иногда при закрытии вкладки, селектирование может уйти на кнопки тулбара
+                                // поэтому насильно вернём его обратно
+                                requestFocus();
+                                getSelectionModel().select(index == 0 ? 0 : index - 1);
                                 // при ручном удалении вкладки событие закрытия не генерируется, поэтому вызовем его сами
                                 Event closedEvent = new Event(activeTab, activeTab, Tab.CLOSED_EVENT);
                                 Event.fireEvent(activeTab, closedEvent);
@@ -124,6 +127,13 @@ public final class TabViewer extends TabPane implements IWidget
                 }
         });
 
+        initUI();
+        EventBus.subscribe(LocaleChangedEvent.class, this, event -> updateText());
+    }
+
+    @Override 
+    public void initUI()
+    {
         if (!side.tabs.isEmpty())
             for (String path : side.tabs)
             {
@@ -136,8 +146,11 @@ public final class TabViewer extends TabPane implements IWidget
         getSelectionModel().select(getTabs().get(side.activeIndex));
     }
 
-    @Override 
-    public void initUI() {}
+    @Override
+    public void updateText()
+    {
+        addTab.getTooltip().setText(AppContext.getLanguageManager().getString(StringKeys.TABVIEWER_ADD_TAB_TOOLTIP));
+    }
 
     /**
      * Создать новую вкладку

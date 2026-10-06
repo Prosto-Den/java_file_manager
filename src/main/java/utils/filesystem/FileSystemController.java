@@ -57,6 +57,10 @@ public class FileSystemController
         instances.remove(id);
     }
 
+    /**
+     * Обновить наблюдателя за файловой системой
+     * @param id идентификатор файловой системы
+     */
     public static void updateWatcher(UUID id)
     {
         stopWatcher(id);
@@ -65,6 +69,10 @@ public class FileSystemController
         AppContext.getThreadPool().execute(watcher);
     }
 
+    /**
+     * Остановить наблюдателя за файловой системой
+     * @param id идентификатор файловой системы
+     */
     public static void stopWatcher(UUID id)
     {
         FolderWatcher watcher = watchers.remove(id);

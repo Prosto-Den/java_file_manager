@@ -18,7 +18,8 @@
          prefHeight="30.0" prefWidth="600.0"
          spacing="5"
          alignment="CENTER_LEFT"
-         style="-fx-background-color: #008fbf;">
+         stylesheets="@/styles/controlPanel.css"
+         styleClass="main-widget">
 
     <padding>
         <Insets bottom="5" top="5" left="5"/>
@@ -28,14 +29,14 @@
     <ImageView HBox.hgrow="ALWAYS" fx:id="diskIcon">
         <Image url="/icons/24x24/disk.png"/>
     </ImageView>
-    <ComboBox fx:id="diskComboBox" HBox.hgrow="ALWAYS"/>
+    <ComboBox fx:id="diskComboBox" HBox.hgrow="ALWAYS" onAction="#onSelectLogicalDrive" styleClass="add-button"/>
 
     <!--Кнопка создать-->
-    <MenuButton textAlignment="RIGHT" fx:id="createButton" HBox.hgrow="ALWAYS" text="%button.add.text">
+    <MenuButton textAlignment="RIGHT" fx:id="createButton" HBox.hgrow="ALWAYS">
         <!-- Меню -->
          <items>
             <!-- Создать папку -->
-            <MenuItem fx:id="createFolderMenuItem" text="%addmenu.item.folder">
+            <MenuItem fx:id="createFolderMenuItem" text="%addmenu.item.folder" onAction="#onCreateFolderItemClick">
                 <graphic>
                     <ImageView>
                         <Image url="/icons/16x16/folder.png"/>
@@ -44,7 +45,7 @@
             </MenuItem>
 
             <!-- Создать текстовый файл -->
-             <MenuItem fx:id="createTextFileMenuItem" text="%addmenu.item.textfile">
+             <MenuItem fx:id="createTextFileMenuItem" text="%addmenu.item.textfile" onAction="#onCreateTextFileItemClick">
                 <graphic>
                     <ImageView>
                         <Image url="/icons/16x16/file.png"/>
@@ -67,29 +68,32 @@
         </tooltip>
     </MenuButton>
 
-    <!--Кнопка "Назад"-->
-    <Button fx:id="backButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30" disable="true">
-        <graphic>
-            <ImageView>
-                <Image url="/icons/24x24/back_arrow.png" preserveRatio="true"/>
-            </ImageView>
-        </graphic>
-        <tooltip>
-            <Tooltip text="%button.back.tooltip"/>
-        </tooltip>
-    </Button>
+    <!-- Кнопки навигации -->
+     <HBox spacing="0" alignment="CENTER_LEFT" styleClass="nav-button-group">
+        <!--Кнопка "Назад"-->
+        <Button fx:id="backButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30" disable="true" styleClass="nav-btn-left">
+            <graphic>
+                <ImageView>
+                    <Image url="/icons/24x24/back_arrow.png" preserveRatio="true"/>
+                </ImageView>
+            </graphic>
+            <tooltip>
+                <Tooltip text="%button.back.tooltip"/>
+            </tooltip>
+        </Button>
 
-    <!--Кнопка "Вперёд"-->
-    <Button fx:id="forwardButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30" disable="true">
-        <graphic>
-            <ImageView>
-                <Image url="/icons/24x24/forward_arrow.png" preserveRatio="true"/>
-            </ImageView>
-        </graphic>
-        <tooltip>
-            <Tooltip text="%button.forward.tooltip"/>
-        </tooltip>
-    </Button>
+        <!--Кнопка "Вперёд"-->
+        <Button fx:id="forwardButton" HBox.hgrow="ALWAYS" minWidth="30" maxWidth="30" disable="true" styleClass="nav-btn-right">
+            <graphic>
+                <ImageView>
+                    <Image url="/icons/24x24/forward_arrow.png" preserveRatio="true"/>
+                </ImageView>
+            </graphic>
+            <tooltip>
+                <Tooltip text="%button.forward.tooltip"/>
+            </tooltip>
+        </Button>
+     </HBox>
 
     <!--Кнопка вставки-->
     <Button fx:id="insertButton" HBox.hgrow="ALWAYS" disable="true">
@@ -103,8 +107,8 @@
         </tooltip>
     </Button>
 
-    <!--Текстовое поле с текущей директорией-->
-    <TextField fx:id="currentPathField" HBox.hgrow="ALWAYS" editable="false">
+    <!--Поле поиска-->
+    <TextField fx:id="searchField" HBox.hgrow="ALWAYS" editable="true" styleClass="search-field">
         <tooltip>
             <Tooltip text="%textfield.currentPath.tooltip"/>
         </tooltip>
