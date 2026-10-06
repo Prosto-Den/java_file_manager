@@ -107,10 +107,23 @@
         </tooltip>
     </Button>
 
-    <!--Поле поиска-->
-    <TextField fx:id="searchField" HBox.hgrow="ALWAYS" editable="true" styleClass="search-field">
-        <tooltip>
-            <Tooltip text="%textfield.currentPath.tooltip"/>
-        </tooltip>
-    </TextField>
+    <!-- Контейнер строки поиска -->
+    <StackPane alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+        <children>
+            <!--Строка поиска-->
+            <TextField fx:id="searchField" HBox.hgrow="ALWAYS" editable="true" styleClass="search-field">
+                <tooltip>
+                    <Tooltip text="%textfield.currentPath.tooltip"/>
+                </tooltip>
+            </TextField>
+
+            <!-- Кнопка очистки строки поиска -->
+            <Button fx:id="clearButton"
+                    text="✕"
+                    onAction="#onClearButtonClick"
+                    styleClass="clear-field-button"
+                    visible="false"/>
+
+        </children>
+    </StackPane>
 </fx:root>

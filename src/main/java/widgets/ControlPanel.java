@@ -58,6 +58,9 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     @FXML
     private TextField searchField; // текстовое поле текущей директории
 
+    @FXML 
+    private Button clearButton;
+
     private final UUID fileSystemId; // ID файловой системы
 
 
@@ -91,6 +94,7 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
             if (newValue == null)
                 return;
 
+            clearButton.setVisible(!newValue.isEmpty() && searchField.isFocused());
             EventBus.publish(new FileFilterEvent(fileSystemId, newValue.trim()));
         });
 
@@ -137,6 +141,16 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
         String value = diskComboBox.getValue();
         if (value != null)
             getFileSystem().setCurrentPath(Path.of(value + "\\"));
+    }
+
+    /**
+     * Действия при нажатии на кнопку очистки строки поиска
+     */
+    @FXML 
+    private void onClearButtonClick()
+    {
+        searchField.clear();
+        searchField.requestFocus();
     }
 
     // IWidget

@@ -53,8 +53,21 @@
 
 .search-field {
     -fx-prompt-text-fill: #777777;
+    -fx-padding: 4px 30px 4px 7px;
 }
 
 .search-field:focused {
     -fx-prompt-text-fill: #666666;
+}
+
+.clear-field-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0px 10px 0px 0px;
+    -fx-font-size: 11px;
+    -fx-text-fill: #999999;
+    -fx-cursor: hand;
+}
+
+.clear-field-button:hover {
+    -fx-text-fill: #333333;
 }
