@@ -12,7 +12,6 @@
 
     <entry key="combobox.disk.tooltip">Сменить диск</entry>
 
-    <entry key="button.add.text">Создать</entry>
     <entry key="button.add.tooltip">Создать файл в директории</entry>
     <entry key="button.back.tooltip">Назад</entry>
     <entry key="button.forward.tooltip">Вперёд</entry>
@@ -30,8 +29,9 @@
 
     <entry key="fileviewer.row.back">..</entry>
 
-    <entry key="trash.title">Корзина</entry>
+    <entry key="tableviewer.add.tooltip">Создать вкладку</entry>
 
+    <entry key="trash.title">Корзина</entry>
     <entry key="trashviewer.column.filename">Имя файла</entry>
     <entry key="trashviewer.column.path">Оригинальное расположение</entry>
     <entry key="trashviewer.column.date">Дата удаления</entry>
@@ -55,9 +55,9 @@
     <!--TODO сделать имя для новых файлов/папок настраиваемым?  -->
     <entry key="new.folder.name">Новая папка</entry>
     <entry key="new.textfile.name">Текстовый файл</entry>
-
     <entry key="pattern.newfile">^%s(?:\s\((\d+)\))?%s$</entry>
 
+    <!-- Текста для предупреждающих окон -->
     <entry key="alert.delete.title">Удаление файлов</entry>
     <entry key="alert.delete.header">Удалить выбранные файлы навсегда?</entry>
     <entry key="alert.delete.text">Это действие нельзя будет отменить.</entry>
@@ -71,6 +71,7 @@
     <entry key="shortcut.move_to_trash">Delete - переместить выбранные файлы в корзину</entry>
     <entry key="shortcut.delete">Shift + Delete - удалить выбранные файлы</entry>
 
+    <!-- Текста ошибок -->
     <entry key="error.load_user_settings">Не удалось загрузить файл пользовательских настроек. Будут применены настройки по умолчанию</entry>
     <entry key="error.save_user_settings">Не удалось сохранить пользовательские настройки</entry>
     <entry key="error.load_default_settings">Не удалось загрузить файл настроек по умолчанию</entry>

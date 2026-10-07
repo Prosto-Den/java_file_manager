@@ -49,5 +49,6 @@ public class StatusBarController implements Initializable, ITranslatable
         renameShortcutLabel.setText(AppContext.getLanguageManager().getString(StringKeys.SHORTCUT_RENAME));
         createTabShortCutLabel.setText(AppContext.getLanguageManager().getString(StringKeys.SHORTCUT_CREATE_NEW_TAB));
         closeTabShortcutLabel.setText(AppContext.getLanguageManager().getString(StringKeys.SHORTCUT_CLOSE_ACTIVE_TAB));
+        deleteShortcutLabel.setText(AppContext.getLanguageManager().getString(StringKeys.SHORTCUT_DELETE));
     }
 }

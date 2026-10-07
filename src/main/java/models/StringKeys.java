@@ -21,9 +21,6 @@ public class StringKeys
     public static final String BUTTON_FORWARD_TOOLTIP = "button.forward.tooltip";
     public static final String BUTTON_INSERT_TOOLTIP = "button.insert.tooltip";
 
-    // текста кнопок
-    public static final String BUTTON_ADD_TEXT = "button.add.text";
-
     // кнопки контекстного меню
     public static final String CONTEXT_MENU_OPEN_ITEM = "contextmenu.item.open";
     public static final String CONTEXT_MENU_COPY_ITEM = "contextmenu.item.copy";
@@ -35,8 +32,9 @@ public class StringKeys
     // "Назад"
     public static final String FILEVIEWER_ROW_BACK = "fileviewer.row.back";
 
-    public static final String TRASH_TITLE = "trash.title";
+    public static final String TABVIEWER_ADD_TAB_TOOLTIP = "tableviewer.add.tooltip";
 
+    public static final String TRASH_TITLE = "trash.title";
     // названия колонок корзины
     public static final String TRASHVIEWER_COLUMN_FILENAME = "trashviewer.column.filename";
     public static final String TRASHVIEWER_COLUMN_PATH = "trashviewer.column.path";

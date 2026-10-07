@@ -30,7 +30,7 @@ import utils.filesystem.FileSystemUtils;
 import types.OSType;
 import widgets.interfaces.IWidget;
 import widgets.interfaces.ITranslatable;
-
+import events.FileFilterEvent;
 
 /**
  * Панель с элементами управления для текущей директории
@@ -56,7 +56,10 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     private Button insertButton; // кнопка вставки
 
     @FXML
-    private TextField currentPathField; // текстовое поле текущей директории
+    private TextField searchField; // текстовое поле текущей директории
+
+    @FXML 
+    private Button clearButton;
 
     private final UUID fileSystemId; // ID файловой системы
 
@@ -73,12 +76,13 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
         load(ResourceHandler.getLayout("ControlPanel.fxml"));
         insertButton.setOnAction(event -> onInsertItemClick());
         
-        currentPathField.setText(getFileSystem().getCurrentPath().toString());
+        searchField.setPromptText(getFileSystem().getCurrentPath().toString());
         initUI();
 
         EventBus.subscribe(LocaleChangedEvent.class, this, event -> updateText());
         EventBus.subscribe(PathChangedEvent.class, this, event -> {
-            currentPathField.setText(getFileSystem().getCurrentPath().toString());
+            searchField.setPromptText(getFileSystem().getCurrentPath().toString());
+            searchField.clear();
             backButton.setDisable(getFileSystem().isBackStackEmpty());
             forwardButton.setDisable(getFileSystem().isForwardStackEmpty());
         });
@@ -86,15 +90,19 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
             insertButton.setDisable(!event.isHasFiles());
         });
 
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null)
+                return;
+
+            clearButton.setVisible(!newValue.isEmpty() && searchField.isFocused());
+            EventBus.publish(new FileFilterEvent(fileSystemId, newValue.trim()));
+        });
+
         backButton.setOnAction(event ->getFileSystem().goBack());
         forwardButton.setOnAction(event -> getFileSystem().goForward());
-        if (OSType.is(OSType.WINDOWS))
-            diskComboBox.setOnAction(event -> onSelectLogicalDrive());
-
-        getCreateMenuItem(CreateButtonMenuId.CREATE_FOLDER_ITEM).ifPresent(item ->
-                item.setOnAction(event -> onCreateFolderItemClick()));
-        getCreateMenuItem(CreateButtonMenuId.CREATE_TEXT_FILE_ITEM).ifPresent(item ->
-                item.setOnAction(event -> onCreateTextFileItemClick()));
+        // TODO перенёс onAction в FXML. Как появится возможность, надо проверить на Windows, что эта штука работает.
+        // if (OSType.is(OSType.WINDOWS))
+        //     diskComboBox.setOnAction(event -> onSelectLogicalDrive());
     }
 
     /**
@@ -102,13 +110,14 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
      * */
     private void onInsertItemClick()
     {   
-        String currentPath = currentPathField.getText();
+        String currentPath = searchField.getText();
         ClipboardUtil.insert(Path.of(currentPath));
     }
 
     /**
      * Действия при нажатии на кнопку "Создать папку"
      */
+    @FXML
     private void onCreateFolderItemClick()
     {
         getFileSystem().createFolderInCurrentDirectory();
@@ -117,6 +126,7 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     /**
      * Действия при нажатии на кнопку "Создать текстовый файл"
      */
+    @FXML
     private void onCreateTextFileItemClick()
     {
         getFileSystem().createTextFileInCurrentDirectory();
@@ -125,10 +135,22 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     /**
      * Действия при выборе логического драйвера из комбобокса. Актуально только для Windows
      */
+    @FXML
     private void onSelectLogicalDrive()
     {
-        String value = diskComboBox.getValue() + "\\";
-        getFileSystem().setCurrentPath(Path.of(value));
+        String value = diskComboBox.getValue();
+        if (value != null)
+            getFileSystem().setCurrentPath(Path.of(value + "\\"));
+    }
+
+    /**
+     * Действия при нажатии на кнопку очистки строки поиска
+     */
+    @FXML 
+    private void onClearButtonClick()
+    {
+        searchField.clear();
+        searchField.requestFocus();
     }
 
     // IWidget
@@ -146,7 +168,6 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     @Override
     public void updateText()
     {
-        createButton.setText(AppContext.getLanguageManager().getString(StringKeys.BUTTON_ADD_TEXT));
         createButton.setTooltip(new Tooltip(AppContext.getLanguageManager().getString(StringKeys.BUTTON_ADD_TOOLTIP)));
         backButton.setTooltip(new Tooltip(AppContext.getLanguageManager().getString(StringKeys.BUTTON_BACK_TOOLTIP)));
         forwardButton.setTooltip(new Tooltip(AppContext.getLanguageManager().getString(StringKeys.BUTTON_FORWARD_TOOLTIP)));
@@ -192,10 +213,10 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
      * @param itemId ID элемента
      * @return кнопку, если кнопка с таким ID была найдена, иначе Null
      */
-    private Optional<MenuItem> getCreateMenuItem(String itemId)
-    {
-        return createButton.getItems().stream()
-            .filter(item -> item.getId() != null && item.getId().equals(itemId))
-            .findFirst();
-    }
+    // private Optional<MenuItem> getCreateMenuItem(String itemId)
+    // {
+    //     return createButton.getItems().stream()
+    //         .filter(item -> item.getId() != null && item.getId().equals(itemId))
+    //         .findFirst();
+    // }
 }

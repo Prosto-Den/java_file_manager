@@ -36,8 +36,17 @@ public final class FileSystem
     private Deque<Path> backStack;
     private Deque<Path> forwardStack;
 
+    /**
+     * Общий интерфейс для операций над файлами
+     * Transfer
+     */
     private static interface Transfer
     {
+        /**
+         * Выполнить операцию
+         * @param source файл источник (откуда производится операция)
+         * @param dest файл назначения (куда производится операция)
+         */
         void execute(Path source, Path dest);
     }
 

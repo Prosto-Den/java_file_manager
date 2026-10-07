@@ -18,9 +18,6 @@
     <entry key="button.forward.tooltip">Forward</entry>
     <entry key="button.insert.tooltip">Insert</entry>
 
-    <!-- Control text -->
-    <entry key="button.add.text">Create</entry>
-
     <!-- Control menu`s items -->
     <entry key="contextmenu.item.open">Open</entry>
     <entry key="contextmenu.item.copy">Copy</entry>
@@ -35,8 +32,9 @@
     <!-- Go back -->
     <entry key="fileviewer.row.back">..</entry>
 
-    <entry key="trash.title">Trash</entry>
+    <entry key="tableviewer.add.tooltip">Add new tab</entry>
 
+    <entry key="trash.title">Trash</entry>
     <!-- Column names for trash viewer -->
     <entry key="trashviewer.column.filename">Filename</entry>
     <entry key="trashviewer.column.path">Original path</entry>
