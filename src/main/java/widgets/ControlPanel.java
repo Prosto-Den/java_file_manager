@@ -100,9 +100,6 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
 
         backButton.setOnAction(event ->getFileSystem().goBack());
         forwardButton.setOnAction(event -> getFileSystem().goForward());
-        // TODO перенёс onAction в FXML. Как появится возможность, надо проверить на Windows, что эта штука работает.
-        // if (OSType.is(OSType.WINDOWS))
-        //     diskComboBox.setOnAction(event -> onSelectLogicalDrive());
     }
 
     /**
@@ -207,16 +204,4 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
     {
         return FileSystemController.get(fileSystemId);
     }
-
-    /**
-     * Выдать кнопку из меню создания файлов
-     * @param itemId ID элемента
-     * @return кнопку, если кнопка с таким ID была найдена, иначе Null
-     */
-    // private Optional<MenuItem> getCreateMenuItem(String itemId)
-    // {
-    //     return createButton.getItems().stream()
-    //         .filter(item -> item.getId() != null && item.getId().equals(itemId))
-    //         .findFirst();
-    // }
 }
