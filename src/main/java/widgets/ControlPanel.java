@@ -110,8 +110,8 @@ public final class ControlPanel extends HBox implements IWidget, ITranslatable
      * */
     private void onInsertItemClick()
     {   
-        String currentPath = searchField.getText();
-        ClipboardUtil.insert(Path.of(currentPath));
+        Path currentPath = getFileSystem().getCurrentPath();
+        ClipboardUtil.insert(currentPath);
     }
 
     /**

@@ -10,6 +10,7 @@
          xmlns:fx="http://javafx.com/fxml"
          fx:controller="controllers.ToolBarController"
          maxHeight="24">
+    <!--TODO пока ничего не делает -->
     <!--Кнопка "Поиск дубликатов файла"-->
     <Button fx:id="findDuplicateButton">
         <graphic>
@@ -20,7 +21,7 @@
     </Button>
 
     <!--Кнопка "Настройки"-->
-    <Button fx:id="settingsButton">
+    <Button fx:id="settingsButton" onAction="#onSettingsButtonClick">
         <graphic>
             <ImageView>
                 <Image url="@/icons/24x24/settings.png"/>
@@ -29,7 +30,7 @@
     </Button>
 
     <!-- Кнопка просмотра корзины -->
-     <Button fx:id="trashButton">
+     <Button fx:id="trashButton" onAction="#onTrashButtonClick">
         <graphic>
             <ImageView>
                 <Image url="@/icons/24x24/trash.png"/>

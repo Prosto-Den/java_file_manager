@@ -7,13 +7,6 @@ import javafx.scene.Node;
  */
 public abstract class IContextMenuConfig 
 {   
-    protected Object data;
-
-    /**
-     * Получить информацию по файлу
-     * @return информация по файлу
-     */
-    public Object getUserData() { return data; };
     /**
      * Выполнить действие при нажатии на кнопку меню
      * @param actionID ID кнопки меню
