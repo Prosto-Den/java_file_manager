@@ -26,6 +26,10 @@ import utils.i18n.LanguageManager;
 import utils.ui.context.IContextMenuConfig;
 
 
+/**
+ * Контроллер для окна корзины
+ * TrashController
+ */
 public class TrashController implements Initializable
 {
     @FXML 

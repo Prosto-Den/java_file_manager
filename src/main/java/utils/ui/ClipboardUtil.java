@@ -1,12 +1,14 @@
 package utils.ui;
 
 import java.io.File;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.nio.file.Path;
 
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import utils.filesystem.FileSystemUtils;
+
+import java.util.List;
 
 /**
  * Утилитный класс для работы с буфером обмена
@@ -19,11 +21,14 @@ public final class ClipboardUtil
      * Скопировать содержимое в буфер обмена
      * @param path - путь к файлу
      */
-    public static void copyToClipboard(Path path)
+    public static void copyToClipboard(List<Path> paths)
     {
         ClipboardContent content = new ClipboardContent();
+        List<File> files = new ArrayList<>();
+        for (Path path : paths)
+            files.add(path.toFile());
 
-        content.putFiles(Collections.singletonList(path.toFile()));
+        content.putFiles(files);
         clipboard.setContent(content);
     }
 

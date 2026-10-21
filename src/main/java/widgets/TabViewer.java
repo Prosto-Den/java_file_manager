@@ -271,6 +271,11 @@ public final class TabViewer extends TabPane implements IWidget, ITranslatable
         });
     }
 
+    /**
+     * Получить идентификатор файловой системы для вкладки
+     * @param tab вкладка
+     * @return UUID файловой системы для данной вкладки, если его удалось получить. Иначе null
+     */
     @Nullable 
     private UUID getUUIDFromTab(Tab tab)
     {

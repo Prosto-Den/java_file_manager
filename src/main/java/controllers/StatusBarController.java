@@ -17,6 +17,10 @@ import java.net.URL;
 
 import widgets.interfaces.ITranslatable;
 
+/**
+ * Контроллер для StatusBar. Отвечает за наполнение подсказок на дне окна при смене локали и нажатии на некоторые клавиши
+ * StatusBarController
+ */
 public class StatusBarController implements Initializable, ITranslatable
 {
     @FXML 
