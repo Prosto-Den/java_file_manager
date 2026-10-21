@@ -149,7 +149,6 @@ public class SettingsController implements Initializable, ITranslatable
         // сохраняем локаль
         Language value = localeBox.getValue();
         settings.settings.locale = value.code();
-        //if (settingsManager.set(SettingKeys.LOCALE, value.code()))
         languageManager.setCurrentLanguage(value);
 
         // сохраняем настройки Linux
@@ -160,9 +159,7 @@ public class SettingsController implements Initializable, ITranslatable
             String linuxOpenCommand = openCommandTextField.getText();
             
             settings.settings.linuxCommands.console = linuxTerminal;
-            //settingsManager.set(SettingKeys.LINUX_CONSOLE, linuxTerminal);
             settings.settings.linuxCommands.open = linuxOpenCommand;
-            //settingsManager.set(SettingKeys.LINUX_OPEN_COMMAND, linuxOpenCommand);
         }
     }
 

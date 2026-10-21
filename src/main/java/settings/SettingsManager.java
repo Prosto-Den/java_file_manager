@@ -19,6 +19,7 @@ import types.OSType;
 
 
 // TODO стоит создать ещё один уровень абстракции. Если я откажусь от yaml, класс придётся переделывать (как я уже делал ранее...)
+
 public final class SettingsManager
 {
     private final Path settingsPath; // путь к настройкам пользователя

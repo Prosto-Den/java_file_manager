@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
 import java.io.IOException;
 import java.util.Objects;
+import utils.logger.CustomLogger;
 
 
 /**
@@ -67,8 +68,8 @@ public final class App extends Application
         }
         catch (IOException ex)
         {
-            ex.printStackTrace();
-            System.err.println("Не удалось загрузить приложение :(");
+            CustomLogger logger = new CustomLogger(getClass().getName());
+            logger.error("Не удалось загрузить приложение :( {0}", ex.toString());
         }
     }
 }

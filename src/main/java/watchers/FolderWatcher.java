@@ -15,14 +15,20 @@ import java.nio.file.WatchEvent;
 import java.nio.file.ClosedWatchServiceException;
 
 import events.EventBus;
+import utils.logger.CustomLogger;
 
 
+/**
+ * Смотритель за директорией. Реагирует на любые изменения файлов в директории
+ * FolderWatcher
+ */
 public class FolderWatcher implements Runnable
 {
     private final UUID fileSystemId;
     private final Path directory;
     private WatchService watchService;
     private volatile boolean isRunning = true;
+    private final CustomLogger logger = new CustomLogger(FolderWatcher.class.getName());
 
     public FolderWatcher(UUID fileSystemId, Path directory)
     {
@@ -38,11 +44,15 @@ public class FolderWatcher implements Runnable
         }
         catch (IOException ex)
         {
-            System.err.println("Не удалось заустить наблюдение для папки: " + ex.getMessage()); 
+            logger.error("Не удалось запустить наблюдение для папки: {0}", ex.toString());
             isRunning = false;
         }
     }
 
+    /**
+     * Запустить смотрителя
+     * @see java.lang.Runnable#run()
+     */
     @Override
     public void run()
     {
@@ -57,12 +67,12 @@ public class FolderWatcher implements Runnable
                 }
                 catch (ClosedWatchServiceException ex)
                 {
-                    System.out.println("Сервис закрыт программно. Остановка мониторинга для: " + directory);
+                    logger.info("Сервис закрыт программно. Остановка мониторинга для: " + directory);
                     break;
                 }
                 catch (InterruptedException ex)
                 {
-                    System.out.println("Мониторинг для папки " + directory.toString() + " прерван");
+                    logger.info("Мониторинг для папки " + directory.toString() + " прерван");
                     break;
                 }
 
@@ -86,15 +96,23 @@ public class FolderWatcher implements Runnable
             cleanup();
         }
 
-        System.out.println("[Watcher]: Поток полностью завершил работу для папки: " + directory);
+        logger.info("[Watcher]: Поток полностью завершил работу для папки: " + directory);
     }
 
+    /**
+     * Остановить смотрителя
+     */
     public void stop()
     {
         isRunning = false;
         cleanup();
     }
 
+    // Приватные методы
+
+    /**
+     * Произвести очистку после остановки
+     */
     private void cleanup()
     {
         if (watchService != null)
@@ -105,7 +123,7 @@ public class FolderWatcher implements Runnable
             }
             catch (IOException ex)
             {
-
+                
             }
         }
     }

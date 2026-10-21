@@ -41,6 +41,10 @@ public class TrashController implements Initializable
     @FXML
     private TableColumn<TrashItem, String> dateColumn;
 
+    /**
+     * Конфигурация контекстного меню
+     * TrashMenuContext
+     */
     private class TrashMenuContext extends IContextMenuConfig
     {
         public TrashMenuContext()
@@ -88,7 +92,7 @@ public class TrashController implements Initializable
     // Приватные методы
     
     /**
-     * Создать контекстное меню для процесса
+     * Создать контекстное меню
      */
     private void createContextMenu()
     {
@@ -98,7 +102,7 @@ public class TrashController implements Initializable
     }
 
     /**
-     * Действие при нажатии на "Восстановить"
+     * Действие при нажатии на кнопку "Восстановить"
      */
     private void onRestoreItem()
     {
@@ -122,7 +126,7 @@ public class TrashController implements Initializable
     }
 
     /**
-     * Действие при нажатии "Удалить навсегда"
+     * Действие при нажатии на кнопку "Удалить навсегда"
      */
     private void onDeletePermanentlyItem()
     {

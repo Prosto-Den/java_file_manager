@@ -1,5 +1,9 @@
 package models;
 
+/**
+ * Идентификаторы кнопок меню созданяи файлов
+ * CreateButtonMenuId
+ */
 public final class CreateButtonMenuId 
 {
     public static final String CREATE_FOLDER_ITEM = "createFolderMenuItem";
