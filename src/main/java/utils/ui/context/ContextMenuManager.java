@@ -82,7 +82,7 @@ public final class ContextMenuManager
                 item.setGraphic(icon);
         }
 
-        setUserData(menu, context.getUserData());
+        //setUserData(menu, context.getUserData());
     }
 
 

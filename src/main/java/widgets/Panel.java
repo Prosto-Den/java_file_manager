@@ -24,7 +24,6 @@ import javafx.fxml.FXML;
 import java.util.List;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.UUID;
@@ -67,16 +66,8 @@ public final class Panel extends TableView<FileData> implements IWidget, ITransl
      */
     public final class PanelMenuContext extends IContextMenuConfig
     {
-        public PanelMenuContext(FileData data)
+        public PanelMenuContext()
         {
-            this.data = data;
-        }
-
-        private Optional<FileData> getFileData()
-        {
-            if (data != null && data instanceof FileData)
-                return Optional.of((FileData) data);
-            return Optional.empty();
         }
 
         // TODO переработать на работу с несколькими файлами
@@ -85,13 +76,23 @@ public final class Panel extends TableView<FileData> implements IWidget, ITransl
         {
             switch (actionID)
             {
-                case (ContextMenuItemId.OPEN_ITEM) -> handleDoubleClick((FileData) data);
-                case (ContextMenuItemId.COPY_ITEM) ->
-                    getFileData().ifPresent(fileData -> ClipboardUtil.copyToClipboard(fileData.getPath()));
+                case (ContextMenuItemId.OPEN_ITEM) -> {
+                    FileData data = getSelectionModel().getSelectedItem();
+                    handleDoubleClick((FileData) data);
+                }
+                case (ContextMenuItemId.COPY_ITEM) -> {
+                    ObservableList<FileData> data = getSelectionModel().getSelectedItems();
+                    List<Path> paths = new ArrayList<>();
+                    for (FileData file : data)
+                        paths.add(file.getPath());
+                    ClipboardUtil.copyToClipboard(paths);
+                }    
                 case (ContextMenuItemId.DELETE_ITEM) -> onDeleteItem();
                 case (ContextMenuItemId.MOVE_TO_TRASH_ITEM) -> onMoveToTrashItem();
-                case (ContextMenuItemId.OPEN_IN_TERMINAL_ITEM) ->
-                    getFileData().ifPresent(fileData -> AppContext.getIntegrationService().openInTerminal(fileData.getPath()));
+                case (ContextMenuItemId.OPEN_IN_TERMINAL_ITEM) -> {
+                    FileData data = getSelectionModel().getSelectedItem();
+                    AppContext.getIntegrationService().openInTerminal(data.getPath());
+                }
                 case (ContextMenuItemId.REFRESH_ITEM) -> refreshTable();
                 case (ContextMenuItemId.RENAME_ITEM) -> onRenameItem();
                 default -> {/*ничего не делаем*/}
@@ -104,7 +105,7 @@ public final class Panel extends TableView<FileData> implements IWidget, ITransl
             switch (actionID)
             {
                 case (ContextMenuItemId.REFRESH_ITEM) : return true;
-                default : return data != null;
+                default : return getSelectionModel().getSelectedItem() != null;
             }
         }
 
@@ -481,8 +482,9 @@ public final class Panel extends TableView<FileData> implements IWidget, ITransl
                     event.consume();
                     return;
                 }
+                getSelectionModel().select(data);
                 ContextMenu contextMenu = AppContext.getContextMenuManager().createOrGetPanelContextMenu();
-                AppContext.getContextMenuManager().configureContextMenu(contextMenu, new PanelMenuContext(data));
+                AppContext.getContextMenuManager().configureContextMenu(contextMenu, new PanelMenuContext());
 
                 contextMenu.show(row, event.getScreenX(), event.getScreenY());
                 event.consume();

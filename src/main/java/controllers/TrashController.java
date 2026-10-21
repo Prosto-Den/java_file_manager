@@ -26,6 +26,10 @@ import utils.i18n.LanguageManager;
 import utils.ui.context.IContextMenuConfig;
 
 
+/**
+ * Контроллер для окна корзины
+ * TrashController
+ */
 public class TrashController implements Initializable
 {
     @FXML 
@@ -83,6 +87,9 @@ public class TrashController implements Initializable
 
     // Приватные методы
     
+    /**
+     * Создать контекстное меню для процесса
+     */
     private void createContextMenu()
     {
         ContextMenu contextMenu = AppContext.getContextMenuManager().createTrashContextMenu();
@@ -90,6 +97,9 @@ public class TrashController implements Initializable
         trashViewer.setContextMenu(contextMenu);
     }
 
+    /**
+     * Действие при нажатии на "Восстановить"
+     */
     private void onRestoreItem()
     {
         ObservableList<TrashItem> selectedItems = trashViewer.getSelectionModel().getSelectedItems();
@@ -111,6 +121,9 @@ public class TrashController implements Initializable
         refreshTable();
     }
 
+    /**
+     * Действие при нажатии "Удалить навсегда"
+     */
     private void onDeletePermanentlyItem()
     {
         ObservableList<TrashItem> selectedItems = trashViewer.getSelectionModel().getSelectedItems();
@@ -133,6 +146,9 @@ public class TrashController implements Initializable
 
     }
 
+    /**
+     * Обновить таблицу
+     */
     private void refreshTable()
     {
         List<TrashItem> items = AppContext.getTrashManager().getTrashItems();
@@ -140,6 +156,11 @@ public class TrashController implements Initializable
     }
 
     // TODO вынести в отдельный менеджер предупреждающих сообщений
+    /**
+     * Показать предупреждающее сообщение
+     * @param title заголовок сообщения
+     * @param text текст сообщения
+     */
     private void showErrorAlert(String title, String text)
     {
         Alert alert = new Alert(Alert.AlertType.ERROR);
