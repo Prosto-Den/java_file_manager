@@ -13,4 +13,11 @@ settings:
     console: "foot -D"
     open: "xdg-open"
     moveToTrash: "gio trash"
+
+  # логгер
+  loggerSettings:
+    level: "ERROR"
+    # по умолчанию будем сбрасывать в папку файлового менеджера. 
+    # Если пользователь захочет, сможет задать другой путь
+    path: "" 
   

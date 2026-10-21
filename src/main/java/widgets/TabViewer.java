@@ -33,6 +33,8 @@ import widgets.interfaces.ITranslatable;
 import widgets.interfaces.IWidget;
 import utils.filesystem.FileSystem;
 import resourceHandler.ResourceHandler;
+
+
 /**
  * Виджет вкладок панели
  * TabViewer

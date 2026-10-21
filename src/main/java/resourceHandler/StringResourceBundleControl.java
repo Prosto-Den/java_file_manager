@@ -9,7 +9,7 @@ import java.net.URL;
 
 
 /**
- * Класс дял управления строковыми ресурсами
+ * Класс дkя управления строковыми ресурсами
  * */
 public class StringResourceBundleControl extends ResourceBundle.Control
 {

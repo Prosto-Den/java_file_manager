@@ -2,6 +2,11 @@ package events;
 
 import java.util.UUID;
 
+
+/**
+ * Событие смены текущей директории
+ * PathChangedEvent
+ */
 public final class PathChangedEvent 
 {
     private UUID fileSystemId;
@@ -11,5 +16,10 @@ public final class PathChangedEvent
         this.fileSystemId = fileSystemId;
     }
 
+    /**
+     * Получить идентификатор файловой системы, 
+     * в которой произошла смена директории
+     * @return идентификатор файловой системы
+     */
     public UUID getFileSystemId() { return fileSystemId; }
 }

@@ -21,8 +21,6 @@ public final class ResourceHandler
     private static final String ICONS_PATH = "/icons";
     private static final String LAYOUTS_PATH = "/layouts";
     private static final String STYLES_PATH = "/styles";
-    //private static final String SETTINGS_PATH = "/settings/default_settings.properties";
-    //private static final String LANGUAGES_PATH = "/languages.yaml";
 
     // Методы для работы с иконками
     /**
@@ -42,7 +40,6 @@ public final class ResourceHandler
         if (size == null || name == null || name.isBlank())
             return null;
 
-        //String path = FileSystemUtils.adjustPath(name, name)
         String path = String.join("/", ICONS_PATH, size.getValue(), name);
         if (iconCache.containsKey(path))
             return iconCache.get(path);

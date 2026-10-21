@@ -8,6 +8,7 @@ import settings.*;
 import types.OSType;
 import utils.filesystem.FileSystemUtils;
 import utils.i18n.LanguageManager;
+import utils.logger.LoggerHelper;
 import utils.platform.OSIntegrationService;
 import utils.trash.ITrashManager;
 import utils.trash.LinuxTrashManager;
@@ -32,6 +33,7 @@ public final class AppContext
 {
     private static final String APP_NAME = "Prosto File Manager"; // название приложения
     private static final String USER_SETTINGS_FILENAME = "user_settings.yaml";
+    private static final String LOG_FILENAME = "log.log";
     private static Path appFolder;// папка приложения
     private static SettingsManager settingsManager;
     private static LanguageManager languageManager;
@@ -69,6 +71,7 @@ public final class AppContext
         integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager.getSettings());
         windowManager = new WindowManager(stage, settingsManager, languageManager);
         contextMenuManager = new ContextMenuManager();
+        LoggerHelper.initLogger(settingsManager.getSettings().settings.loggerSettings);
 
         if (OSType.is(OSType.LINUX))
             trashManager = new LinuxTrashManager();
@@ -76,6 +79,7 @@ public final class AppContext
             trashManager = new WindowsTrashManager();
 
         panelDataFormat = new DataFormat("application/panel");
+
         clipboardWatcher = new ClipboardWatcher();
         clipboardWatcher.start();
     }
@@ -90,6 +94,10 @@ public final class AppContext
         threadPool.shutdownNow();
     }
 
+    /**
+     * Проинициализировать события с клавиатуры для главной сцены
+     * @param scene главная сцена приложения
+     */
     public static void initKeyboardEvent(Scene scene)
     {
         if (scene != null)
@@ -148,13 +156,35 @@ public final class AppContext
      * */
     public static String getAppName() {return APP_NAME;}
 
+    /**
+     * Получить формат данных для сохранения контента в буфере обмена
+     * @return формат данных
+     */
     public static DataFormat getPanelDataFormat() {return panelDataFormat;}
 
+    /**
+     * Получить менеджер работы с корзиной
+     * @return менеджер работы с корзиной
+     */
     public static ITrashManager getTrashManager() { return trashManager; }
 
+    /**
+     * Получить главное окно приложения
+     * @return главное окно приложения
+     */
     public static Stage getMainWindow() { return appWindow; }
 
+    /**
+     * Получить коллекцию потоков приложения
+     * @return коллекция потоков приложения
+     */
     public static ExecutorService getThreadPool() { return threadPool; }
+
+    /**
+     * Получить путь к файлу логов
+     * @return путь к файлу логов
+     */
+    public static Path getLogPath() { return getAppFolder().resolve(LOG_FILENAME); }
 
     // Приватные методы
 

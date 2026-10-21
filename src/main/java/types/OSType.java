@@ -1,6 +1,10 @@
 package types;
 
 
+/**
+ * Поддерживаемые операционные системы
+ * OSType
+ */
 public enum OSType
 {
     WINDOWS,
@@ -8,6 +12,9 @@ public enum OSType
 
     private static OSType CURRENT_OS;
 
+    /**
+     * Инициализация
+     */
     static
     {
         String osName = System.getProperty("os.name").toLowerCase();

@@ -6,7 +6,12 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public class Converter 
-{
+{   
+    /**
+     * Конвертировать размер файла. Переводит байты в более компактный вид
+     * @param size размер файла в байтах
+     * @return строка с размеров файла в более подходящих величинах
+     */
     public static String convertFileSize(long size)
     {
         String[] units = {"B", "KB", "MB", "GB", "TB"};

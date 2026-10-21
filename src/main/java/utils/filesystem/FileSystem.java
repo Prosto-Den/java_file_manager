@@ -13,6 +13,8 @@ import java.util.ArrayDeque;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.DirectoryStream;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import app.AppContext;
 import events.EventBus;
@@ -35,6 +37,8 @@ public final class FileSystem
     // TODO добавить настройки с количеством файлов в истории
     private Deque<Path> backStack;
     private Deque<Path> forwardStack;
+
+    private final Logger logger = Logger.getLogger(FileSystem.class.getName());
 
     /**
      * Общий интерфейс для операций над файлами
@@ -100,10 +104,6 @@ public final class FileSystem
         return currentPath.resolve(fileName);
     }
 
-    /*TODO возможны ситуации, когда изменения в файловой системе будут происходить в другом месте (например, пользователь удалит папку из 
-        другого файлового менеджера). И может сложиться ситуация, что будет происходить переход в папку, которая уже не существует.
-        Стоит предусмотреть такой сценарий и выводить alert, если вдруг переданный путь не существует
-     */
     /**
      * Сменить текущую директорию
      * */
@@ -295,7 +295,7 @@ public final class FileSystem
                 }
                 catch (IOException ex)
                 {
-                    System.err.println("Не удалось создать папку назначения " + ex.getMessage());
+                    logger.log(Level.SEVERE, "Не удалось создать папку назначения " + ex.getMessage());
                     return;
                 }
             command.execute(file.toPath(), dest);
@@ -341,7 +341,7 @@ public final class FileSystem
         }
         catch (IOException ex)
         {
-            System.err.println("Не удалось создать поток чтения директории: " + ex.getMessage());
+            logger.log(Level.SEVERE, "Не удалось создать поток чтения директории: " + ex.getMessage());
             return fileName;
         }
         

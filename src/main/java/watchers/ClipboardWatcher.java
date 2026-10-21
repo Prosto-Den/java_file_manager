@@ -8,6 +8,10 @@ import javafx.animation.Timeline;
 import javafx.scene.input.Clipboard;
 import javafx.util.Duration;
 
+/**
+ * Смотритель за буфером обмена
+ * ClipboardWatcher
+ */
 public class ClipboardWatcher
 {
     private final Timeline timeline;
@@ -27,11 +31,17 @@ public class ClipboardWatcher
         timeline.setCycleCount(Animation.INDEFINITE);
     }
 
-    public void start()
+    /**
+     * Запустить таймер отслеживания
+     */
+    public void start() 
     {
       timeline.play();
     }
 
+    /**
+     * Остановить таймер
+     */
     public void stop()
     {
         if (timeline != null)

@@ -21,25 +21,45 @@ public record FileData(Path filePath, StringProperty nameProperty, StringPropert
         );
     }
 
+    /**
+     * Получить имя файла в виде проперти
+     * @return проперти имени файла
+     */
     public StringProperty getName()
     {
         return new SimpleStringProperty(getNameValue());
     }
 
+    /**
+     * Получить имя файла в виде строки
+     * @return имя файла в виде строки
+     */
     public String getNameValue() 
     {
        return nameProperty.getValue();
     }
 
+    /**
+     * Получить путь к файлу
+     * @return путь к файлу
+     */
     public Path getPath()
     {
         return filePath;
     }
 
+    /**
+     * Получить размер файла в виде строки
+     * @return размер файла в виде строки
+     */
     public String getSizeValue() {
         return sizeProperty.getValue();
     }
 
+    /**
+     * Получить дату последней модификации файла в виде строки
+     * @return дата последней модификации файла в виде строки
+     */
     public String getDateValue() {
         return dateProperty.getValue();
     }

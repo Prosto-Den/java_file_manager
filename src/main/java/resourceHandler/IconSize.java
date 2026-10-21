@@ -1,5 +1,10 @@
 package resourceHandler;
 
+//TODO нужен ли?
+/**
+ * Размеры иконок
+ * IconSize
+ */
 public enum IconSize
 {
     SMALL("16x16"),

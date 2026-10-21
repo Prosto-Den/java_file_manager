@@ -5,6 +5,8 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -14,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
  * */
 public final class FileSystemUtils
 {
+    private static final Logger logger = Logger.getLogger(FileSystemUtils.class.getName());
+
     /**
      * Возвращает список со всеми логическими дисками системы (C:\, D:\ и т.д).
      * Вызов функции актуален только для Windows.
@@ -62,7 +66,7 @@ public final class FileSystemUtils
         }
         catch (IOException ex)
         {
-            System.err.println("Ошибка чтения пути: " + ex.getMessage());
+            logger.log(Level.WARNING, "Ошибка чтения пути: " + ex.getMessage());
             return null;
         }
     }
@@ -107,7 +111,7 @@ public final class FileSystemUtils
         }
         catch (IOException ex)
         {
-            System.err.println("Не удалось создать поток для чтения директории: " + ex.getMessage());
+            logger.log(Level.WARNING, "Не удалось создать поток для чтения директории: " + ex.getMessage());
             return false;
         }
     }
@@ -128,7 +132,7 @@ public final class FileSystemUtils
         }
         catch (IOException ex)
         {
-            System.err.println("Не удалось удалить: " + ex.getMessage());
+            logger.log(Level.WARNING, "Не удалось удалить: " + ex.getMessage());
             return false;
         }
     }
@@ -148,7 +152,7 @@ public final class FileSystemUtils
         }
         catch (IOException ex)
         {
-            System.err.println("Не удалось создать директорию: " + ex.getMessage());
+            logger.log(Level.WARNING, "Не удалось создать директорию: " + ex.getMessage());
             return false;
         }
     }
@@ -168,7 +172,7 @@ public final class FileSystemUtils
         }
         catch (IOException ex)
         {
-            System.err.println("Не удалось создать файл: " + ex.getMessage());
+            logger.log(Level.WARNING, "Не удалось создать файл: " + ex.getMessage());
             return false;
         }
     }
@@ -193,7 +197,7 @@ public final class FileSystemUtils
         }
         catch (IOException ex)
         {
-            System.err.println("Не удалось переименовать файл: " + ex.getMessage());
+            logger.log(Level.WARNING, "Не удалось переименовать файл: " + ex.getMessage());
             return false;
         }
     }
@@ -246,7 +250,7 @@ public final class FileSystemUtils
         }
         catch (IOException ex)
         {
-            System.err.println("Не удалось создать поток для чтения директории: " + ex.getMessage());
+            logger.log(Level.WARNING, "Не удалось создать поток для чтения директории: " + ex.getMessage());
         }
 
         return res;
@@ -294,7 +298,7 @@ public final class FileSystemUtils
         }
         catch (IOException ex)
         {
-            System.err.println(ex);
+            logger.log(Level.WARNING, "Ошибка при манипуляции с файлами: " + ex);
         }
     }
 
@@ -333,7 +337,7 @@ public final class FileSystemUtils
         }
         catch (IOException ex)
         {
-            ex.printStackTrace();
+            logger.log(Level.WARNING, "Ошибка при удалении файлов: " + ex);
         }
 
         return res;

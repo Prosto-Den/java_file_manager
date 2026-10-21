@@ -23,6 +23,7 @@ public class AppSettings
         public String locale = "ru_RU";
         public DefaultDir defaultDir = new DefaultDir();
         public LinuxCommands linuxCommands = new LinuxCommands();
+        public LoggerSettings loggerSettings = new LoggerSettings();
     }
 
     /**
@@ -64,5 +65,15 @@ public class AppSettings
     {
         public int activeIndex = 0;
         public List<String> tabs = new ArrayList<>();
+    }
+
+    /**
+     * Настройки логгера
+     * LoggerSettings
+     */
+    public static class LoggerSettings
+    {
+        public String level = "INFO";
+        public String path = "";
     }
 }

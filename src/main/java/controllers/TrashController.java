@@ -37,6 +37,10 @@ public class TrashController implements Initializable
     @FXML
     private TableColumn<TrashItem, String> dateColumn;
 
+    /**
+     * Конфигурация контекстного меню
+     * TrashMenuContext
+     */
     private class TrashMenuContext extends IContextMenuConfig
     {
         public TrashMenuContext()
@@ -83,6 +87,9 @@ public class TrashController implements Initializable
 
     // Приватные методы
     
+    /**
+     * Создать контекстное меню
+     */
     private void createContextMenu()
     {
         ContextMenu contextMenu = AppContext.getContextMenuManager().createTrashContextMenu();
@@ -90,6 +97,9 @@ public class TrashController implements Initializable
         trashViewer.setContextMenu(contextMenu);
     }
 
+    /**
+     * Действие при нажатии на кнопку "Восстановить"
+     */
     private void onRestoreItem()
     {
         ObservableList<TrashItem> selectedItems = trashViewer.getSelectionModel().getSelectedItems();
@@ -111,6 +121,9 @@ public class TrashController implements Initializable
         refreshTable();
     }
 
+    /**
+     * Действие при нажатии на кнопку "Удалить навсегда"
+     */
     private void onDeletePermanentlyItem()
     {
         ObservableList<TrashItem> selectedItems = trashViewer.getSelectionModel().getSelectedItems();
@@ -133,6 +146,9 @@ public class TrashController implements Initializable
 
     }
 
+    /**
+     * Обновить таблицу
+     */
     private void refreshTable()
     {
         List<TrashItem> items = AppContext.getTrashManager().getTrashItems();
@@ -140,6 +156,11 @@ public class TrashController implements Initializable
     }
 
     // TODO вынести в отдельный менеджер предупреждающих сообщений
+    /**
+     * Показать предупреждающее сообщение
+     * @param title заголовок сообщения
+     * @param text текст сообщения
+     */
     private void showErrorAlert(String title, String text)
     {
         Alert alert = new Alert(Alert.AlertType.ERROR);
