@@ -15,8 +15,7 @@ import java.nio.file.WatchEvent;
 import java.nio.file.ClosedWatchServiceException;
 
 import events.EventBus;
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import utils.logger.CustomLogger;
 
 
 /**
@@ -29,7 +28,7 @@ public class FolderWatcher implements Runnable
     private final Path directory;
     private WatchService watchService;
     private volatile boolean isRunning = true;
-    private final Logger logger = Logger.getLogger(FolderWatcher.class.getName());
+    private final CustomLogger logger = new CustomLogger(FolderWatcher.class.getName());
 
     public FolderWatcher(UUID fileSystemId, Path directory)
     {
@@ -45,7 +44,7 @@ public class FolderWatcher implements Runnable
         }
         catch (IOException ex)
         {
-            logger.log(Level.SEVERE, "Не удалось запустить наблюдение для папки: " + ex);
+            logger.error("Не удалось запустить наблюдение для папки: {0}", ex.toString());
             isRunning = false;
         }
     }
