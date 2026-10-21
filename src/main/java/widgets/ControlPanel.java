@@ -8,10 +8,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import java.util.Optional;
 import java.nio.file.Path;
 import java.util.UUID;
 
@@ -20,7 +18,6 @@ import events.EventBus;
 import events.LocaleChangedEvent;
 import events.PathChangedEvent;
 import events.ClipboardEvent;
-import models.CreateButtonMenuId;
 import models.StringKeys;
 import resourceHandler.ResourceHandler;
 import utils.filesystem.FileSystem;

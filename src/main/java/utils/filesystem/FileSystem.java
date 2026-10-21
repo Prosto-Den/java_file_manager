@@ -13,8 +13,6 @@ import java.util.ArrayDeque;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.nio.file.DirectoryStream;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 import app.AppContext;
 import events.EventBus;
@@ -22,7 +20,7 @@ import events.PathChangedEvent;
 
 import models.StringKeys;
 import utils.i18n.LanguageManager;
-
+import utils.logger.CustomLogger;
 
 /**
  * Класс для работы с файловой системой
@@ -38,7 +36,7 @@ public final class FileSystem
     private Deque<Path> backStack;
     private Deque<Path> forwardStack;
 
-    private final Logger logger = Logger.getLogger(FileSystem.class.getName());
+    private final CustomLogger logger = new CustomLogger(FileSystem.class.getName());
 
     /**
      * Общий интерфейс для операций над файлами
@@ -92,6 +90,7 @@ public final class FileSystem
     /**
      * Построить путь до файла. Путь строится путём конкатенации текущего пути с переданным именем файла
      * (с добавлением разделителя между ними). Не проверяет, существует ли файл по этому пути на самом деле
+     * @param fileName имя файла в виде строки
      * @return Путь к файлу
      * */
     public Path buildPath(String fileName)
@@ -99,6 +98,12 @@ public final class FileSystem
         return currentPath.resolve(fileName);
     }
 
+    /**
+     * Построить путь до файла. Путь строится путём конкатенации текущего пути с переданным именем файла
+     * (с добавлением разделителя между ними). Не проверяет, существует ли файл по этому пути на самом деле
+     * @param fileName имя файла в виде объекта Path
+     * @return Путь к файлу
+     * */
     public Path buildPath(Path fileName)
     {
         return currentPath.resolve(fileName);
@@ -109,6 +114,7 @@ public final class FileSystem
      * */
     public void setCurrentPath(Path path)
     {
+        logger.info("Смена директории для ФС с id: " + id.toString());
         backStack.push(currentPath);
         // TODO размер истории вынести в настройки
         if (backStack.size() >= 10)
@@ -261,6 +267,7 @@ public final class FileSystem
             @Override
             public void execute(Path source, Path dest)
             {
+                logger.info("Перемещение файлов из {0} в {1}", source.toString(), dest.toString());
                 FileSystemUtils.moveFile(source, dest);
             }
         });
@@ -295,7 +302,7 @@ public final class FileSystem
                 }
                 catch (IOException ex)
                 {
-                    logger.log(Level.SEVERE, "Не удалось создать папку назначения " + ex.getMessage());
+                    logger.error("Не удалось создать папку назначения {0}", ex.getMessage());
                     return;
                 }
             command.execute(file.toPath(), dest);
@@ -309,6 +316,7 @@ public final class FileSystem
     private void changeCurrentPath(Path newPath)
     {
         currentPath = newPath;
+        logger.info("Теперь ФС {0} указывает на: {1}", id.toString(), newPath.toString());
         FileSystemController.updateWatcher(id);
         EventBus.publish(new PathChangedEvent(id));
     }
@@ -341,7 +349,7 @@ public final class FileSystem
         }
         catch (IOException ex)
         {
-            logger.log(Level.SEVERE, "Не удалось создать поток чтения директории: " + ex.getMessage());
+            logger.error("Не удалось создать поток чтения директории: ", ex.getMessage());
             return fileName;
         }
         
