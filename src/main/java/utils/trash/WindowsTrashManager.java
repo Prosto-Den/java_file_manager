@@ -8,7 +8,13 @@ import java.io.File;
 
 import models.TrashItem;
 import utils.filesystem.FileSystemUtils;
+import app.AppContext;
 
+
+/**
+ * Менеджер корзины для Windows
+ * WindowsTrashManager
+ */
 public final class WindowsTrashManager implements ITrashManager
 {
     private final String SEARCH_SCRIPT = "(New-Object -ComObject Shell.Application).NameSpace(0x0a).Items() | " +
@@ -16,12 +22,12 @@ public final class WindowsTrashManager implements ITrashManager
             "Path, " +
             "@{n='OriginalPath';e={$_.ExtendedProperty('{9B174B33-40FF-11D2-A27E-00C04FC30871} 2')}}, " +
             "@{n='DeletionDate';e={$_.ExtendedProperty('{9B174B33-40FF-11D2-A27E-00C04FC30871} 3')}} | " +
-            "ConvertTo-Csv -NoTypeInformation";
+            "ConvertTo-Csv -NoTypeInformation"; // скрипт поиска по корзине
 
     private final String RESTORE_SCRIPT = "$shell = New-Object -ComObject Shell.Application; " +
             "$recycleBin = $shell.NameSpace(0x0a); " +
             "$item = $recycleBin.Items() | Where-Object { $_.Path -eq '%s' } | Select-Object -First 1; " +
-            "if ($item) { $item.InvokeVerb('Undelete'); Write-Output 'SUCCESS' } else { Write-Output 'NOT_FOUND' }";
+            "if ($item) { $item.InvokeVerb('Undelete'); Write-Output 'SUCCESS' } else { Write-Output 'NOT_FOUND' }"; // скрипт восстановления
 
     @Override
     public List<TrashItem> getTrashItems()
@@ -62,12 +68,14 @@ public final class WindowsTrashManager implements ITrashManager
         return items;
     }
 
+    // TODO метод executePowerShell здесь не к месту. Нужно проверить, правильно ли сработал переход на метод из integrationService
     @Override
     public boolean restoreItem(TrashItem item)
     {
         String path = item.getTrashFile().getPath().replace("'", "''");
         String script = String.format(RESTORE_SCRIPT, path);
-        return executePowerShell(script);
+        return AppContext.getIntegrationService().runCommandAndWait("powershell.exe", script);
+        //return executePowerShell(script);
     }
 
     @Override
@@ -76,17 +84,17 @@ public final class WindowsTrashManager implements ITrashManager
         return FileSystemUtils.delete(item.getTrashFile().toPath());
     }
 
-    private boolean executePowerShell(String script)
-    {
-        try
-        {
-            Process p = new ProcessBuilder("powershell.exe", "-Command", script).start();
-            return p.waitFor() == 0;
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            return false;
-        }
-    }
+    // private boolean executePowerShell(String script)
+    // {
+    //     try
+    //     {
+    //         Process p = new ProcessBuilder("powershell.exe", "-Command", script).start();
+    //         return p.waitFor() == 0;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         ex.printStackTrace();
+    //         return false;
+    //     }
+    // }
 }

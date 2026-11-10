@@ -9,7 +9,9 @@ import types.OSType;
 import utils.filesystem.FileSystemUtils;
 import utils.i18n.LanguageManager;
 import utils.logger.LoggerHelper;
-import utils.platform.OSIntegrationService;
+import utils.platform.IIntegrationService;
+import utils.platform.LinuxIntegrationService;
+import utils.platform.WindowsIntegrationService;
 import utils.trash.ITrashManager;
 import utils.trash.LinuxTrashManager;
 import utils.trash.WindowsTrashManager;
@@ -37,7 +39,7 @@ public final class AppContext
     private static Path appFolder;// папка приложения
     private static SettingsManager settingsManager;
     private static LanguageManager languageManager;
-    private static OSIntegrationService integrationService;
+    private static IIntegrationService integrationService;
     private static WindowManager windowManager;
     private static ContextMenuManager contextMenuManager;
     private static ClipboardWatcher clipboardWatcher;
@@ -68,7 +70,10 @@ public final class AppContext
         Path settingsPath = appFolder.resolve(USER_SETTINGS_FILENAME);
         settingsManager = new SettingsManager(settingsPath);
         languageManager = new LanguageManager(settingsManager.getSettings());
-        integrationService = new OSIntegrationService(OSType.getCurrentOsType(), settingsManager.getSettings());
+        if (OSType.is(OSType.LINUX))
+            integrationService = new LinuxIntegrationService(settingsManager.getSettings());
+        else
+            integrationService = new WindowsIntegrationService();
         windowManager = new WindowManager(stage, settingsManager, languageManager);
         contextMenuManager = new ContextMenuManager();
         LoggerHelper.initLogger(settingsManager.getSettings().settings.loggerSettings);
@@ -130,7 +135,7 @@ public final class AppContext
      * Выдать сервис интергации с ОС
      * @return сервис интеграции
      */
-    public static OSIntegrationService getIntegrationService() { return integrationService; }
+    public static IIntegrationService getIntegrationService() { return integrationService; }
 
     /**
      * Выдать менеджер окон приложения

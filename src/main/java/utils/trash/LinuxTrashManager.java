@@ -16,11 +16,15 @@ import java.util.ArrayList;
 import java.util.Optional;
 import utils.filesystem.FileSystemUtils;
 
+/**
+ * Менеджер корзины для Linux
+ * LinuxTrashManager
+ */
 public final class LinuxTrashManager implements ITrashManager
 {
-    private final File trashHome = new File(System.getProperty("user.home"), ".local/share/Trash");
-    private final File filesDir = new File(trashHome, "files");
-    private final File infoDir = new File(trashHome, "info");
+    private final File trashHome = new File(System.getProperty("user.home"), ".local/share/Trash"); // корзина
+    private final File filesDir = new File(trashHome, "files"); // физические файлы
+    private final File infoDir = new File(trashHome, "info"); // файлы метаданных
 
     private record TrashMetaData(String originalPath, String deletionDate) {}
 
@@ -85,6 +89,11 @@ public final class LinuxTrashManager implements ITrashManager
         return FileSystemUtils.delete(item.getTrashFile().toPath()) && FileSystemUtils.delete(item.getInfoFile().toPath());
     }
 
+    /**
+     * Парсинг информации файла
+     * @param file файл из корзины
+     * @return метаданные файла, если их удалось достать
+     */
     private Optional<TrashMetaData> parseTrashInfo(File file)
     {
         String path = null, date = null;

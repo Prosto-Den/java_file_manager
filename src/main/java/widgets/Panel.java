@@ -105,6 +105,9 @@ public final class Panel extends TableView<FileData> implements IWidget, ITransl
             switch (actionID)
             {
                 case (ContextMenuItemId.REFRESH_ITEM) : return true;
+                case (ContextMenuItemId.OPEN_IN_TERMINAL_ITEM) :
+                case (ContextMenuItemId.OPEN_ITEM) : 
+                case (ContextMenuItemId.RENAME_ITEM) : return getSelectionModel().getSelectedItems().size() == 1;
                 default : return getSelectionModel().getSelectedItem() != null;
             }
         }
